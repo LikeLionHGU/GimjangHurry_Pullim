@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import '../assets/body_assets.dart';
+import '../assets/tool_assets.dart';
 import '../course_generator/models/fatigue_entry.dart';
+import '../services/tool_registration_service.dart';
 
 /// face + part 조합 키.
 typedef _FatigueKey = ({BodyFace face, BodyPart part});
@@ -41,6 +43,43 @@ class _BodySelectionScreenState extends State<BodySelectionScreen> {
 
   /// 전면/후면 구분 없이 누적되는 피로도 맵.
   final Map<_FatigueKey, double> _fatigueLevels = {};
+
+  // ── 도구 선택 ──────────────────────────────────────────────
+  final _toolService = ToolRegistrationService();
+
+  /// 온보딩에서 등록된 도구 인덱스 목록.
+  List<int> _registeredToolIndexes = [];
+
+  /// 현재 선택된 도구 인덱스 (초기: 전체 선택).
+  Set<int> _selectedToolIndexes = {};
+
+  /// 도구 로딩 상태.
+  bool _isLoadingTools = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadTools();
+  }
+
+  Future<void> _loadTools() async {
+    final indexes = await _toolService.getRegisteredTools();
+    setState(() {
+      _registeredToolIndexes = indexes;
+      _selectedToolIndexes = indexes.toSet(); // 전체 선택 상태로 시작
+      _isLoadingTools = false;
+    });
+  }
+
+  void _toggleToolSelection(int index) {
+    setState(() {
+      if (_selectedToolIndexes.contains(index)) {
+        _selectedToolIndexes.remove(index);
+      } else {
+        _selectedToolIndexes.add(index);
+      }
+    });
+  }
 
   BodyFace get _currentFace => _isFront ? BodyFace.front : BodyFace.back;
 
@@ -114,6 +153,9 @@ class _BodySelectionScreenState extends State<BodySelectionScreen> {
               const SizedBox(height: 12),
               _buildTimeSelector(),
               const SizedBox(height: 32),
+              // 도구 선택
+              _buildToolSelector(),
+              const SizedBox(height: 32),
               // 부위 선택
               const Text(
                 '불편한 부위 선택',
@@ -133,18 +175,27 @@ class _BodySelectionScreenState extends State<BodySelectionScreen> {
               const SizedBox(height: 16),
               _buildBodyImageWithSpots(),
               const SizedBox(height: 24),
-              if (_fatigueLevels.isNotEmpty) ...[
-                const Text(
-                  '피로도 입력',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
+              const Text(
+                '피로도 입력',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
                 ),
-                const SizedBox(height: 12),
+              ),
+              const SizedBox(height: 12),
+              if (_fatigueLevels.isEmpty)
+                const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 10),
+                  child: Center(
+                    child: Text(
+                      '전면/후면 선택 부위를 지정하세요.',
+                      style: TextStyle(color: Colors.grey, fontSize: 14),
+                    )
+                  )
+                )
+              else
                 ..._fatigueLevels.keys.map(_buildFatigueSlider),
-              ],
               const SizedBox(height: 24),
               _buildGenerateButton(),
               const SizedBox(height: 16),
@@ -435,17 +486,15 @@ class _BodySelectionScreenState extends State<BodySelectionScreen> {
               data: SliderThemeData(
                 activeTrackColor: const Color(0xFFBBFF00),
                 inactiveTrackColor: Colors.grey[800],
-                thumbColor: const Color(0xFFBBFF00),
+                thumbShape: _NumberedThumbShape(value: level.round()),
                 overlayColor: const Color(0xFFBBFF00).withValues(alpha: 0.2),
-                valueIndicatorColor: const Color(0xFFBBFF00),
-                valueIndicatorTextStyle: const TextStyle(color: Colors.black),
+                trackHeight: 3,
               ),
               child: Slider(
                 value: level,
                 min: 1,
                 max: 10,
                 divisions: 9,
-                label: level.round().toString(),
                 onChanged: (value) {
                   setState(() {
                     _fatigueLevels[key] = value;
@@ -454,9 +503,96 @@ class _BodySelectionScreenState extends State<BodySelectionScreen> {
               ),
             ),
           ),
-          const Text('10', style: TextStyle(color: Colors.grey, fontSize: 12)),
+          const Text('10',
+              style: TextStyle(color: Color(0xFFBBFF00), fontSize: 12)),
         ],
       ),
+    );
+  }
+
+  // ── 도구 선택 섹션 ─────────────────────────────────────────
+
+  Widget _buildToolSelector() {
+    if (_isLoadingTools) {
+      return const Center(
+        child: Padding(
+          padding: EdgeInsets.symmetric(vertical: 16),
+          child: CircularProgressIndicator(color: Color(0xFFBBFF00)),
+        ),
+      );
+    }
+
+    if (_registeredToolIndexes.isEmpty) {
+      return const Text(
+        '등록된 도구가 없습니다.',
+        style: TextStyle(color: Colors.grey, fontSize: 14),
+      );
+    }
+
+    final tools = _registeredToolIndexes
+        .map((i) => kTools[i])
+        .whereType<Tool>()
+        .toList();
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          '오늘 사용할 도구',
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        const SizedBox(height: 12),
+        SizedBox(
+          height: 100,
+          child: ListView.separated(
+            scrollDirection: Axis.horizontal,
+            itemCount: tools.length,
+            separatorBuilder: (_, __) => const SizedBox(width: 12),
+            itemBuilder: (context, i) {
+              final tool = tools[i];
+              final isSelected = _selectedToolIndexes.contains(tool.index);
+              return GestureDetector(
+                onTap: () => _toggleToolSelection(tool.index),
+                child: Column(
+                  children: [
+                    Container(
+                      width: 68,
+                      height: 68,
+                      decoration: BoxDecoration(
+                        color: Colors.grey[900],
+                        border: Border.all(
+                          color: isSelected
+                              ? const Color(0xFFBBFF00)
+                              : Colors.grey[700]!,
+                          width: 2,
+                        ),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      padding: const EdgeInsets.all(8),
+                      child: Image.asset(
+                        tool.imagePath,
+                        fit: BoxFit.contain,
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      tool.shape.label,
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: isSelected ? Colors.white : Colors.grey,
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            },
+          ),
+        ),
+      ],
     );
   }
 
@@ -469,10 +605,13 @@ class _BodySelectionScreenState extends State<BodySelectionScreen> {
         onPressed: isEnabled
             ? () {
                 final entries = _buildFatigueEntries();
+                final selectedTools = _selectedToolIndexes.toList();
                 debugPrint('=== 생성된 FatigueEntry 목록 ===');
                 for (final entry in entries) {
                   debugPrint(entry.toString());
                 }
+                debugPrint('=== 선택된 도구 인덱스 ===');
+                debugPrint(selectedTools.toString());
                 debugPrint('==============================');
               }
             : null,
@@ -494,5 +633,69 @@ class _BodySelectionScreenState extends State<BodySelectionScreen> {
         ),
       ),
     );
+  }
+}
+
+/// 슬라이더 thumb에 현재 값을 항상 표시하는 커스텀 Shape.
+class _NumberedThumbShape extends SliderComponentShape {
+  const _NumberedThumbShape({required this.value});
+
+  final int value;
+
+  static const double _thumbRadius = 18.0;
+
+  @override
+  Size getPreferredSize(bool isEnabled, bool isDiscrete) =>
+      const Size.fromRadius(_thumbRadius);
+
+  @override
+  void paint(
+    PaintingContext context,
+    Offset center, {
+    required Animation<double> activationAnimation,
+    required Animation<double> enableAnimation,
+    required bool isDiscrete,
+    required TextPainter labelPainter,
+    required RenderBox parentBox,
+    required SliderThemeData sliderTheme,
+    required TextDirection textDirection,
+    required double value,
+    required double textScaleFactor,
+    required Size sizeWithOverflow,
+  }) {
+    final canvas = context.canvas;
+    const accentColor = Color(0xFFBBFF00);
+
+    // 외부 링 (stroke)
+    final ringPaint = Paint()
+      ..color = accentColor
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 3;
+    canvas.drawCircle(center, _thumbRadius, ringPaint);
+
+    // 내부 배경 (검정)
+    final fillPaint = Paint()
+      ..color = const Color(0xFF000000)
+      ..style = PaintingStyle.fill;
+    canvas.drawCircle(center, _thumbRadius - 2, fillPaint);
+
+    // 숫자 텍스트
+    final textSpan = TextSpan(
+      text: this.value.toString(),
+      style: const TextStyle(
+        color: accentColor,
+        fontSize: 14,
+        fontWeight: FontWeight.bold,
+      ),
+    );
+    final textPainter = TextPainter(
+      text: textSpan,
+      textDirection: TextDirection.ltr,
+    )..layout();
+    final textOffset = Offset(
+      center.dx - textPainter.width / 2,
+      center.dy - textPainter.height / 2,
+    );
+    textPainter.paint(canvas, textOffset);
   }
 }

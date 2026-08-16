@@ -1,12 +1,21 @@
 import 'package:flutter/material.dart';
 import 'screens/body_selection_screen.dart';
+import 'screens/tool_registration_screen.dart';
+import 'services/tool_registration_service.dart';
 
-void main() {
-  runApp(const MyApp());
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  final service = ToolRegistrationService();
+  final onboardingDone = await service.isOnboardingComplete();
+
+  runApp(MyApp(showOnboarding: !onboardingDone));
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  const MyApp({super.key, required this.showOnboarding});
+
+  final bool showOnboarding;
 
   @override
   Widget build(BuildContext context) {
@@ -21,7 +30,13 @@ class MyApp extends StatelessWidget {
           surface: Colors.grey[900]!,
         ),
       ),
-      home: const HomePage(),
+      // Named route '/'는 HomePage로 설정.
+      // 온보딩 미완료 시 initialRoute를 '/onboarding'으로 변경.
+      initialRoute: showOnboarding ? '/onboarding' : '/',
+      routes: {
+        '/': (context) => const HomePage(),
+        '/onboarding': (context) => const ToolRegistrationScreen(),
+      },
     );
   }
 }
