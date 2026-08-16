@@ -17,7 +17,7 @@ class FatigueEntry {
   /// 몸 부위 구역.
   final BodyPart part;
 
-  /// 피로도 (1: 약간, 5: 매우 심함).
+  /// 피로도 (1: 가장 약함, 10: 매우 심함).
   final int level;
 
   /// 이 조합에 해당하는 모든 Body 인덱스를 반환한다.
