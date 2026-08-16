@@ -12,9 +12,6 @@ dependencies:
     sdk: flutter
 
   cupertino_icons: ^1.0.8
-  http: ^1.2.0
-  shared_preferences: ^2.3.4
-  flutter_dotenv: ^6.0.1
 
   # Firebase & Auth (Google 로그인용)
   firebase_core: ^3.12.1
@@ -38,13 +35,13 @@ dependencies:
   intl: ^0.19.0
   shared_preferences: ^2.3.5
   permission_handler: ^11.3.1
-  assets:
-    - .env
-    - assets/images/
-    - assets/images/tools/
 
   # TTS (자세 측정 음성 안내)
   flutter_tts: ^4.2.0
+
+  # 코스 생성 (팀원 추가)
+  http: ^1.2.0
+  flutter_dotenv: ^6.0.1
 
 dev_dependencies:
   flutter_test:
@@ -55,6 +52,7 @@ flutter:
   uses-material-design: true
 
   assets:
+    - .env
     - assets/images/
     - assets/images/tools/
     - assets/images/body/

@@ -496,7 +496,8 @@ class _PostureScreenState extends State<PostureScreen> {
       );
 
       final db = DatabaseHelper();
-      await db.insertPostureResult(result);
+      final resultId = await db.insertPostureResult(result);
+      debugPrint('자세 측정 결과 저장 완료: id=$resultId, score=$score');
 
       if (mounted) {
         nav.pushReplacement(

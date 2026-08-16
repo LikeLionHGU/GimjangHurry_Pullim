@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../constants/app_colors.dart';
 import '../../widgets/common_widgets.dart';
+import '../tool_registration_screen.dart';
 
 class ServiceIntroScreen extends StatelessWidget {
   const ServiceIntroScreen({super.key});
@@ -155,8 +156,12 @@ class ServiceIntroScreen extends StatelessWidget {
                 width: double.infinity,
                 child: ElevatedButton(
                   onPressed: () {
-                    // TODO: 도구 등록 화면으로 이동 (다른 팀원 구현)
-                    Navigator.pop(context);
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const ToolRegistrationScreen(),
+                      ),
+                    );
                   },
                   child: const Text('도구 등록하고 시작하기'),
                 ),

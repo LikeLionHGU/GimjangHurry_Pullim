@@ -5,6 +5,8 @@
 import 'package:flutter/material.dart';
 import '../assets/tool_assets.dart';
 import '../services/tool_registration_service.dart';
+import 'main_shell.dart';
+import 'posture/posture_guide_screen.dart';
 
 /// 온보딩용 도구 등록 화면.
 /// 첫 실행 시에만 표시되며, 등록 완료 후 홈 화면으로 이동한다.
@@ -286,7 +288,146 @@ class _ToolRegistrationScreenState extends State<ToolRegistrationScreen> {
 
     if (!mounted) return;
 
-    // 홈 화면으로 교체 (뒤로가기 불가)
-    Navigator.of(context).pushNamedAndRemoveUntil('/', (_) => false);
+    // 다음 단계: 자세 측정 화면으로 이동
+    Navigator.of(context).pushReplacement(
+      MaterialPageRoute(builder: (_) => const _OnboardingPostureScreen()),
+    );
+  }
+}
+
+
+/// 온보딩 단계의 자세 측정 화면.
+/// 자세 측정 완료 또는 스킵 후 홈 화면으로 이동.
+class _OnboardingPostureScreen extends StatelessWidget {
+  const _OnboardingPostureScreen();
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: SafeArea(
+        child: Column(
+          children: [
+            // 상단 안내
+            const Padding(
+              padding: EdgeInsets.fromLTRB(24, 32, 24, 0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    '자세 점검',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 26,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  SizedBox(height: 8),
+                  Text(
+                    '정면과 측면 자세를 촬영하면\n맞춤 코스를 더 정확하게 만들 수 있습니다.',
+                    style: TextStyle(
+                      color: Colors.grey,
+                      fontSize: 14,
+                      height: 1.5,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            const Spacer(),
+
+            // 자세 측정 아이콘
+            Container(
+              width: 120,
+              height: 120,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: const Color(0xFFBBFF00).withValues(alpha: 0.15),
+              ),
+              child: const Icon(
+                Icons.accessibility_new,
+                color: Color(0xFFBBFF00),
+                size: 56,
+              ),
+            ),
+
+            const Spacer(),
+
+            // 버튼들
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24),
+              child: Column(
+                children: [
+                  // 자세 측정 시작 버튼
+                  SizedBox(
+                    width: double.infinity,
+                    height: 52,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const PostureGuideScreen(),
+                          ),
+                        ).then((_) {
+                          // 자세 측정 완료 후 (또는 뒤로가기) → 홈으로
+                          if (context.mounted) {
+                            Navigator.of(context).pushAndRemoveUntil(
+                              MaterialPageRoute(
+                                builder: (_) => const MainShell(),
+                              ),
+                              (_) => false,
+                            );
+                          }
+                        });
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFFBBFF00),
+                        foregroundColor: Colors.black,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      child: const Text(
+                        '자세 측정 시작하기',
+                        style: TextStyle(
+                            fontSize: 16, fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+
+                  // 나중에 하기 버튼
+                  SizedBox(
+                    width: double.infinity,
+                    height: 52,
+                    child: TextButton(
+                      onPressed: () {
+                        Navigator.of(context).pushAndRemoveUntil(
+                          MaterialPageRoute(
+                            builder: (_) => const MainShell(),
+                          ),
+                          (_) => false,
+                        );
+                      },
+                      child: const Text(
+                        '나중에 하기',
+                        style: TextStyle(
+                          color: Colors.grey,
+                          fontSize: 14,
+                          decoration: TextDecoration.underline,
+                          decorationColor: Colors.grey,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 32),
+          ],
+        ),
+      ),
+    );
   }
 }
