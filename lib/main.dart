@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
+import 'course_generator/env_loader.dart';
 import 'screens/body_selection_screen.dart';
 import 'screens/tool_registration_screen.dart';
 import 'services/tool_registration_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // .env 파일에서 API 키 로드
+  await EnvLoader.load();
 
   final service = ToolRegistrationService();
   final onboardingDone = await service.isOnboardingComplete();

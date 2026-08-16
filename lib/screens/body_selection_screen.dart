@@ -1,7 +1,11 @@
+// 코스 생성 화면.
+// 사용시간 선택 → 도구 선택 → 부위 선택 → 피로도 입력 → 코스 생성 호출.
+// 생성 버튼을 누르면 로딩 화면으로 전환되어 AI 코스 생성을 수행한다.
+
 import 'package:flutter/material.dart';
 import '../assets/body_assets.dart';
 import '../assets/tool_assets.dart';
-import '../course_generator/models/fatigue_entry.dart';
+import '../course_generator/course_generator_library.dart';
 import '../services/tool_registration_service.dart';
 
 /// face + part 조합 키.
@@ -596,25 +600,28 @@ class _BodySelectionScreenState extends State<BodySelectionScreen> {
     );
   }
 
+  void _onGeneratePressed() {
+    final request = CourseRequest(
+      fatigueEntries: _buildFatigueEntries(),
+      ownedTools: _selectedToolIndexes.toList(),
+      availableTime: _availableTime,
+    );
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => _CourseLoadingScreen(request: request),
+      ),
+    );
+  }
+
   Widget _buildGenerateButton() {
     final isEnabled = _fatigueLevels.isNotEmpty;
     return SizedBox(
       width: double.infinity,
       height: 52,
       child: ElevatedButton(
-        onPressed: isEnabled
-            ? () {
-                final entries = _buildFatigueEntries();
-                final selectedTools = _selectedToolIndexes.toList();
-                debugPrint('=== 생성된 FatigueEntry 목록 ===');
-                for (final entry in entries) {
-                  debugPrint(entry.toString());
-                }
-                debugPrint('=== 선택된 도구 인덱스 ===');
-                debugPrint(selectedTools.toString());
-                debugPrint('==============================');
-              }
-            : null,
+        onPressed: isEnabled ? _onGeneratePressed : null,
         style: ElevatedButton.styleFrom(
           backgroundColor:
               isEnabled ? const Color(0xFFBBFF00) : Colors.grey[800],
@@ -629,6 +636,68 @@ class _BodySelectionScreenState extends State<BodySelectionScreen> {
             fontSize: 16,
             fontWeight: FontWeight.bold,
             color: isEnabled ? Colors.black : Colors.grey,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// 코스 생성 로딩 화면.
+class _CourseLoadingScreen extends StatefulWidget {
+  const _CourseLoadingScreen({required this.request});
+
+  final CourseRequest request;
+
+  @override
+  State<_CourseLoadingScreen> createState() => _CourseLoadingScreenState();
+}
+
+class _CourseLoadingScreenState extends State<_CourseLoadingScreen> {
+  @override
+  void initState() {
+    super.initState();
+    // 빌드 완료 후 생성 시작 (빌드 중 네비게이션 방지)
+    WidgetsBinding.instance.addPostFrameCallback((_) => _generate());
+  }
+
+  Future<void> _generate() async {
+    try {
+      final generator = CourseGenerator();
+      final course = await generator.generateCourse(widget.request);
+
+      debugPrint('=== 코스 생성 완료 ===');
+      debugPrint('요약: ${course.summary}');
+      debugPrint('총 소요시간: ${course.totalDuration ~/ 60}분 ${course.totalDuration % 60}초');
+      debugPrint('스텝 수: ${course.steps.length}');
+      for (var i = 0; i < course.steps.length; i++) {
+        final step = course.steps[i];
+        debugPrint('  [${i + 1}] 동작:${step.moveIndex}, 도구:${step.toolIndex}, '
+            '${step.duration}초 - ${step.reason}');
+      }
+      debugPrint('=====================');
+
+      generator.dispose();
+    } catch (e) {
+      debugPrint('❌ 코스 생성 오류: $e');
+    }
+
+    if (mounted) {
+      Navigator.of(context).pushNamedAndRemoveUntil('/', (_) => false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return const Scaffold(
+      backgroundColor: Colors.black,
+      body: Center(
+        child: Text(
+          '로딩중',
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 20,
+            fontWeight: FontWeight.w600,
           ),
         ),
       ),

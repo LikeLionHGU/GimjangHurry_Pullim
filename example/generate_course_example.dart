@@ -1,4 +1,8 @@
 // ignore_for_file: avoid_print
+//
+// 코스 생성 엔진 CLI 테스트 스크립트.
+// Flutter 앱 빌드 없이 터미널에서 엔진을 단독 실행하여 결과를 확인할 수 있다.
+//
 // 근막이완 코스 생성 예제.
 //
 // 실행 방법:
@@ -20,7 +24,7 @@ import 'package:likelion_mid_hackathon/course_generator/env_loader.dart';
 
 Future<void> main() async {
   // .env 로드 및 API 키 확인
-  EnvLoader.load();
+  await EnvLoader.load();
   final apiKey = EnvLoader.get('OPENAI_API_KEY');
   if (apiKey == null || apiKey.isEmpty) {
     print('❌ OPENAI_API_KEY가 설정되지 않았습니다.');

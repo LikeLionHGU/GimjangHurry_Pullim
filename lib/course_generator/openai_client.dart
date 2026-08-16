@@ -13,10 +13,7 @@ class OpenAiClient {
   OpenAiClient({
     http.Client? httpClient,
     this.model = 'gpt-4o',
-  }) : _httpClient = httpClient ?? http.Client() {
-    // .env 파일 로드 (이미 로드된 경우 건너뜀)
-    EnvLoader.load();
-  }
+  }) : _httpClient = httpClient ?? http.Client();
 
   static const _baseUrl = 'https://api.openai.com/v1/chat/completions';
 

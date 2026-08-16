@@ -1,3 +1,7 @@
+// 온보딩에서 사용자가 등록한 도구 목록을 로컬(SharedPreferences)에
+// 저장하고 조회하는 서비스 레이어.
+// UI(화면)와 데이터 영속화(저장소) 사이의 중간 계층 역할을 한다.
+
 import 'package:shared_preferences/shared_preferences.dart';
 
 /// 도구 등록 정보를 SharedPreferences에 저장/조회하는 서비스.

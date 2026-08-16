@@ -1,3 +1,7 @@
+// 온보딩 도구 등록 화면.
+// 첫 실행 시 표시되며, 보유한 폼롤러/마사지볼/스틱을 선택해 로컬에 저장한다.
+// 등록 완료 후 홈 화면으로 이동한다.
+
 import 'package:flutter/material.dart';
 import '../assets/tool_assets.dart';
 import '../services/tool_registration_service.dart';
