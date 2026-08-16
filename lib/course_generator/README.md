@@ -15,6 +15,7 @@ course_generator/
 ├── course_generator.dart          ← 메인 엔진 클래스 (파이프라인 통합)
 ├── move_filter.dart               ← 로컬 필터링 (보유 도구 × 피로 부위 교집합)
 ├── prompt_builder.dart            ← OpenAI 프롬프트 조립 + JSON schema 정의
+├── env_loader.dart                ← 환경변수 로드 (flutter_dotenv 기반, 웹/모바일/데스크톱 호환)
 ├── openai_client.dart             ← OpenAI Chat Completions API HTTP 클라이언트
 ├── response_parser.dart           ← LLM 응답 JSON → Course 모델 변환 + 유효성 검증
 └── models/
@@ -142,9 +143,12 @@ generator.dispose();
 
 | 항목 | 값 |
 |------|------|
-| 환경변수 | `OPENAI_API_KEY` (필수) |
+| 환경변수 | `OPENAI_API_KEY` (필수, `.env` 파일에 설정) |
 | Dart SDK | ^3.10.1 |
-| 외부 패키지 | `http: ^1.2.0` |
+| 외부 패키지 | `http: ^1.2.0`, `flutter_dotenv: ^6.0.1` |
+
+`.env` 파일은 `flutter_dotenv`를 통해 앱 assets로 번들링되어 로드된다.
+`main.dart`에서 `await EnvLoader.load()`를 호출하면 이후 어디서든 `EnvLoader.get(key)`로 접근 가능.
 
 ---
 
