@@ -25,8 +25,11 @@ Map<BodyPart, ({double x, double y})> _spotCoordinates(BodyFace face) {
 /// 중앙에 위치하여 미러링이 필요 없는 부위.
 const _centerParts = <BodyPart>{
   BodyPart.neck,
+  BodyPart.chest,
+  BodyPart.upperBack,
   BodyPart.abdomen,
   BodyPart.waist,
+  BodyPart.hip,
 };
 
 class BodySelectionScreen extends StatefulWidget {
