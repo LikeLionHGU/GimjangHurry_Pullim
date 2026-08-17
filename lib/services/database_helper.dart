@@ -25,8 +25,9 @@ class DatabaseHelper {
 
     return await openDatabase(
       path,
-      version: 1,
+      version: 2,
       onCreate: _onCreate,
+      onUpgrade: _onUpgrade,
     );
   }
 
@@ -64,7 +65,8 @@ class DatabaseHelper {
         save INTEGER NOT NULL DEFAULT 0,
         executed_at TEXT,
         status TEXT NOT NULL DEFAULT 'pending',
-        progress INTEGER NOT NULL DEFAULT 0
+        progress INTEGER NOT NULL DEFAULT 0,
+        source TEXT NOT NULL DEFAULT 'manual'
       )
     ''');
 
@@ -95,6 +97,14 @@ class DatabaseHelper {
         FOREIGN KEY (user_id) REFERENCES users(user_id)
       )
     ''');
+  }
+
+  Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
+    if (oldVersion < 2) {
+      await db.execute(
+        "ALTER TABLE courses ADD COLUMN source TEXT NOT NULL DEFAULT 'manual'",
+      );
+    }
   }
 
   // ==================== USER ====================

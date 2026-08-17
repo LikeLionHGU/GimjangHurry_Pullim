@@ -34,7 +34,14 @@ const _centerParts = <BodyPart>{
 };
 
 class CourseGenerationScreen extends StatefulWidget {
-  const CourseGenerationScreen({super.key});
+  const CourseGenerationScreen({
+    super.key,
+    this.initialFatigueEntries,
+  });
+
+  /// 외부에서 전달받은 초기 피로도 부위 (예: 자세 점검 결과 기반 추천).
+  /// null이면 빈 상태로 시작한다.
+  final List<FatigueEntry>? initialFatigueEntries;
 
   @override
   State<CourseGenerationScreen> createState() => _CourseGenerationScreenState();
@@ -68,6 +75,18 @@ class _CourseGenerationScreenState extends State<CourseGenerationScreen> {
   void initState() {
     super.initState();
     _loadTools();
+    _applyInitialFatigueEntries();
+  }
+
+  /// 외부에서 전달받은 초기 부위를 _fatigueLevels에 적용한다.
+  void _applyInitialFatigueEntries() {
+    final entries = widget.initialFatigueEntries;
+    if (entries == null || entries.isEmpty) return;
+
+    for (final entry in entries) {
+      final key = (face: entry.face, part: entry.part);
+      _fatigueLevels[key] = entry.level.toDouble();
+    }
   }
 
   Future<void> _loadTools() async {
@@ -90,6 +109,11 @@ class _CourseGenerationScreenState extends State<CourseGenerationScreen> {
   }
 
   BodyFace get _currentFace => _isFront ? BodyFace.front : BodyFace.back;
+
+  /// 자세 측정 기반 모드인지 여부.
+  bool get _isPostureBased =>
+      widget.initialFatigueEntries != null &&
+      widget.initialFatigueEntries!.isNotEmpty;
 
   _FatigueKey _key(BodyPart part) => (face: _currentFace, part: part);
 
@@ -164,46 +188,68 @@ class _CourseGenerationScreenState extends State<CourseGenerationScreen> {
               // 도구 선택
               _buildToolSelector(),
               const SizedBox(height: 32),
-              // 부위 선택
-              const Text(
-                '불편한 부위 선택',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
+              // 부위 선택 (자세 측정 기반이면 읽기 전용 요약만 표시)
+              if (_isPostureBased) ...[
+                const Text(
+                  '측정 기반 추천 부위',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
-              ),
-              const SizedBox(height: 4),
-              const Text(
-                '전면/후면 선택 후 부위를 지정하세요.',
-                style: TextStyle(color: Colors.grey, fontSize: 14),
-              ),
-              const SizedBox(height: 16),
-              _buildToggleButtons(),
-              const SizedBox(height: 16),
-              _buildBodyImageWithSpots(),
-              const SizedBox(height: 24),
-              const Text(
-                '피로도 입력',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
+                const SizedBox(height: 4),
+                const Text(
+                  '자세 점검 결과를 기반으로 선택된 부위입니다.',
+                  style: TextStyle(color: Colors.grey, fontSize: 14),
                 ),
-              ),
-              const SizedBox(height: 12),
-              if (_fatigueLevels.isEmpty)
-                const Padding(
-                  padding: EdgeInsets.symmetric(vertical: 10),
-                  child: Center(
-                    child: Text(
-                      '전면/후면 선택 부위를 지정하세요.',
-                      style: TextStyle(color: Colors.grey, fontSize: 14),
+                const SizedBox(height: 16),
+                _buildToggleButtons(),
+                const SizedBox(height: 16),
+                _buildBodyImageWithSpots(),
+                const SizedBox(height: 16),
+                _buildPostureBasedPartsSummary(),
+              ] else ...[
+                const Text(
+                  '불편한 부위 선택',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                const Text(
+                  '전면/후면 선택 후 부위를 지정하세요.',
+                  style: TextStyle(color: Colors.grey, fontSize: 14),
+                ),
+                const SizedBox(height: 16),
+                _buildToggleButtons(),
+                const SizedBox(height: 16),
+                _buildBodyImageWithSpots(),
+                const SizedBox(height: 24),
+                const Text(
+                  '피로도 입력',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                if (_fatigueLevels.isEmpty)
+                  const Padding(
+                    padding: EdgeInsets.symmetric(vertical: 10),
+                    child: Center(
+                      child: Text(
+                        '전면/후면 선택 부위를 지정하세요.',
+                        style: TextStyle(color: Colors.grey, fontSize: 14),
+                      )
                     )
                   )
-                )
-              else
-                ..._fatigueLevels.keys.map(_buildFatigueSlider),
+                else
+                  ..._fatigueLevels.keys.map(_buildFatigueSlider),
+              ],
               const SizedBox(height: 24),
               _buildGenerateButton(),
               const SizedBox(height: 16),
@@ -382,6 +428,9 @@ class _CourseGenerationScreenState extends State<CourseGenerationScreen> {
                           final coord = entry.value;
                           final isCenter = _centerParts.contains(part);
                           final selected = _isSelected(part);
+                          final onTap = _isPostureBased
+                              ? null
+                              : () => _togglePart(part);
 
                           if (isCenter) {
                             return [
@@ -389,7 +438,7 @@ class _CourseGenerationScreenState extends State<CourseGenerationScreen> {
                                 left: coord.x * width - 18,
                                 top: coord.y * height - 18,
                                 isSelected: selected,
-                                onTap: () => _togglePart(part),
+                                onTap: onTap,
                               ),
                             ];
                           } else {
@@ -398,13 +447,13 @@ class _CourseGenerationScreenState extends State<CourseGenerationScreen> {
                                 left: coord.x * width - 18,
                                 top: coord.y * height - 18,
                                 isSelected: selected,
-                                onTap: () => _togglePart(part),
+                                onTap: onTap,
                               ),
                               _buildSpot(
                                 left: (1 - coord.x) * width - 18,
                                 top: coord.y * height - 18,
                                 isSelected: selected,
-                                onTap: () => _togglePart(part),
+                                onTap: onTap,
                               ),
                             ];
                           }
@@ -425,7 +474,7 @@ class _CourseGenerationScreenState extends State<CourseGenerationScreen> {
     required double left,
     required double top,
     required bool isSelected,
-    required VoidCallback onTap,
+    required VoidCallback? onTap,
   }) {
     return Positioned(
       left: left,
@@ -472,18 +521,22 @@ class _CourseGenerationScreenState extends State<CourseGenerationScreen> {
       padding: const EdgeInsets.only(bottom: 12),
       child: Row(
         children: [
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-            decoration: BoxDecoration(
-              border: Border.all(color: const Color(0xFFBBFF00)),
-              borderRadius: BorderRadius.circular(16),
-            ),
-            child: Text(
-              label,
-              style: const TextStyle(
-                color: Color(0xFFBBFF00),
-                fontSize: 12,
-                fontWeight: FontWeight.w500,
+          SizedBox(
+            width: 72,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              decoration: BoxDecoration(
+                border: Border.all(color: const Color(0xFFBBFF00)),
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Text(
+                label,
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  color: Color(0xFFBBFF00),
+                  fontSize: 12,
+                  fontWeight: FontWeight.w500,
+                ),
               ),
             ),
           ),
@@ -515,6 +568,34 @@ class _CourseGenerationScreenState extends State<CourseGenerationScreen> {
               style: TextStyle(color: Color(0xFFBBFF00), fontSize: 12)),
         ],
       ),
+    );
+  }
+
+  /// 자세 측정 기반 모드에서 선택된 부위를 칩으로 표시하는 위젯.
+  Widget _buildPostureBasedPartsSummary() {
+    return Wrap(
+      spacing: 8,
+      runSpacing: 8,
+      children: _fatigueLevels.entries.map((entry) {
+        final label = '${entry.key.face.label} ${entry.key.part.label}';
+        final level = entry.value.round();
+        return Container(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+          decoration: BoxDecoration(
+            color: const Color(0xFFBBFF00).withValues(alpha: 0.15),
+            border: Border.all(color: const Color(0xFFBBFF00)),
+            borderRadius: BorderRadius.circular(20),
+          ),
+          child: Text(
+            '$label (Lv.$level)',
+            style: const TextStyle(
+              color: Color(0xFFBBFF00),
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        );
+      }).toList(),
     );
   }
 
@@ -614,7 +695,10 @@ class _CourseGenerationScreenState extends State<CourseGenerationScreen> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (_) => _CourseLoadingScreen(request: request),
+        builder: (_) => _CourseLoadingScreen(
+          request: request,
+          isPostureBased: _isPostureBased,
+        ),
       ),
     );
   }
@@ -649,9 +733,13 @@ class _CourseGenerationScreenState extends State<CourseGenerationScreen> {
 
 /// 코스 생성 로딩 화면.
 class _CourseLoadingScreen extends StatefulWidget {
-  const _CourseLoadingScreen({required this.request});
+  const _CourseLoadingScreen({
+    required this.request,
+    this.isPostureBased = false,
+  });
 
   final CourseRequest request;
+  final bool isPostureBased;
 
   @override
   State<_CourseLoadingScreen> createState() => _CourseLoadingScreenState();
@@ -686,7 +774,10 @@ class _CourseLoadingScreenState extends State<_CourseLoadingScreen> {
       if (mounted) {
         Navigator.of(context).pushReplacement(
           MaterialPageRoute(
-            builder: (_) => CourseResultScreen(course: course),
+            builder: (_) => CourseResultScreen(
+              course: course,
+              isPostureBased: widget.isPostureBased,
+            ),
           ),
         );
       }

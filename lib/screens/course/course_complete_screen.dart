@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../course_generator/models/course.dart';
 import '../../models/course_model.dart';
 import '../../services/database_helper.dart';
+import '../posture/posture_guide_screen.dart';
 
 /// 코스 완료 화면.
 /// 코스 실행 후 부위별 피로도를 재입력받고, DB에 after 피로도/status/progress를 업데이트한다.
@@ -11,10 +12,12 @@ class CourseCompleteScreen extends StatefulWidget {
     super.key,
     required this.course,
     required this.courseId,
+    this.isPostureBased = false,
   });
 
   final Course course;
   final int courseId;
+  final bool isPostureBased;
 
   @override
   State<CourseCompleteScreen> createState() => _CourseCompleteScreenState();
@@ -123,10 +126,12 @@ class _CourseCompleteScreenState extends State<CourseCompleteScreen> {
 
   /// 홈 이동 로직 — after 피로도 저장 후 네비게이션.
   Future<void> _onComplete() async {
-    // after 피로도 맵 생성
-    final afterMap = _fatigueLevels.map(
-      (key, value) => MapEntry(key, value.round()),
-    );
+    // after 피로도 맵 생성 (측정 기반이면 빈 맵)
+    final afterMap = widget.isPostureBased
+        ? <String, int>{}
+        : _fatigueLevels.map(
+            (key, value) => MapEntry(key, value.round()),
+          );
 
     // DB 업데이트
     final db = DatabaseHelper();
@@ -172,8 +177,10 @@ class _CourseCompleteScreenState extends State<CourseCompleteScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const SizedBox(height: 16),
-                    _buildFatigueSection(),
-                    const SizedBox(height: 40),
+                    if (!widget.isPostureBased) ...[
+                      _buildFatigueSection(),
+                      const SizedBox(height: 40),
+                    ],
                     _buildSaveCourseSection(),
                     const SizedBox(height: 24),
                   ],
@@ -348,26 +355,51 @@ class _CourseCompleteScreenState extends State<CourseCompleteScreen> {
   Widget _buildBottomButton() {
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 8, 20, 16),
-      child: SizedBox(
-        width: double.infinity,
-        height: 56,
-        child: ElevatedButton(
-          onPressed: _onComplete,
-          style: ElevatedButton.styleFrom(
-            backgroundColor: const Color(0xFFBBFF00),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(30),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          SizedBox(
+            width: double.infinity,
+            height: 56,
+            child: ElevatedButton(
+              onPressed: _onComplete,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFFBBFF00),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(30),
+                ),
+              ),
+              child: const Text(
+                '홈으로 이동',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black,
+                ),
+              ),
             ),
           ),
-          child: const Text(
-            '홈으로 이동',
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-              color: Colors.black,
+          if (widget.isPostureBased) ...[
+            const SizedBox(height: 12),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pushAndRemoveUntil(
+                  MaterialPageRoute(builder: (_) => const PostureGuideScreen()),
+                  (_) => false,
+                );
+              },
+              child: const Text(
+                '자세 다시 점검하러 가기',
+                style: TextStyle(
+                  color: Colors.grey,
+                  fontSize: 14,
+                  decoration: TextDecoration.underline,
+                  decorationColor: Colors.grey,
+                ),
+              ),
             ),
-          ),
-        ),
+          ],
+        ],
       ),
     );
   }
@@ -380,18 +412,22 @@ class _CourseCompleteScreenState extends State<CourseCompleteScreen> {
       padding: const EdgeInsets.only(bottom: 16),
       child: Row(
         children: [
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-            decoration: BoxDecoration(
-              border: Border.all(color: const Color(0xFFBBFF00)),
-              borderRadius: BorderRadius.circular(16),
-            ),
-            child: Text(
-              label,
-              style: const TextStyle(
-                color: Color(0xFFBBFF00),
-                fontSize: 12,
-                fontWeight: FontWeight.w500,
+          SizedBox(
+            width: 72,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              decoration: BoxDecoration(
+                border: Border.all(color: const Color(0xFFBBFF00)),
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Text(
+                label,
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  color: Color(0xFFBBFF00),
+                  fontSize: 12,
+                  fontWeight: FontWeight.w500,
+                ),
               ),
             ),
           ),

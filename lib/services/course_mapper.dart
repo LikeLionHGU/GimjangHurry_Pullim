@@ -10,7 +10,11 @@ class CourseMapper {
 
   /// [Course] → [CourseModel] 변환.
   /// DB 저장 전 사용한다. courseId는 null (INSERT 시 자동 생성).
-  static CourseModel toCourseModel(Course course) {
+  /// [source]로 코스 생성 소스(선택 기반/측정 기반)를 지정한다.
+  static CourseModel toCourseModel(
+    Course course, {
+    CourseSource source = CourseSource.manual,
+  }) {
     // request에서 부위별 피로도 맵 생성: "{face}_{part}" → level
     final fatigueMap = <String, int>{};
     final request = course.request;
@@ -34,6 +38,7 @@ class CourseMapper {
       summary: course.summary,
       before: fatigueMap,
       after: Map<String, int>.from(fatigueMap), // 초기값은 before와 동일
+      source: source,
     );
   }
 
