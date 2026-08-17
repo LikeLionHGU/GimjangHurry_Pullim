@@ -280,55 +280,60 @@ class _CourseCompleteScreenState extends State<CourseCompleteScreen> {
             color: Colors.grey[900],
             borderRadius: BorderRadius.circular(16),
           ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+          child: Row(
             children: [
-              Text(
-                widget.course.name,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      widget.course.name,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      '총 $stepsCount단계 · 예상시간 $durationMinutes분',
+                      style: const TextStyle(
+                        color: Colors.grey,
+                        fontSize: 13,
+                      ),
+                    ),
+                  ],
                 ),
               ),
-              const SizedBox(height: 8),
-              Text(
-                '총 $stepsCount단계·예상시간 $durationMinutes분',
-                style: const TextStyle(
-                  color: Colors.grey,
-                  fontSize: 13,
-                ),
-              ),
-              const SizedBox(height: 16),
-              // Save Button
-              SizedBox(
-                width: double.infinity,
-                height: 44,
-                child: ElevatedButton(
-                  onPressed: _isSaved || _isSaving ? null : _onSaveCourse,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor:
-                        _isSaved ? Colors.grey[700] : const Color(0xFFBBFF00),
-                    disabledBackgroundColor: Colors.grey[700],
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(22),
+              const SizedBox(width: 12),
+              // Save pill button
+              GestureDetector(
+                onTap: _isSaved || _isSaving ? null : _onSaveCourse,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF2A2A00),
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(
+                      color: const Color(0xFF4A4A00),
+                      width: 1,
                     ),
                   ),
                   child: _isSaving
                       ? const SizedBox(
-                          width: 20,
-                          height: 20,
+                          width: 16,
+                          height: 16,
                           child: CircularProgressIndicator(
                             strokeWidth: 2,
-                            color: Colors.white,
+                            color: Color(0xFFBBFF00),
                           ),
                         )
                       : Text(
                           _isSaved ? '저장 완료' : '저장',
-                          style: TextStyle(
+                          style: const TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.bold,
-                            color: _isSaved ? Colors.white : Colors.black,
+                            color: Color(0xFFBBFF00),
                           ),
                         ),
                 ),
@@ -432,15 +437,15 @@ class _CourseCompleteScreenState extends State<CourseCompleteScreen> {
             ),
           ),
           const SizedBox(width: 8),
-          const Text('1', style: TextStyle(color: Colors.grey, fontSize: 12)),
+          const Text('1', style: TextStyle(color: Colors.grey, fontSize: 14)),
           Expanded(
             child: SliderTheme(
               data: SliderThemeData(
-                activeTrackColor: const Color(0xFFBBFF00),
-                inactiveTrackColor: Colors.grey[800],
+                activeTrackColor: const Color(0xFFBBFF00).withValues(alpha: 0.5),
+                inactiveTrackColor: const Color(0xFFBBFF00).withValues(alpha: 0.5),
                 thumbShape: _NumberedThumbShape(value: level.round()),
                 overlayColor: const Color(0xFFBBFF00).withValues(alpha: 0.2),
-                trackHeight: 3,
+                trackHeight: 2,
               ),
               child: Slider(
                 value: level,
@@ -456,7 +461,7 @@ class _CourseCompleteScreenState extends State<CourseCompleteScreen> {
             ),
           ),
           const Text('10',
-              style: TextStyle(color: Color(0xFFBBFF00), fontSize: 12)),
+              style: TextStyle(color: Color(0xFFBBFF00), fontSize: 14)),
         ],
       ),
     );
@@ -493,21 +498,17 @@ class _NumberedThumbShape extends SliderComponentShape {
     final canvas = context.canvas;
     const accentColor = Color(0xFFBBFF00);
 
-    final ringPaint = Paint()
-      ..color = accentColor
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 3;
-    canvas.drawCircle(center, _thumbRadius, ringPaint);
-
+    // Filled circle
     final fillPaint = Paint()
-      ..color = const Color(0xFF000000)
+      ..color = accentColor
       ..style = PaintingStyle.fill;
-    canvas.drawCircle(center, _thumbRadius - 2, fillPaint);
+    canvas.drawCircle(center, _thumbRadius, fillPaint);
 
+    // Number text
     final textSpan = TextSpan(
       text: this.value.toString(),
       style: const TextStyle(
-        color: accentColor,
+        color: Colors.black,
         fontSize: 14,
         fontWeight: FontWeight.bold,
       ),

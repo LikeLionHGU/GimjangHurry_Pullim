@@ -71,6 +71,12 @@ class _CourseGenerationScreenState extends State<CourseGenerationScreen> {
   /// 도구 로딩 상태.
   bool _isLoadingTools = true;
 
+  /// 커스텀 시간 슬라이더 표시 여부.
+  bool _showCustomTimeSlider = false;
+
+  /// 커스텀 시간 슬라이더 값 (분 단위).
+  double _customTimeMinutes = 15.0;
+
   @override
   void initState() {
     super.initState();
@@ -261,94 +267,126 @@ class _CourseGenerationScreenState extends State<CourseGenerationScreen> {
   }
 
   Widget _buildTimeSelector() {
-    return Wrap(
-      spacing: 8,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        ..._timeOptions.map((seconds) {
-          final minutes = seconds ~/ 60;
-          final isActive = _availableTime == seconds;
-          return GestureDetector(
-            onTap: () => setState(() => _availableTime = seconds),
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(20),
-                border: Border.all(
-                  color: isActive ? const Color(0xFFBBFF00) : Colors.grey[700]!,
+        Wrap(
+          spacing: 8,
+          children: [
+            ..._timeOptions.map((seconds) {
+              final minutes = seconds ~/ 60;
+              final isActive = _availableTime == seconds && !_showCustomTimeSlider;
+              return GestureDetector(
+                onTap: () => setState(() {
+                  _availableTime = seconds;
+                  _showCustomTimeSlider = false;
+                }),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(
+                      color: isActive ? const Color(0xFFBBFF00) : Colors.grey[700]!,
+                    ),
+                  ),
+                  child: Text(
+                    '$minutes분',
+                    style: TextStyle(
+                      color: isActive ? const Color(0xFFBBFF00) : Colors.grey,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              );
+            }),
+            GestureDetector(
+              onTap: () => setState(() {
+                _showCustomTimeSlider = !_showCustomTimeSlider;
+                if (_showCustomTimeSlider) {
+                  _customTimeMinutes = (_availableTime ~/ 60).toDouble().clamp(10, 60);
+                }
+              }),
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(
+                    color: _showCustomTimeSlider || !_timeOptions.contains(_availableTime)
+                        ? const Color(0xFFBBFF00)
+                        : Colors.grey[700]!,
+                  ),
+                ),
+                child: Text(
+                  _showCustomTimeSlider
+                      ? '${_customTimeMinutes.round()}분'
+                      : !_timeOptions.contains(_availableTime)
+                          ? '${_availableTime ~/ 60}분'
+                          : '+',
+                  style: TextStyle(
+                    color: _showCustomTimeSlider || !_timeOptions.contains(_availableTime)
+                        ? const Color(0xFFBBFF00)
+                        : Colors.grey,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
               ),
-              child: Text(
-                '${minutes}분',
-                style: TextStyle(
-                  color: isActive ? const Color(0xFFBBFF00) : Colors.grey,
-                  fontWeight: FontWeight.w600,
+            ),
+          ],
+        ),
+        if (_showCustomTimeSlider) ...[
+          const SizedBox(height: 16),
+          Row(
+            children: [
+              const Text('10', style: TextStyle(color: Color(0xFFBBFF00), fontSize: 12)),
+              Expanded(
+                child: SliderTheme(
+                  data: SliderThemeData(
+                    activeTrackColor: const Color(0xFFBBFF00),
+                    inactiveTrackColor: Colors.grey[800],
+                    thumbShape: _NumberedThumbShape(value: _customTimeMinutes.round()),
+                    overlayColor: const Color(0xFFBBFF00).withValues(alpha: 0.2),
+                    trackHeight: 3,
+                  ),
+                  child: Slider(
+                    value: _customTimeMinutes,
+                    min: 10,
+                    max: 60,
+                    divisions: 50,
+                    onChanged: (value) {
+                      setState(() {
+                        _customTimeMinutes = value;
+                      });
+                    },
+                  ),
                 ),
               ),
-            ),
-          );
-        }),
-        GestureDetector(
-          onTap: () => _showCustomTimeDialog(),
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(20),
-              border: Border.all(
-                color: !_timeOptions.contains(_availableTime)
-                    ? const Color(0xFFBBFF00)
-                    : Colors.grey[700]!,
+              const Text('60', style: TextStyle(color: Color(0xFFBBFF00), fontSize: 12)),
+              const SizedBox(width: 12),
+              GestureDetector(
+                onTap: () => setState(() {
+                  _availableTime = _customTimeMinutes.round() * 60;
+                  _showCustomTimeSlider = false;
+                }),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: const Color(0xFFBBFF00)),
+                  ),
+                  child: const Text(
+                    '확인',
+                    style: TextStyle(
+                      color: Color(0xFFBBFF00),
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
               ),
-            ),
-            child: Text(
-              !_timeOptions.contains(_availableTime)
-                  ? '${_availableTime ~/ 60}분'
-                  : '+',
-              style: TextStyle(
-                color: !_timeOptions.contains(_availableTime)
-                    ? const Color(0xFFBBFF00)
-                    : Colors.grey,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  void _showCustomTimeDialog() {
-    final controller = TextEditingController();
-    showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        backgroundColor: Colors.grey[900],
-        title: const Text('사용시간 입력 (분)', style: TextStyle(color: Colors.white)),
-        content: TextField(
-          controller: controller,
-          keyboardType: TextInputType.number,
-          style: const TextStyle(color: Colors.white),
-          decoration: const InputDecoration(
-            hintText: '예: 15',
-            hintStyle: TextStyle(color: Colors.grey),
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: const Text('취소'),
-          ),
-          TextButton(
-            onPressed: () {
-              final minutes = int.tryParse(controller.text);
-              if (minutes != null && minutes > 0) {
-                setState(() => _availableTime = minutes * 60);
-              }
-              Navigator.pop(ctx);
-            },
-            child: const Text('확인'),
+            ],
           ),
         ],
-      ),
+      ],
     );
   }
 
