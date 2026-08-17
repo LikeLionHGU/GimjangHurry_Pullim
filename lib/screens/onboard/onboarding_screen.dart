@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
-import 'home/service_intro_screen.dart';
+import '../home/service_intro_screen.dart';
 import '../../constants/app_colors.dart';
 import '../../widgets/common_widgets.dart';
-import 'tool_registration_screen.dart';
 
 /// 온보딩 첫 화면 - 서비스 소개 + 이용 흐름 + 주의사항 + 면책
 /// PDF 1페이지: "서비스 소개 보기" 버튼 + "주의 사항 자세히 보기" 링크

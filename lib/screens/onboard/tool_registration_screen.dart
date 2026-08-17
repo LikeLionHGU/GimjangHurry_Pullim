@@ -5,6 +5,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../assets/tool_assets.dart';
+import '../../providers/app_provider.dart';
 import '../../services/tool_registration_service.dart';
 import '../main_shell.dart';
 import '../posture/posture_guide_screen.dart';
