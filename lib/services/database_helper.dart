@@ -1,10 +1,8 @@
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 import '../models/user_model.dart';
-import '../models/tool_model.dart';
 import '../models/course_model.dart';
 import '../models/step_model.dart';
-import '../models/move_model.dart';
 import '../models/posture_result_model.dart';
 
 class DatabaseHelper {
@@ -42,24 +40,13 @@ class DatabaseHelper {
       )
     ''');
 
-    // TOOL 테이블 (사전 정의 도구 목록)
-    await db.execute('''
-      CREATE TABLE tools (
-        tool_id INTEGER PRIMARY KEY AUTOINCREMENT,
-        category TEXT NOT NULL,
-        shape TEXT NOT NULL,
-        img TEXT
-      )
-    ''');
-
     // OWNED_TOOL 테이블 (사용자 보유 도구)
+    // tool_id는 tool_assets의 인덱스(1~12)를 직접 참조한다.
     await db.execute('''
       CREATE TABLE owned_tools (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         tool_id INTEGER NOT NULL,
-        user_id INTEGER NOT NULL,
-        FOREIGN KEY (tool_id) REFERENCES tools(tool_id),
-        FOREIGN KEY (user_id) REFERENCES users(user_id)
+        user_id INTEGER NOT NULL
       )
     ''');
 
@@ -93,19 +80,6 @@ class DatabaseHelper {
       )
     ''');
 
-    // MOVE 테이블 (동작 에셋)
-    await db.execute('''
-      CREATE TABLE moves (
-        move_id INTEGER PRIMARY KEY AUTOINCREMENT,
-        body TEXT NOT NULL,
-        tool TEXT NOT NULL,
-        name TEXT NOT NULL,
-        description TEXT NOT NULL,
-        img TEXT,
-        time INTEGER NOT NULL
-      )
-    ''');
-
     // POSTURE_RESULT 테이블 (자세 측정 결과)
     await db.execute('''
       CREATE TABLE posture_results (
@@ -119,122 +93,6 @@ class DatabaseHelper {
         FOREIGN KEY (user_id) REFERENCES users(user_id)
       )
     ''');
-
-    // 기본 도구 데이터 삽입
-    await _insertDefaultTools(db);
-    // 기본 동작 데이터 삽입
-    await _insertDefaultMoves(db);
-  }
-
-  Future<void> _insertDefaultTools(Database db) async {
-    final tools = [
-      // 폼롤러
-      {'category': 'foamRoller', 'shape': 'normal', 'img': null},
-      {'category': 'foamRoller', 'shape': 'soft', 'img': null},
-      {'category': 'foamRoller', 'shape': 'hard', 'img': null},
-      {'category': 'foamRoller', 'shape': 'grid', 'img': null},
-      {'category': 'foamRoller', 'shape': 'half', 'img': null},
-      {'category': 'foamRoller', 'shape': 'mini', 'img': null},
-      // 마사지볼
-      {'category': 'massageBall', 'shape': 'single', 'img': null},
-      {'category': 'massageBall', 'shape': 'peanut', 'img': null},
-      {'category': 'massageBall', 'shape': 'softBall', 'img': null},
-      {'category': 'massageBall', 'shape': 'hardBall', 'img': null},
-      {'category': 'massageBall', 'shape': 'miniBall', 'img': null},
-    ];
-
-    for (final tool in tools) {
-      await db.insert('tools', tool);
-    }
-  }
-
-  Future<void> _insertDefaultMoves(Database db) async {
-    final moves = [
-      {
-        'body': '종아리',
-        'tool': '폼롤러',
-        'name': '종아리 롤링',
-        'description': '폼롤러를 종아리 아래에 위치합니다\n손으로 바닥을 짚고 몸을 지탱합니다.\n천천히 앞뒤로 움직이며 근육을 이완합니다.\n통증이 느껴지면 그 위치에서 10~15초 유지합니다.',
-        'img': null,
-        'time': 60,
-      },
-      {
-        'body': '허벅지',
-        'tool': '폼롤러',
-        'name': '허벅지 전면 롤링',
-        'description': '엎드린 자세에서 폼롤러를 허벅지 앞쪽에 놓습니다.\n팔꿈치로 몸을 지탱하며 앞뒤로 움직입니다.\n무릎 위부터 골반 아래까지 천천히 이동합니다.\n통증 부위에서 잠시 멈추어 압박합니다.',
-        'img': null,
-        'time': 60,
-      },
-      {
-        'body': '허벅지 뒤',
-        'tool': '폼롤러',
-        'name': '햄스트링 롤링',
-        'description': '앉은 자세에서 폼롤러를 허벅지 뒤에 놓습니다.\n손으로 몸을 지탱하며 앞뒤로 움직입니다.\n엉덩이부터 무릎 뒤까지 천천히 이동합니다.',
-        'img': null,
-        'time': 60,
-      },
-      {
-        'body': '등',
-        'tool': '폼롤러',
-        'name': '등 상부 롤링',
-        'description': '등 상부에 폼롤러를 놓고 누운 자세를 취합니다.\n무릎을 구부리고 발을 바닥에 댑니다.\n엉덩이를 들어 천천히 위아래로 움직입니다.\n목까지 올라가지 않도록 주의합니다.',
-        'img': null,
-        'time': 60,
-      },
-      {
-        'body': '둔근',
-        'tool': '마사지볼',
-        'name': '둔근 압박',
-        'description': '마사지볼 위에 엉덩이를 올려놓습니다.\n한쪽 다리를 반대쪽 무릎 위에 올립니다.\n체중을 이용해 천천히 압박합니다.\n통증 부위에서 10~15초 유지합니다.',
-        'img': null,
-        'time': 60,
-      },
-      {
-        'body': '발',
-        'tool': '마사지볼',
-        'name': '족저 압박',
-        'description': '서있는 자세에서 마사지볼을 발바닥 아래에 놓습니다.\n체중을 실어 천천히 앞뒤로 굴립니다.\n아치 부분을 집중적으로 압박합니다.\n통증이 심하면 의자에 앉아서 진행합니다.',
-        'img': null,
-        'time': 60,
-      },
-      {
-        'body': '어깨',
-        'tool': '마사지볼',
-        'name': '어깨 압박',
-        'description': '벽에 마사지볼을 대고 어깨 뒷면에 위치시킵니다.\n몸무게를 이용해 적당한 압력을 가합니다.\n작은 원을 그리며 근육을 이완합니다.\n승모근 부위를 집중적으로 풀어줍니다.',
-        'img': null,
-        'time': 60,
-      },
-      {
-        'body': '목',
-        'tool': '마사지볼',
-        'name': '목 뒤 압박',
-        'description': '바닥에 누운 상태에서 마사지볼을 목 뒤에 놓습니다.\n천천히 고개를 좌우로 돌려 근육을 이완합니다.\n뒷목 중앙에서 양 옆으로 이동하며 압박합니다.\n과도한 압력을 가하지 않도록 주의합니다.',
-        'img': null,
-        'time': 60,
-      },
-      {
-        'body': '허리',
-        'tool': '폼롤러',
-        'name': '허리 롤링',
-        'description': '폼롤러를 허리 아래에 놓고 누운 자세를 취합니다.\n무릎을 구부리고 코어에 힘을 줍니다.\n좌우로 부드럽게 움직이며 이완합니다.\n척추 직접 압박은 피합니다.',
-        'img': null,
-        'time': 60,
-      },
-      {
-        'body': '가슴',
-        'tool': '마사지볼',
-        'name': '가슴 압박',
-        'description': '벽에 마사지볼을 대고 가슴 근육에 위치시킵니다.\n팔을 천천히 위아래로 움직이며 이완합니다.\n쇄골 아래쪽을 집중적으로 풀어줍니다.',
-        'img': null,
-        'time': 60,
-      },
-    ];
-
-    for (final move in moves) {
-      await db.insert('moves', move);
-    }
   }
 
   // ==================== USER ====================
@@ -266,70 +124,6 @@ class DatabaseHelper {
       where: 'user_id = ?',
       whereArgs: [user.userId],
     );
-  }
-
-  // ==================== TOOLS ====================
-
-  Future<List<ToolModel>> getAllTools() async {
-    final db = await database;
-    final maps = await db.query('tools');
-    return maps.map((m) => ToolModel.fromMap(m)).toList();
-  }
-
-  Future<List<ToolModel>> getToolsByCategory(ToolCategory category) async {
-    final db = await database;
-    final maps = await db.query(
-      'tools',
-      where: 'category = ?',
-      whereArgs: [category.name],
-    );
-    return maps.map((m) => ToolModel.fromMap(m)).toList();
-  }
-
-  Future<ToolModel?> getTool(int toolId) async {
-    final db = await database;
-    final maps = await db.query('tools', where: 'tool_id = ?', whereArgs: [toolId]);
-    if (maps.isEmpty) return null;
-    return ToolModel.fromMap(maps.first);
-  }
-
-  // ==================== OWNED TOOLS ====================
-
-  Future<int> addOwnedTool(int userId, int toolId) async {
-    final db = await database;
-    return await db.insert('owned_tools', {
-      'user_id': userId,
-      'tool_id': toolId,
-    });
-  }
-
-  Future<int> removeOwnedTool(int userId, int toolId) async {
-    final db = await database;
-    return await db.delete(
-      'owned_tools',
-      where: 'user_id = ? AND tool_id = ?',
-      whereArgs: [userId, toolId],
-    );
-  }
-
-  Future<List<ToolModel>> getOwnedTools(int userId) async {
-    final db = await database;
-    final maps = await db.rawQuery('''
-      SELECT t.* FROM tools t
-      INNER JOIN owned_tools ot ON t.tool_id = ot.tool_id
-      WHERE ot.user_id = ?
-    ''', [userId]);
-    return maps.map((m) => ToolModel.fromMap(m)).toList();
-  }
-
-  Future<bool> isToolOwned(int userId, int toolId) async {
-    final db = await database;
-    final maps = await db.query(
-      'owned_tools',
-      where: 'user_id = ? AND tool_id = ?',
-      whereArgs: [userId, toolId],
-    );
-    return maps.isNotEmpty;
   }
 
   // ==================== COURSES ====================
@@ -412,27 +206,6 @@ class DatabaseHelper {
       where: 'used_id = ?',
       whereArgs: [step.usedId],
     );
-  }
-
-  // ==================== MOVES ====================
-
-  Future<List<MoveModel>> getAllMoves() async {
-    final db = await database;
-    final maps = await db.query('moves');
-    return maps.map((m) => MoveModel.fromMap(m)).toList();
-  }
-
-  Future<MoveModel?> getMove(int moveId) async {
-    final db = await database;
-    final maps = await db.query('moves', where: 'move_id = ?', whereArgs: [moveId]);
-    if (maps.isEmpty) return null;
-    return MoveModel.fromMap(maps.first);
-  }
-
-  Future<List<MoveModel>> getMovesByBody(String body) async {
-    final db = await database;
-    final maps = await db.query('moves', where: 'body = ?', whereArgs: [body]);
-    return maps.map((m) => MoveModel.fromMap(m)).toList();
   }
 
   // ==================== POSTURE RESULTS ====================
