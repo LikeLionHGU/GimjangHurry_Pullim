@@ -3,9 +3,12 @@ import '../../assets/move_assets.dart';
 import '../../assets/tool_assets.dart';
 import '../../course_generator/models/course.dart';
 import '../../course_generator/models/course_step.dart';
+import '../../services/course_mapper.dart';
+import '../../services/database_helper.dart';
+import 'course_execution_screen.dart';
 
 /// 코스 생성 결과 화면.
-/// 생성된 [Course] 객체의 정보를 표시하고, "코스 시작하기" 버튼(UI만)을 제공한다.
+/// 생성된 [Course] 객체의 정보를 표시하고, "코스 시작하기" 버튼을 제공한다.
 class CourseResultScreen extends StatelessWidget {
   const CourseResultScreen({super.key, required this.course});
 
@@ -154,8 +157,29 @@ class CourseResultScreen extends StatelessWidget {
                 width: double.infinity,
                 height: 56,
                 child: ElevatedButton.icon(
-                  onPressed: () {
-                    // 아직 로직 없음
+                  onPressed: () async {
+                    // 코스 정보를 DB에 저장
+                    final db = DatabaseHelper();
+                    final courseModel = CourseMapper.toCourseModel(course);
+                    final courseId = await db.insertCourse(courseModel);
+                    final stepModels = CourseMapper.toStepModels(
+                      course.steps,
+                      courseId: courseId,
+                    );
+                    for (final step in stepModels) {
+                      await db.insertStep(step);
+                    }
+
+                    if (!context.mounted) return;
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => CourseExecutionScreen(
+                          course: course,
+                          courseId: courseId,
+                        ),
+                      ),
+                    );
                   },
                   icon: const Icon(Icons.play_arrow, color: Colors.black),
                   label: const Text(

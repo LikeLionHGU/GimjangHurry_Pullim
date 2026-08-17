@@ -19,7 +19,8 @@ class PromptBuilder {
         '3. **시간 범위 준수**: 각 동작의 duration은 해당 동작의 time.min ~ time.max 범위 내에서 배정한다.\n'
         '4. **총 시간 준수**: 모든 step의 duration 합이 가용 시간을 초과하지 않아야 한다. 가용 시간의 90~100%를 채우는 것이 이상적이다.\n'
         '5. **동작 선택 이유**: 각 동작을 선택한 이유를 한국어로 간결하게 설명한다 (1~2문장).\n'
-        '6. **코스 요약**: 전체 코스의 목적과 흐름을 한국어로 2~3문장으로 요약한다.\n'
+        '6. **코스 이름**: 코스의 목적을 나타내는 짧고 직관적인 한국어 이름을 생성한다 (예: "목·어깨 집중 이완", "전신 피로 해소 코스").\n'
+        '7. **코스 요약**: 전체 코스의 목적과 흐름을 한국어로 2~3문장으로 요약한다.\n'
         '\n'
         '## 응답 형식\n'
         '\n'
@@ -88,6 +89,10 @@ class PromptBuilder {
       'schema': {
         'type': 'object',
         'properties': {
+          'name': {
+            'type': 'string',
+            'description': '코스 이름 (한국어, 짧고 직관적으로. 예: "목·어깨 집중 이완")',
+          },
           'steps': {
             'type': 'array',
             'description': '코스를 구성하는 동작 단계들 (순서대로)',
@@ -120,7 +125,7 @@ class PromptBuilder {
             'description': '코스 전체 요약 (한국어, 2~3문장)',
           },
         },
-        'required': ['steps', 'totalDuration', 'summary'],
+        'required': ['name', 'steps', 'totalDuration', 'summary'],
         'additionalProperties': false,
       },
     };
