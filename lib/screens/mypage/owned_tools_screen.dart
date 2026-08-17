@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../constants/app_colors.dart';
 import '../../assets/tool_assets.dart' as tool_assets;
 import '../../services/tool_registration_service.dart';
+import 'add_tool_screen.dart';
 
 class OwnedToolsScreen extends StatefulWidget {
   const OwnedToolsScreen({super.key});
@@ -69,39 +70,77 @@ class _OwnedToolsScreenState extends State<OwnedToolsScreen> {
                       Wrap(
                         spacing: 16,
                         runSpacing: 16,
-                        children: _ownedTools.map((tool) => Column(
-                          children: [
-                            Container(
-                              width: 90,
-                              height: 90,
-                              decoration: BoxDecoration(
-                                color: AppColors.cardBackground,
-                                borderRadius: BorderRadius.circular(12),
-                                border: Border.all(color: AppColors.border),
-                              ),
-                              padding: const EdgeInsets.all(8),
-                              child: Image.asset(
-                                tool.imagePath,
-                                fit: BoxFit.contain,
-                                errorBuilder: (_, __, ___) => Icon(
-                                  tool.category == tool_assets.ToolCategory.foamRoller
-                                      ? Icons.sports_gymnastics
-                                      : Icons.circle,
-                                  color: AppColors.textSecondary,
-                                  size: 32,
+                        children: [
+                          ..._ownedTools.map((tool) => Column(
+                            children: [
+                              Container(
+                                width: 90,
+                                height: 90,
+                                decoration: BoxDecoration(
+                                  color: AppColors.cardBackground,
+                                  borderRadius: BorderRadius.circular(12),
+                                  border: Border.all(color: AppColors.border),
+                                ),
+                                padding: const EdgeInsets.all(8),
+                                child: Image.asset(
+                                  tool.imagePath,
+                                  fit: BoxFit.contain,
+                                  errorBuilder: (_, __, ___) => Icon(
+                                    tool.category == tool_assets.ToolCategory.foamRoller
+                                        ? Icons.sports_gymnastics
+                                        : Icons.circle,
+                                    color: AppColors.textSecondary,
+                                    size: 32,
+                                  ),
                                 ),
                               ),
-                            ),
-                            const SizedBox(height: 6),
-                            Text(
-                              tool.shape.label,
-                              style: const TextStyle(
-                                color: AppColors.textSecondary,
-                                fontSize: 12,
+                              const SizedBox(height: 6),
+                              Text(
+                                tool.shape.label,
+                                style: const TextStyle(
+                                  color: AppColors.textSecondary,
+                                  fontSize: 12,
+                                ),
                               ),
+                            ],
+                          )),
+                          // 도구 추가 버튼
+                          GestureDetector(
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (_) => const AddToolScreen()),
+                              ).then((_) => _loadTools());
+                            },
+                            child: Column(
+                              children: [
+                                Container(
+                                  width: 90,
+                                  height: 90,
+                                  decoration: BoxDecoration(
+                                    color: AppColors.cardBackground,
+                                    borderRadius: BorderRadius.circular(12),
+                                    border: Border.all(color: AppColors.border),
+                                  ),
+                                  child: const Icon(
+                                    Icons.add_circle_outline,
+                                    color: AppColors.textTertiary,
+                                    size: 32,
+                                  ),
+                                ),
+                                const SizedBox(height: 6),
+                                const Text(
+                                  '추가',
+                                  style: TextStyle(
+                                    color: AppColors.textTertiary,
+                                    fontSize: 12,
+                                  ),
+                                ),
+                              ],
                             ),
-                          ],
-                        )).toList(),
+                          ),
+                        ],
                       ),
                   ],
                 ),

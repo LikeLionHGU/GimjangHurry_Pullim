@@ -1,17 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:provider/provider.dart';
+import 'constants/app_colors.dart';
 import 'constants/app_theme.dart';
 import 'providers/app_provider.dart';
-import 'screens/auth/login_screen.dart';
 import 'screens/main_shell.dart';
 import 'screens/onboard/onboarding_screen.dart';
 import 'course_generator/env_loader.dart';
-import 'services/tool_registration_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp();
   await EnvLoader.load();
   runApp(const MyApp());
 }
@@ -27,78 +24,64 @@ class MyApp extends StatelessWidget {
         title: '풀림',
         debugShowCheckedModeBanner: false,
         theme: AppTheme.darkTheme,
-        home: Consumer<AppProvider>(
-          builder: (context, provider, _) {
-            if (provider.isLoading) {
-              return const _SplashScreen();
-            }
-            if (!provider.isLoggedIn) {
-              return const LoginScreen();
-            }
-            // 로그인 후 매번 온보딩 상태 체크
-            return const _OnboardingChecker();
-          },
-        ),
+        home: const SplashScreen(),
       ),
     );
   }
 }
 
-/// 로그인 후 온보딩 완료 여부를 체크해서 적절한 화면을 보여주는 위젯
-class _OnboardingChecker extends StatefulWidget {
-  const _OnboardingChecker();
+/// 스플래시 화면: 로고 표시 후 자동으로 다음 화면으로 이동
+class SplashScreen extends StatefulWidget {
+  const SplashScreen({super.key});
 
   @override
-  State<_OnboardingChecker> createState() => _OnboardingCheckerState();
+  State<SplashScreen> createState() => _SplashScreenState();
 }
 
-class _OnboardingCheckerState extends State<_OnboardingChecker> {
-  bool? _onboardingDone;
-
+class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
-    _checkOnboarding();
+    _navigateAfterDelay();
   }
 
-  Future<void> _checkOnboarding() async {
+  Future<void> _navigateAfterDelay() async {
+    // 로고를 2초 보여준 후 이동
+    await Future.delayed(const Duration(seconds: 2));
+
+    if (!mounted) return;
+
     final provider = context.read<AppProvider>();
-    final email = provider.currentUser?.email;
-    final toolService = ToolRegistrationService();
-    final done = await toolService.isOnboardingCompleteForUser(email);
-    if (mounted) {
-      setState(() => _onboardingDone = done);
-    }
-  }
 
-  @override
-  Widget build(BuildContext context) {
-    if (_onboardingDone == null) {
-      // 아직 확인 중
-      return const Scaffold(
-        body: Center(child: CircularProgressIndicator()),
-      );
+    // Provider가 아직 로딩 중이면 완료될 때까지 대기
+    while (provider.isLoading) {
+      await Future.delayed(const Duration(milliseconds: 100));
+      if (!mounted) return;
     }
-    if (!_onboardingDone!) {
-      return const OnboardingScreen();
-    }
-    return const MainShell();
-  }
-}
 
-class _SplashScreen extends StatelessWidget {
-  const _SplashScreen();
+    if (!mounted) return;
+
+    // DB에 사용자가 있으면 홈, 없으면 온보딩
+    final destination = provider.isLoggedIn
+        ? const MainShell()
+        : const OnboardingScreen();
+
+    Navigator.of(context).pushReplacement(
+      MaterialPageRoute(builder: (_) => destination),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     return const Scaffold(
       body: Center(
         child: Text(
-          '풀림',
+          'PULLIM',
           style: TextStyle(
-            fontSize: 32,
-            fontWeight: FontWeight.w700,
-            color: Colors.white,
+            fontSize: 36,
+            fontWeight: FontWeight.w800,
+            color: AppColors.textPrimary,
+            letterSpacing: 3,
           ),
         ),
       ),

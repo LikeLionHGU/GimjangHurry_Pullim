@@ -286,9 +286,9 @@ class _ToolRegistrationScreenState extends State<ToolRegistrationScreen> {
     setState(() => _isSaving = true);
 
     await _service.saveRegisteredTools(_selectedIndexes.toList());
-    // 현재 사용자 이메일 기반으로 온보딩 완료 저장
-    final email = context.read<AppProvider>().currentUser?.email;
-    await _service.completeOnboardingForUser(email);
+    // 현재 사용자 이름 기반으로 온보딩 완료 저장
+    final userName = context.read<AppProvider>().currentUser?.name ?? '';
+    await _service.completeOnboardingForUser(userName);
 
     if (!mounted) return;
 

@@ -9,6 +9,8 @@ import '../../services/database_helper.dart';
 import '../../services/tool_registration_service.dart';
 import '../../widgets/common_widgets.dart';
 import '../posture/posture_guide_screen.dart';
+import '../home/recent_history_screen.dart';
+import 'add_tool_screen.dart';
 import 'owned_tools_screen.dart';
 
 class MypageScreen extends StatefulWidget {
@@ -67,13 +69,6 @@ class _MypageScreenState extends State<MypageScreen> {
         title: const Text('마이페이지'),
         leading: const SizedBox.shrink(),
         leadingWidth: 0,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.logout, color: AppColors.textSecondary),
-            tooltip: '로그아웃',
-            onPressed: () => _showLogoutDialog(context),
-          ),
-        ],
       ),
       body: SafeArea(
         child: _isLoading
@@ -227,6 +222,39 @@ class _MypageScreenState extends State<MypageScreen> {
                       padding: const EdgeInsets.only(right: 12),
                       child: _ToolImageCard(tool: tool),
                     )),
+                // 도구 추가 버튼
+                Padding(
+                  padding: const EdgeInsets.only(right: 12),
+                  child: GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (_) => const AddToolScreen()),
+                      ).then((_) => _loadData());
+                    },
+                    child: Container(
+                      width: 80,
+                      height: 100,
+                      decoration: BoxDecoration(
+                        color: AppColors.cardBackground,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: AppColors.border),
+                      ),
+                      child: const Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Icons.add_circle_outline,
+                              color: AppColors.textTertiary, size: 32),
+                          SizedBox(height: 6),
+                          Text('추가',
+                              style: TextStyle(
+                                  color: AppColors.textTertiary, fontSize: 11)),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
               ],
             ),
           ),
@@ -251,7 +279,10 @@ class _MypageScreenState extends State<MypageScreen> {
             const Spacer(),
             GestureDetector(
               onTap: () {
-                context.read<AppProvider>().setNavIndex(1);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const RecentHistoryScreen()),
+                ).then((_) => _loadData());
               },
               child: const Text(
                 AppStrings.seeMore,
@@ -282,30 +313,6 @@ class _MypageScreenState extends State<MypageScreen> {
                 ),
               )),
       ],
-    );
-  }
-  void _showLogoutDialog(BuildContext context) {
-    final provider = context.read<AppProvider>();
-    showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        backgroundColor: AppColors.cardBackground,
-        title: const Text('로그아웃', style: TextStyle(color: AppColors.textPrimary)),
-        content: const Text('정말 로그아웃 하시겠습니까?', style: TextStyle(color: AppColors.textSecondary)),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: const Text('취소', style: TextStyle(color: AppColors.textTertiary)),
-          ),
-          TextButton(
-            onPressed: () async {
-              Navigator.pop(ctx);
-              await provider.logout();
-            },
-            child: const Text('로그아웃', style: TextStyle(color: AppColors.primary)),
-          ),
-        ],
-      ),
     );
   }
 }

@@ -1,12 +1,137 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../home/service_intro_screen.dart';
 import '../../constants/app_colors.dart';
+import '../../providers/app_provider.dart';
 import '../../widgets/common_widgets.dart';
 
-/// 온보딩 첫 화면 - 서비스 소개 + 이용 흐름 + 주의사항 + 면책
-/// PDF 1페이지: "서비스 소개 보기" 버튼 + "주의 사항 자세히 보기" 링크
-class OnboardingScreen extends StatelessWidget {
+/// 온보딩 첫 화면 - 이름 입력 후 서비스 소개로 진행
+class OnboardingScreen extends StatefulWidget {
   const OnboardingScreen({super.key});
+
+  @override
+  State<OnboardingScreen> createState() => _OnboardingScreenState();
+}
+
+class _OnboardingScreenState extends State<OnboardingScreen> {
+  final _nameController = TextEditingController();
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _onNext() async {
+    final name = _nameController.text.trim();
+    if (name.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('이름을 입력해주세요')),
+      );
+      return;
+    }
+
+    // 사용자 DB에 저장 + 로그인 상태 설정
+    final provider = context.read<AppProvider>();
+    await provider.login(name, '');
+
+    if (!mounted) return;
+
+    // 다음 페이지: 서비스 소개
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => const _OnboardingIntroScreen()),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 32),
+          child: Column(
+            children: [
+              const Spacer(flex: 2),
+
+              // 로고
+              const Text(
+                'PULLIM',
+                style: TextStyle(
+                  color: AppColors.textPrimary,
+                  fontSize: 36,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: 3,
+                ),
+              ),
+              const SizedBox(height: 8),
+              const Text(
+                '근막 이완 코스',
+                style: TextStyle(color: AppColors.textSecondary, fontSize: 14),
+              ),
+
+              const Spacer(flex: 1),
+
+              // 이름 입력
+              const Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  '이름을 입력해주세요',
+                  style: TextStyle(
+                    color: AppColors.textPrimary,
+                    fontSize: 18,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 12),
+              TextField(
+                controller: _nameController,
+                style: const TextStyle(
+                    color: AppColors.textPrimary, fontSize: 16),
+                decoration: InputDecoration(
+                  hintText: '이름 입력',
+                  hintStyle: const TextStyle(color: AppColors.textTertiary),
+                  filled: true,
+                  fillColor: AppColors.surface,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide.none,
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: const BorderSide(color: AppColors.primary),
+                  ),
+                  contentPadding:
+                      const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                ),
+                textInputAction: TextInputAction.done,
+                onSubmitted: (_) => _onNext(),
+              ),
+
+              const Spacer(flex: 2),
+
+              // 다음 버튼
+              SizedBox(
+                width: double.infinity,
+                height: 56,
+                child: ElevatedButton(
+                  onPressed: _onNext,
+                  child: const Text('다음'),
+                ),
+              ),
+              const SizedBox(height: 40),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// 온보딩 2단계: 서비스 소개 + 이용 흐름 + 주의사항 → "서비스 소개 보기" → 도구 등록
+class _OnboardingIntroScreen extends StatelessWidget {
+  const _OnboardingIntroScreen();
 
   @override
   Widget build(BuildContext context) {
@@ -35,7 +160,6 @@ class OnboardingScreen extends StatelessWidget {
                   height: 1.5,
                 ),
               ),
-
               const SizedBox(height: 32),
 
               // 이용 흐름
@@ -43,14 +167,11 @@ class OnboardingScreen extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
-                      '이용 흐름',
-                      style: TextStyle(
-                        color: AppColors.textPrimary,
-                        fontSize: 18,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
+                    const Text('이용 흐름',
+                        style: TextStyle(
+                            color: AppColors.textPrimary,
+                            fontSize: 18,
+                            fontWeight: FontWeight.w700)),
                     const SizedBox(height: 16),
                     _flowItem(1, '도구 등록'),
                     const SizedBox(height: 10),
@@ -62,7 +183,6 @@ class OnboardingScreen extends StatelessWidget {
                   ],
                 ),
               ),
-
               const SizedBox(height: 20),
 
               // 기본 주의사항
@@ -70,14 +190,11 @@ class OnboardingScreen extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      '기본 주의사항',
-                      style: TextStyle(
-                        color: AppColors.textPrimary,
-                        fontSize: 18,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
+                    Text('기본 주의사항',
+                        style: TextStyle(
+                            color: AppColors.textPrimary,
+                            fontSize: 18,
+                            fontWeight: FontWeight.w700)),
                     SizedBox(height: 16),
                     _CautionText('과도한 통증이 느껴지면 즉시 중단하세요.'),
                     SizedBox(height: 8),
@@ -89,56 +206,38 @@ class OnboardingScreen extends StatelessWidget {
                   ],
                 ),
               ),
-
               const SizedBox(height: 20),
 
               // 의료 면책
-              SectionCard(
+              const SectionCard(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Row(
-                      children: [
-                        Icon(Icons.warning_amber_rounded,
-                            color: AppColors.warning, size: 20),
-                        SizedBox(width: 8),
-                        Text(
-                          '의료 진단·치료 아님',
+                    Row(children: [
+                      Icon(Icons.warning_amber_rounded,
+                          color: AppColors.warning, size: 20),
+                      SizedBox(width: 8),
+                      Text('의료 진단·치료 아님',
                           style: TextStyle(
-                            color: AppColors.textPrimary,
-                            fontSize: 16,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 12),
-                    const Text(
+                              color: AppColors.textPrimary,
+                              fontSize: 16,
+                              fontWeight: FontWeight.w700)),
+                    ]),
+                    SizedBox(height: 12),
+                    Text(
                       '이 앱은 의료기기가 아니며, 제공되는 코스는 의료 진단이나 치료를 대체하지 않습니다. '
                       '통증이 지속될 경우 전문 의료인과 상담하세요.',
                       style: TextStyle(
-                        color: AppColors.textSecondary,
-                        fontSize: 13,
-                        height: 1.5,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    const Text(
-                      '본 서비스는 건강 증진을 목적으로 하는 참고용 콘텐츠이며, '
-                      '개인별 금기사항 판단이나 의학적 처방을 제공하지 않습니다.',
-                      style: TextStyle(
-                        color: AppColors.textTertiary,
-                        fontSize: 12,
-                        height: 1.5,
-                      ),
+                          color: AppColors.textSecondary,
+                          fontSize: 13,
+                          height: 1.5),
                     ),
                   ],
                 ),
               ),
-
               const SizedBox(height: 32),
 
-              // "서비스 소개 보기" 버튼 → 서비스 소개 상세 (거기서 도구 등록으로 이동)
+              // 서비스 소개 보기 버튼
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
@@ -146,8 +245,7 @@ class OnboardingScreen extends StatelessWidget {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (_) => const ServiceIntroScreen(),
-                      ),
+                          builder: (_) => const ServiceIntroScreen()),
                     );
                   },
                   child: const Text('서비스 소개 보기'),
@@ -155,15 +253,14 @@ class OnboardingScreen extends StatelessWidget {
               ),
               const SizedBox(height: 12),
 
-              // "주의 사항 자세히 보기" 링크
+              // 주의 사항 자세히 보기
               Center(
                 child: TextButton(
                   onPressed: () {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (_) => const CautionScreen(),
-                      ),
+                          builder: (_) => const CautionScreen()),
                     );
                   },
                   child: const Text(
@@ -184,7 +281,7 @@ class OnboardingScreen extends StatelessWidget {
     );
   }
 
-  Widget _flowItem(int number, String text) {
+  static Widget _flowItem(int number, String text) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       decoration: BoxDecoration(
@@ -195,13 +292,9 @@ class OnboardingScreen extends StatelessWidget {
         children: [
           NumberBadge(number: number, isActive: true),
           const SizedBox(width: 14),
-          Text(
-            text,
-            style: const TextStyle(
-              color: AppColors.textPrimary,
-              fontSize: 15,
-            ),
-          ),
+          Text(text,
+              style: const TextStyle(
+                  color: AppColors.textPrimary, fontSize: 15)),
         ],
       ),
     );
@@ -219,14 +312,9 @@ class _CautionText extends StatelessWidget {
       children: [
         const Text('· ', style: TextStyle(color: AppColors.textSecondary)),
         Expanded(
-          child: Text(
-            text,
-            style: const TextStyle(
-              color: AppColors.textSecondary,
-              fontSize: 14,
-              height: 1.4,
-            ),
-          ),
+          child: Text(text,
+              style: const TextStyle(
+                  color: AppColors.textSecondary, fontSize: 14, height: 1.4)),
         ),
       ],
     );

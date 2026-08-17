@@ -1,22 +1,22 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import '../../constants/app_colors.dart';
 import '../../models/course_model.dart';
 import '../../services/database_helper.dart';
 import '../../services/course_loader.dart';
-import '../../widgets/common_widgets.dart';
 import '../course/course_execution_screen.dart';
 
-/// 저장된 코스 전체 목록 페이지
-class LibraryAllScreen extends StatefulWidget {
-  const LibraryAllScreen({super.key});
+/// 최근 운동 내역 전체 페이지
+class RecentHistoryScreen extends StatefulWidget {
+  const RecentHistoryScreen({super.key});
 
   @override
-  State<LibraryAllScreen> createState() => _LibraryAllScreenState();
+  State<RecentHistoryScreen> createState() => _RecentHistoryScreenState();
 }
 
-class _LibraryAllScreenState extends State<LibraryAllScreen> {
+class _RecentHistoryScreenState extends State<RecentHistoryScreen> {
   final DatabaseHelper _db = DatabaseHelper();
-  List<CourseModel> _savedCourses = [];
+  List<CourseModel> _courses = [];
   bool _isLoading = true;
 
   @override
@@ -27,9 +27,9 @@ class _LibraryAllScreenState extends State<LibraryAllScreen> {
 
   Future<void> _loadCourses() async {
     setState(() => _isLoading = true);
-    final courses = await _db.getSavedCourses();
+    final courses = await _db.getCompletedCourses();
     setState(() {
-      _savedCourses = courses;
+      _courses = courses;
       _isLoading = false;
     });
   }
@@ -38,7 +38,7 @@ class _LibraryAllScreenState extends State<LibraryAllScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('저장된 코스'),
+        title: const Text('최근 운동 내역'),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () => Navigator.pop(context),
@@ -47,39 +47,73 @@ class _LibraryAllScreenState extends State<LibraryAllScreen> {
       body: SafeArea(
         child: _isLoading
             ? const Center(child: CircularProgressIndicator())
-            : _savedCourses.isEmpty
+            : _courses.isEmpty
                 ? const Center(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(Icons.bookmark_border,
+                        Icon(Icons.fitness_center,
                             color: AppColors.textTertiary, size: 48),
                         SizedBox(height: 16),
-                        Text('저장된 코스가 없습니다',
+                        Text('운동 기록이 없습니다',
                             style: TextStyle(
                                 color: AppColors.textTertiary, fontSize: 15)),
-                        SizedBox(height: 8),
-                        Text('코스 실행 중 저장 버튼을 눌러보세요',
-                            style: TextStyle(
-                                color: AppColors.textTertiary, fontSize: 13)),
                       ],
                     ),
                   )
                 : ListView.separated(
                     padding: const EdgeInsets.all(24),
-                    itemCount: _savedCourses.length,
+                    itemCount: _courses.length,
                     separatorBuilder: (_, __) => const SizedBox(height: 12),
                     itemBuilder: (context, index) {
-                      final course = _savedCourses[index];
-                      return CourseItemCard(
-                        title: course.name,
-                        toolInfo: course.summary ?? '',
-                        duration: course.formattedTime,
-                        steps: '${course.totalMove}단계',
-                        onTap: () => _showExecuteDialog(course),
-                      );
+                      final course = _courses[index];
+                      return _buildItem(course);
                     },
                   ),
+      ),
+    );
+  }
+
+  Widget _buildItem(CourseModel course) {
+    final dateStr = course.executedAt != null
+        ? DateFormat('yyyy.MM.dd  a h:mm').format(course.executedAt!)
+        : '';
+
+    return GestureDetector(
+      onTap: () => _showExecuteDialog(course),
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: AppColors.cardBackground,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Row(
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(course.name,
+                      style: const TextStyle(
+                          color: AppColors.textPrimary,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600)),
+                  const SizedBox(height: 4),
+                  Text('${course.totalMove}단계 · ${course.formattedTime}',
+                      style: const TextStyle(
+                          color: AppColors.textTertiary, fontSize: 13)),
+                  if (dateStr.isNotEmpty) ...[
+                    const SizedBox(height: 4),
+                    Text(dateStr,
+                        style: const TextStyle(
+                            color: AppColors.textTertiary, fontSize: 12)),
+                  ],
+                ],
+              ),
+            ),
+            const Icon(Icons.chevron_right, color: AppColors.textTertiary),
+          ],
+        ),
       ),
     );
   }
@@ -92,7 +126,7 @@ class _LibraryAllScreenState extends State<LibraryAllScreen> {
         title: Text(courseModel.name,
             style: const TextStyle(color: AppColors.textPrimary, fontSize: 18)),
         content: Text(
-          '${courseModel.totalMove}단계 · ${courseModel.formattedTime}\n\n이 코스를 실행하시겠습니까?',
+          '${courseModel.totalMove}단계 · ${courseModel.formattedTime}\n\n이 코스를 다시 실행하시겠습니까?',
           style: const TextStyle(color: AppColors.textSecondary),
         ),
         actions: [
