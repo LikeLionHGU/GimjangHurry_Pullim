@@ -13,17 +13,11 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
   await EnvLoader.load();
-
-  final toolService = ToolRegistrationService();
-  final onboardingDone = await toolService.isOnboardingComplete();
-
-  runApp(MyApp(showOnboarding: !onboardingDone));
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key, required this.showOnboarding});
-
-  final bool showOnboarding;
+  const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -41,15 +35,54 @@ class MyApp extends StatelessWidget {
             if (!provider.isLoggedIn) {
               return const LoginScreen();
             }
-            // 온보딩 미완료 시 온보딩 화면 (서비스 소개 → 도구 등록)
-            if (showOnboarding) {
-              return const OnboardingScreen();
-            }
-            return const MainShell();
+            // 로그인 후 매번 온보딩 상태 체크
+            return const _OnboardingChecker();
           },
         ),
       ),
     );
+  }
+}
+
+/// 로그인 후 온보딩 완료 여부를 체크해서 적절한 화면을 보여주는 위젯
+class _OnboardingChecker extends StatefulWidget {
+  const _OnboardingChecker();
+
+  @override
+  State<_OnboardingChecker> createState() => _OnboardingCheckerState();
+}
+
+class _OnboardingCheckerState extends State<_OnboardingChecker> {
+  bool? _onboardingDone;
+
+  @override
+  void initState() {
+    super.initState();
+    _checkOnboarding();
+  }
+
+  Future<void> _checkOnboarding() async {
+    final provider = context.read<AppProvider>();
+    final email = provider.currentUser?.email;
+    final toolService = ToolRegistrationService();
+    final done = await toolService.isOnboardingCompleteForUser(email);
+    if (mounted) {
+      setState(() => _onboardingDone = done);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_onboardingDone == null) {
+      // 아직 확인 중
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
+    if (!_onboardingDone!) {
+      return const OnboardingScreen();
+    }
+    return const MainShell();
   }
 }
 

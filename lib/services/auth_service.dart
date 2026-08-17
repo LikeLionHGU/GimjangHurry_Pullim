@@ -40,7 +40,7 @@ class AuthService {
 
   /// 로그아웃
   Future<void> signOut() async {
-    await _googleSignIn.signOut();
+    await _googleSignIn.disconnect(); // 계정 연결 해제 (다음 로그인 시 계정 선택 화면 표시)
     await _auth.signOut();
   }
 

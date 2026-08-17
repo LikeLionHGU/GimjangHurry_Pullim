@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import '../constants/app_colors.dart';
 import '../widgets/common_widgets.dart';
-import 'tool_registration_screen.dart';
+import 'home/service_intro_screen.dart';
 
-/// 온보딩 화면 - 서비스 소개 + 이용 흐름 + 주의사항 + "도구 등록하고 시작하기" 버튼
-/// GUI 1~2페이지에 해당 (처음 접속 사용자가 보는 화면)
+/// 온보딩 첫 화면 - 서비스 소개 + 이용 흐름 + 주의사항 + 면책
+/// PDF 1페이지: "서비스 소개 보기" 버튼 + "주의 사항 자세히 보기" 링크
 class OnboardingScreen extends StatelessWidget {
   const OnboardingScreen({super.key});
 
@@ -138,7 +138,7 @@ class OnboardingScreen extends StatelessWidget {
 
               const SizedBox(height: 32),
 
-              // 도구 등록하고 시작하기 버튼
+              // "서비스 소개 보기" 버튼 → 서비스 소개 상세 (거기서 도구 등록으로 이동)
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
@@ -146,11 +146,34 @@ class OnboardingScreen extends StatelessWidget {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (_) => const ToolRegistrationScreen(),
+                        builder: (_) => const ServiceIntroScreen(),
                       ),
                     );
                   },
-                  child: const Text('도구 등록하고 시작하기'),
+                  child: const Text('서비스 소개 보기'),
+                ),
+              ),
+              const SizedBox(height: 12),
+
+              // "주의 사항 자세히 보기" 링크
+              Center(
+                child: TextButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const CautionScreen(),
+                      ),
+                    );
+                  },
+                  child: const Text(
+                    '주의 사항 자세히 보기',
+                    style: TextStyle(
+                      color: AppColors.textSecondary,
+                      decoration: TextDecoration.underline,
+                      decorationColor: AppColors.textSecondary,
+                    ),
+                  ),
                 ),
               ),
               const SizedBox(height: 16),

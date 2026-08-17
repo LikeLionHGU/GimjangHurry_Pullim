@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import '../../constants/app_colors.dart';
 import '../../models/posture_result_model.dart';
+import '../main_shell.dart';
 
 class PostureResultScreen extends StatefulWidget {
   final PostureResultModel result;
@@ -91,7 +92,13 @@ class _PostureResultScreenState extends State<PostureResultScreen> {
                 width: double.infinity,
                 height: 56,
                 child: ElevatedButton.icon(
-                  onPressed: () => Navigator.pop(context),
+                  onPressed: () {
+                    // 모든 이전 화면을 지우고 홈으로 이동
+                    Navigator.of(context).pushAndRemoveUntil(
+                      MaterialPageRoute(builder: (_) => const MainShell()),
+                      (_) => false,
+                    );
+                  },
                   icon: const Icon(Icons.play_arrow),
                   label: const Text('코스 시작하기'),
                 ),

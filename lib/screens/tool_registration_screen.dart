@@ -3,7 +3,9 @@
 // 등록 완료 후 홈 화면으로 이동한다.
 
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../assets/tool_assets.dart';
+import '../providers/app_provider.dart';
 import '../services/tool_registration_service.dart';
 import 'main_shell.dart';
 import 'posture/posture_guide_screen.dart';
@@ -284,7 +286,9 @@ class _ToolRegistrationScreenState extends State<ToolRegistrationScreen> {
     setState(() => _isSaving = true);
 
     await _service.saveRegisteredTools(_selectedIndexes.toList());
-    await _service.completeOnboarding();
+    // 현재 사용자 이메일 기반으로 온보딩 완료 저장
+    final email = context.read<AppProvider>().currentUser?.email;
+    await _service.completeOnboardingForUser(email);
 
     if (!mounted) return;
 
@@ -369,17 +373,9 @@ class _OnboardingPostureScreen extends StatelessWidget {
                           MaterialPageRoute(
                             builder: (_) => const PostureGuideScreen(),
                           ),
-                        ).then((_) {
-                          // 자세 측정 완료 후 (또는 뒤로가기) → 홈으로
-                          if (context.mounted) {
-                            Navigator.of(context).pushAndRemoveUntil(
-                              MaterialPageRoute(
-                                builder: (_) => const MainShell(),
-                              ),
-                              (_) => false,
-                            );
-                          }
-                        });
+                        );
+                        // 자세 측정 완료 후 결과 화면의 "코스 시작하기"에서 홈으로 이동됨
+                        // 뒤로가기 시에는 이 화면에 머무름
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFFBBFF00),

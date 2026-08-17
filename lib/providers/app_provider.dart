@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/user_model.dart';
+import '../services/auth_service.dart';
 import '../services/database_helper.dart';
 
 class AppProvider extends ChangeNotifier {
@@ -60,6 +61,10 @@ class AppProvider extends ChangeNotifier {
   }
 
   Future<void> logout() async {
+    // Google 로그인 연결 해제 + Firebase 로그아웃
+    final authService = AuthService();
+    await authService.signOut();
+
     _currentUser = null;
     _isLoggedIn = false;
 

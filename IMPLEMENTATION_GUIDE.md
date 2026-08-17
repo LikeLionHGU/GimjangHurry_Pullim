@@ -251,4 +251,3 @@ lib/
 - `AndroidManifest.xml`: CAMERA + INTERNET 권한 설정됨
 - `google-services.json`: Firebase Console에서 다운 → `android/app/`에 위치해야 함
 - 에뮬레이터 시간대: 한국(서울)으로 설정해야 날짜 정확
-- 앱 삭제 후 재설치: DB 스키마 변경 시 필요 (score 컬럼 등)

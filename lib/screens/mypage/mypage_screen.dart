@@ -67,6 +67,13 @@ class _MypageScreenState extends State<MypageScreen> {
         title: const Text('마이페이지'),
         leading: const SizedBox.shrink(),
         leadingWidth: 0,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.logout, color: AppColors.textSecondary),
+            tooltip: '로그아웃',
+            onPressed: () => _showLogoutDialog(context),
+          ),
+        ],
       ),
       body: SafeArea(
         child: _isLoading
@@ -275,6 +282,30 @@ class _MypageScreenState extends State<MypageScreen> {
                 ),
               )),
       ],
+    );
+  }
+  void _showLogoutDialog(BuildContext context) {
+    final provider = context.read<AppProvider>();
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: AppColors.cardBackground,
+        title: const Text('로그아웃', style: TextStyle(color: AppColors.textPrimary)),
+        content: const Text('정말 로그아웃 하시겠습니까?', style: TextStyle(color: AppColors.textSecondary)),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('취소', style: TextStyle(color: AppColors.textTertiary)),
+          ),
+          TextButton(
+            onPressed: () async {
+              Navigator.pop(ctx);
+              await provider.logout();
+            },
+            child: const Text('로그아웃', style: TextStyle(color: AppColors.primary)),
+          ),
+        ],
+      ),
     );
   }
 }
