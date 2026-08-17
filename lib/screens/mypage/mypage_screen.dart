@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../constants/app_colors.dart';
 import '../../constants/app_strings.dart';
+import '../../constants/app_typography.dart';
 import '../../models/course_model.dart';
 import '../../assets/tool_assets.dart' as tool_assets;
 import '../../providers/app_provider.dart';
@@ -84,10 +85,8 @@ class _MypageScreenState extends State<MypageScreen> {
                       // 사용자 이름
                       Text(
                         '$userName님,',
-                        style: const TextStyle(
+                        style: AppTypography.sb24.copyWith(
                           color: AppColors.primary,
-                          fontSize: 24,
-                          fontWeight: FontWeight.w700,
                         ),
                       ),
                       const SizedBox(height: 16),
@@ -134,7 +133,7 @@ class _MypageScreenState extends State<MypageScreen> {
           children: [
             Text(
               AppStrings.postureCheck,
-              style: const TextStyle(
+              style: AppTypography.r14.copyWith(
                 color: AppColors.primary,
                 fontSize: 15,
                 fontWeight: FontWeight.w500,
@@ -177,12 +176,10 @@ class _MypageScreenState extends State<MypageScreen> {
       children: [
         Row(
           children: [
-            const Text(
+            Text(
               AppStrings.ownedTools,
-              style: TextStyle(
+              style: AppTypography.b18.copyWith(
                 color: AppColors.textPrimary,
-                fontSize: 18,
-                fontWeight: FontWeight.w700,
               ),
             ),
             const Spacer(),
@@ -193,9 +190,9 @@ class _MypageScreenState extends State<MypageScreen> {
                   MaterialPageRoute(builder: (_) => const OwnedToolsScreen()),
                 ).then((_) => _loadData());
               },
-              child: const Text(
+              child: Text(
                 AppStrings.seeMore,
-                style: TextStyle(color: AppColors.textSecondary, fontSize: 13),
+                style: AppTypography.r12.copyWith(color: AppColors.textSecondary, fontSize: 13),
               ),
             ),
           ],
@@ -205,10 +202,10 @@ class _MypageScreenState extends State<MypageScreen> {
           Container(
             width: double.infinity,
             padding: const EdgeInsets.symmetric(vertical: 20),
-            child: const Center(
+            child: Center(
               child: Text(
                 '등록된 도구가 없습니다',
-                style: TextStyle(color: AppColors.textTertiary, fontSize: 14),
+                style: AppTypography.r14.copyWith(color: AppColors.textTertiary),
               ),
             ),
           )
@@ -241,14 +238,14 @@ class _MypageScreenState extends State<MypageScreen> {
                         borderRadius: BorderRadius.circular(12),
                         border: Border.all(color: AppColors.border),
                       ),
-                      child: const Column(
+                      child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Icon(Icons.add_circle_outline,
+                          const Icon(Icons.add_circle_outline,
                               color: AppColors.textTertiary, size: 32),
-                          SizedBox(height: 6),
+                          const SizedBox(height: 6),
                           Text('추가',
-                              style: TextStyle(
+                              style: AppTypography.r12.copyWith(
                                   color: AppColors.textTertiary, fontSize: 11)),
                         ],
                       ),
@@ -268,12 +265,10 @@ class _MypageScreenState extends State<MypageScreen> {
       children: [
         Row(
           children: [
-            const Text(
+            Text(
               AppStrings.recentRecords,
-              style: TextStyle(
+              style: AppTypography.b18.copyWith(
                 color: AppColors.textPrimary,
-                fontSize: 18,
-                fontWeight: FontWeight.w700,
               ),
             ),
             const Spacer(),
@@ -284,21 +279,21 @@ class _MypageScreenState extends State<MypageScreen> {
                   MaterialPageRoute(builder: (_) => const RecentHistoryScreen()),
                 ).then((_) => _loadData());
               },
-              child: const Text(
+              child: Text(
                 AppStrings.seeMore,
-                style: TextStyle(color: AppColors.textSecondary, fontSize: 13),
+                style: AppTypography.r12.copyWith(color: AppColors.textSecondary, fontSize: 13),
               ),
             ),
           ],
         ),
         const SizedBox(height: 16),
         if (_recentCourses.isEmpty)
-          const Padding(
-            padding: EdgeInsets.symmetric(vertical: 24),
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 24),
             child: Center(
               child: Text(
                 '최근 기록이 없습니다',
-                style: TextStyle(color: AppColors.textTertiary, fontSize: 14),
+                style: AppTypography.r14.copyWith(color: AppColors.textTertiary),
               ),
             ),
           )
@@ -352,7 +347,7 @@ class _ToolImageCard extends StatelessWidget {
         const SizedBox(height: 6),
         Text(
           tool.shape.label,
-          style: const TextStyle(
+          style: AppTypography.r12.copyWith(
             color: AppColors.textSecondary,
             fontSize: 11,
           ),

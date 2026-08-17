@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../constants/app_colors.dart';
+import '../../constants/app_typography.dart';
 import '../../widgets/common_widgets.dart';
 import 'posture_screen.dart';
 
@@ -26,21 +27,18 @@ class PostureGuideScreen extends StatelessWidget {
             children: [
               const SizedBox(height: 32),
 
-              const Text(
+              Text(
                 '내 몸을 먼저 확인할게요',
-                style: TextStyle(
+                style: AppTypography.sb24.copyWith(
                   color: AppColors.textPrimary,
-                  fontSize: 24,
-                  fontWeight: FontWeight.w700,
                 ),
               ),
               const SizedBox(height: 12),
-              const Text(
+              Text(
                 '현재 자세를 분석해 나에게 맞는 운동을 추천해 드려요. '
                 '정면과 측면을 차례로 촬영해 주세요.',
-                style: TextStyle(
+                style: AppTypography.r14.copyWith(
                   color: AppColors.textSecondary,
-                  fontSize: 14,
                   height: 1.5,
                 ),
               ),
@@ -48,12 +46,10 @@ class PostureGuideScreen extends StatelessWidget {
               const SizedBox(height: 36),
 
               // 촬영 가이드
-              const Text(
+              Text(
                 '촬영 가이드',
-                style: TextStyle(
+                style: AppTypography.sb16.copyWith(
                   color: AppColors.textPrimary,
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
                 ),
               ),
               const SizedBox(height: 16),
@@ -106,7 +102,7 @@ class PostureGuideScreen extends StatelessWidget {
               children: [
                 Text(
                   title,
-                  style: const TextStyle(
+                  style: AppTypography.r14.copyWith(
                     color: AppColors.textPrimary,
                     fontSize: 15,
                     fontWeight: FontWeight.w600,
@@ -115,7 +111,7 @@ class PostureGuideScreen extends StatelessWidget {
                 const SizedBox(height: 2),
                 Text(
                   desc,
-                  style: const TextStyle(
+                  style: AppTypography.r12.copyWith(
                     color: AppColors.textTertiary,
                     fontSize: 13,
                   ),

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../home/service_intro_screen.dart';
 import '../../constants/app_colors.dart';
+import '../../constants/app_typography.dart';
 import '../../providers/app_provider.dart';
 import '../../widgets/common_widgets.dart';
 
@@ -55,9 +56,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               const Spacer(flex: 2),
 
               // 로고
-              const Text(
+              Text(
                 'PULLIM',
-                style: TextStyle(
+                style: AppTypography.b35.copyWith(
                   color: AppColors.textPrimary,
                   fontSize: 36,
                   fontWeight: FontWeight.w800,
@@ -65,33 +66,30 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 ),
               ),
               const SizedBox(height: 8),
-              const Text(
+              Text(
                 '근막 이완 코스',
-                style: TextStyle(color: AppColors.textSecondary, fontSize: 14),
+                style: AppTypography.r14.copyWith(color: AppColors.textSecondary),
               ),
 
               const Spacer(flex: 1),
 
               // 이름 입력
-              const Align(
+              Align(
                 alignment: Alignment.centerLeft,
                 child: Text(
                   '이름을 입력해주세요',
-                  style: TextStyle(
+                  style: AppTypography.sb18.copyWith(
                     color: AppColors.textPrimary,
-                    fontSize: 18,
-                    fontWeight: FontWeight.w600,
                   ),
                 ),
               ),
               const SizedBox(height: 12),
               TextField(
                 controller: _nameController,
-                style: const TextStyle(
-                    color: AppColors.textPrimary, fontSize: 16),
+                style: AppTypography.r16.copyWith(color: AppColors.textPrimary),
                 decoration: InputDecoration(
                   hintText: '이름 입력',
-                  hintStyle: const TextStyle(color: AppColors.textTertiary),
+                  hintStyle: AppTypography.r16.copyWith(color: AppColors.textTertiary),
                   filled: true,
                   fillColor: AppColors.surface,
                   border: OutlineInputBorder(
@@ -143,20 +141,18 @@ class _OnboardingIntroScreen extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // 헤더
-              const Text(
+              Text(
                 '근막 이완 코스',
-                style: TextStyle(
+                style: AppTypography.sb24.copyWith(
                   color: AppColors.textPrimary,
                   fontSize: 26,
-                  fontWeight: FontWeight.w700,
                 ),
               ),
               const SizedBox(height: 8),
-              const Text(
+              Text(
                 '짧은 시간 안에 뭉친 근육을 풀고\n몸의 변화를 직접 느껴보세요.',
-                style: TextStyle(
+                style: AppTypography.r14.copyWith(
                   color: AppColors.textSecondary,
-                  fontSize: 14,
                   height: 1.5,
                 ),
               ),
@@ -167,11 +163,9 @@ class _OnboardingIntroScreen extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text('이용 흐름',
-                        style: TextStyle(
-                            color: AppColors.textPrimary,
-                            fontSize: 18,
-                            fontWeight: FontWeight.w700)),
+                    Text('이용 흐름',
+                        style: AppTypography.b18.copyWith(
+                            color: AppColors.textPrimary)),
                     const SizedBox(height: 16),
                     _flowItem(1, '도구 등록'),
                     const SizedBox(height: 10),
@@ -186,48 +180,44 @@ class _OnboardingIntroScreen extends StatelessWidget {
               const SizedBox(height: 20),
 
               // 기본 주의사항
-              const SectionCard(
+              SectionCard(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text('기본 주의사항',
-                        style: TextStyle(
-                            color: AppColors.textPrimary,
-                            fontSize: 18,
-                            fontWeight: FontWeight.w700)),
-                    SizedBox(height: 16),
-                    _CautionText('과도한 통증이 느껴지면 즉시 중단하세요.'),
-                    SizedBox(height: 8),
-                    _CautionText('한 부위에 30초~2분 이상 압박하지 마세요.'),
-                    SizedBox(height: 8),
-                    _CautionText('급성 부상·염증 부위에는 사용하지 마세요.'),
-                    SizedBox(height: 8),
-                    _CautionText('준비 운동 후 사용 시 효과가 높아집니다.'),
+                        style: AppTypography.b18.copyWith(
+                            color: AppColors.textPrimary)),
+                    const SizedBox(height: 16),
+                    const _CautionText('과도한 통증이 느껴지면 즉시 중단하세요.'),
+                    const SizedBox(height: 8),
+                    const _CautionText('한 부위에 30초~2분 이상 압박하지 마세요.'),
+                    const SizedBox(height: 8),
+                    const _CautionText('급성 부상·염증 부위에는 사용하지 마세요.'),
+                    const SizedBox(height: 8),
+                    const _CautionText('준비 운동 후 사용 시 효과가 높아집니다.'),
                   ],
                 ),
               ),
               const SizedBox(height: 20),
 
               // 의료 면책
-              const SectionCard(
+              SectionCard(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Row(children: [
-                      Icon(Icons.warning_amber_rounded,
+                      const Icon(Icons.warning_amber_rounded,
                           color: AppColors.warning, size: 20),
-                      SizedBox(width: 8),
+                      const SizedBox(width: 8),
                       Text('의료 진단·치료 아님',
-                          style: TextStyle(
-                              color: AppColors.textPrimary,
-                              fontSize: 16,
-                              fontWeight: FontWeight.w700)),
+                          style: AppTypography.b16.copyWith(
+                              color: AppColors.textPrimary)),
                     ]),
-                    SizedBox(height: 12),
+                    const SizedBox(height: 12),
                     Text(
                       '이 앱은 의료기기가 아니며, 제공되는 코스는 의료 진단이나 치료를 대체하지 않습니다. '
                       '통증이 지속될 경우 전문 의료인과 상담하세요.',
-                      style: TextStyle(
+                      style: AppTypography.r12.copyWith(
                           color: AppColors.textSecondary,
                           fontSize: 13,
                           height: 1.5),
@@ -263,9 +253,9 @@ class _OnboardingIntroScreen extends StatelessWidget {
                           builder: (_) => const CautionScreen()),
                     );
                   },
-                  child: const Text(
+                  child: Text(
                     '주의 사항 자세히 보기',
-                    style: TextStyle(
+                    style: AppTypography.r14.copyWith(
                       color: AppColors.textSecondary,
                       decoration: TextDecoration.underline,
                       decorationColor: AppColors.textSecondary,
@@ -293,7 +283,7 @@ class _OnboardingIntroScreen extends StatelessWidget {
           NumberBadge(number: number, isActive: true),
           const SizedBox(width: 14),
           Text(text,
-              style: const TextStyle(
+              style: AppTypography.r14.copyWith(
                   color: AppColors.textPrimary, fontSize: 15)),
         ],
       ),
@@ -310,11 +300,11 @@ class _CautionText extends StatelessWidget {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text('· ', style: TextStyle(color: AppColors.textSecondary)),
+        Text('· ', style: AppTypography.r14.copyWith(color: AppColors.textSecondary)),
         Expanded(
           child: Text(text,
-              style: const TextStyle(
-                  color: AppColors.textSecondary, fontSize: 14, height: 1.4)),
+              style: AppTypography.r14.copyWith(
+                  color: AppColors.textSecondary, height: 1.4)),
         ),
       ],
     );

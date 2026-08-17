@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../constants/app_colors.dart';
+import '../../constants/app_typography.dart';
 import '../../widgets/common_widgets.dart';
 import '../onboard/tool_registration_screen.dart';
 
@@ -23,21 +24,18 @@ class ServiceIntroScreen extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // 타이틀
-              const Text(
+              Text(
                 '내 몸 상태에 맞는\n근막 이완 루틴',
-                style: TextStyle(
+                style: AppTypography.sb24.copyWith(
                   color: AppColors.textPrimary,
-                  fontSize: 24,
-                  fontWeight: FontWeight.w700,
                   height: 1.3,
                 ),
               ),
               const SizedBox(height: 12),
-              const Text(
+              Text(
                 '보유한 도구와 피곤한 부위를 입력하면\n맞춤 코스를 바로 시작할 수 있습니다.',
-                style: TextStyle(
+                style: AppTypography.r14.copyWith(
                   color: AppColors.textSecondary,
-                  fontSize: 14,
                   height: 1.5,
                 ),
               ),
@@ -49,12 +47,10 @@ class ServiceIntroScreen extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
+                    Text(
                       '이용 순서',
-                      style: TextStyle(
+                      style: AppTypography.b18.copyWith(
                         color: AppColors.textPrimary,
-                        fontSize: 18,
-                        fontWeight: FontWeight.w700,
                       ),
                     ),
                     const SizedBox(height: 16),
@@ -88,26 +84,24 @@ class ServiceIntroScreen extends StatelessWidget {
               const SizedBox(height: 20),
 
               // 기본 주의사항
-              const SectionCard(
+              SectionCard(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       '기본 주의사항',
-                      style: TextStyle(
+                      style: AppTypography.b18.copyWith(
                         color: AppColors.textPrimary,
-                        fontSize: 18,
-                        fontWeight: FontWeight.w700,
                       ),
                     ),
-                    SizedBox(height: 16),
-                    _CautionText('운동 전 충분히 수분을 섭취하세요.'),
-                    SizedBox(height: 8),
-                    _CautionText('과도한 통증이 느껴지면 즉시 중단하세요.'),
-                    SizedBox(height: 8),
-                    _CautionText('식사 직후 30분 이내에는 실행을 피하세요.'),
-                    SizedBox(height: 8),
-                    _CautionText('급성 염증, 골절 부위에는 사용하지 마세요.'),
+                    const SizedBox(height: 16),
+                    const _CautionText('운동 전 충분히 수분을 섭취하세요.'),
+                    const SizedBox(height: 8),
+                    const _CautionText('과도한 통증이 느껴지면 즉시 중단하세요.'),
+                    const SizedBox(height: 8),
+                    const _CautionText('식사 직후 30분 이내에는 실행을 피하세요.'),
+                    const SizedBox(height: 8),
+                    const _CautionText('급성 염증, 골절 부위에는 사용하지 마세요.'),
                   ],
                 ),
               ),
@@ -124,10 +118,10 @@ class ServiceIntroScreen extends StatelessWidget {
                         const Icon(Icons.warning_amber_rounded,
                             color: AppColors.warning, size: 20),
                         const SizedBox(width: 8),
-                        const Expanded(
+                        Expanded(
                           child: Text(
                             '이 서비스는 의료 진단 또는 치료를 제공하지 않습니다.',
-                            style: TextStyle(
+                            style: AppTypography.r12.copyWith(
                               color: AppColors.textSecondary,
                               fontSize: 13,
                               height: 1.4,
@@ -137,11 +131,10 @@ class ServiceIntroScreen extends StatelessWidget {
                       ],
                     ),
                     const SizedBox(height: 8),
-                    const Text(
+                    Text(
                       '건강 이상이 의심될 경우 전문 의료기관을 방문하세요.',
-                      style: TextStyle(
+                      style: AppTypography.r12.copyWith(
                         color: AppColors.textTertiary,
-                        fontSize: 12,
                         height: 1.4,
                       ),
                     ),
@@ -179,9 +172,9 @@ class ServiceIntroScreen extends StatelessWidget {
                       ),
                     );
                   },
-                  child: const Text(
+                  child: Text(
                     '주의 사항 자세히 보기',
-                    style: TextStyle(
+                    style: AppTypography.r14.copyWith(
                       color: AppColors.textSecondary,
                       decoration: TextDecoration.underline,
                       decorationColor: AppColors.textSecondary,
@@ -226,9 +219,8 @@ class _StepDescription extends StatelessWidget {
               children: [
                 Text(
                   '$title — $description',
-                  style: const TextStyle(
+                  style: AppTypography.r14.copyWith(
                     color: AppColors.textPrimary,
-                    fontSize: 14,
                     height: 1.4,
                   ),
                 ),
@@ -251,13 +243,12 @@ class _CautionText extends StatelessWidget {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text('· ', style: TextStyle(color: AppColors.textSecondary)),
+        Text('· ', style: AppTypography.r14.copyWith(color: AppColors.textSecondary)),
         Expanded(
           child: Text(
             text,
-            style: const TextStyle(
+            style: AppTypography.r14.copyWith(
               color: AppColors.textSecondary,
-              fontSize: 14,
               height: 1.4,
             ),
           ),
@@ -296,34 +287,30 @@ class _CautionScreenFull extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
+              Text(
                 '안전하게 시작해요',
-                style: TextStyle(
+                style: AppTypography.sb24.copyWith(
                   color: AppColors.primary,
                   fontSize: 22,
-                  fontWeight: FontWeight.w700,
                 ),
               ),
               const SizedBox(height: 24),
-              const SectionCard(
+              SectionCard(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       '근막 이완 코스란?',
-                      style: TextStyle(
+                      style: AppTypography.b18.copyWith(
                         color: AppColors.textPrimary,
-                        fontSize: 18,
-                        fontWeight: FontWeight.w700,
                       ),
                     ),
-                    SizedBox(height: 12),
+                    const SizedBox(height: 12),
                     Text(
                       '폼롤러·마사지볼로 근막의 긴장을 풀어 피로를 회복하는 셀프 케어 루틴입니다. '
                       '피곤한 부위를 선택하면 맞춤 코스를 바로 시작할 수 있습니다.',
-                      style: TextStyle(
+                      style: AppTypography.r14.copyWith(
                         color: AppColors.textSecondary,
-                        fontSize: 14,
                         height: 1.5,
                       ),
                     ),
@@ -331,28 +318,26 @@ class _CautionScreenFull extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 20),
-              const SectionCard(
+              SectionCard(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       '기본 주의사항',
-                      style: TextStyle(
+                      style: AppTypography.b18.copyWith(
                         color: AppColors.textPrimary,
-                        fontSize: 18,
-                        fontWeight: FontWeight.w700,
                       ),
                     ),
-                    SizedBox(height: 16),
-                    _DetailCaution('운동 전 가볍게 몸을 풀고 시작하세요.'),
-                    SizedBox(height: 10),
-                    _DetailCaution('한 부위에 30초~60초 이상 과도하게 압박하지 마세요.'),
-                    SizedBox(height: 10),
-                    _DetailCaution('날카롭거나 심한 통증이 느껴지면 즉시 중단하세요.'),
-                    SizedBox(height: 10),
-                    _DetailCaution('임산부, 골다공증, 혈전증 등 기저질환이 있는 경우 전문가와 상담 후 이용하세요.'),
-                    SizedBox(height: 10),
-                    _DetailCaution('식사 직후에는 이용을 삼가세요.'),
+                    const SizedBox(height: 16),
+                    const _DetailCaution('운동 전 가볍게 몸을 풀고 시작하세요.'),
+                    const SizedBox(height: 10),
+                    const _DetailCaution('한 부위에 30초~60초 이상 과도하게 압박하지 마세요.'),
+                    const SizedBox(height: 10),
+                    const _DetailCaution('날카롭거나 심한 통증이 느껴지면 즉시 중단하세요.'),
+                    const SizedBox(height: 10),
+                    const _DetailCaution('임산부, 골다공증, 혈전증 등 기저질환이 있는 경우 전문가와 상담 후 이용하세요.'),
+                    const SizedBox(height: 10),
+                    const _DetailCaution('식사 직후에는 이용을 삼가세요.'),
                   ],
                 ),
               ),
@@ -366,21 +351,19 @@ class _CautionScreenFull extends StatelessWidget {
                         const Icon(Icons.warning_amber_rounded,
                             color: AppColors.warning, size: 20),
                         const SizedBox(width: 8),
-                        const Text(
+                        Text(
                           '의료 서비스가 아닙니다',
-                          style: TextStyle(
+                          style: AppTypography.b16.copyWith(
                             color: AppColors.textPrimary,
-                            fontSize: 16,
-                            fontWeight: FontWeight.w700,
                           ),
                         ),
                       ],
                     ),
                     const SizedBox(height: 12),
-                    const Text(
+                    Text(
                       '이 앱은 일반적인 셀프 케어 가이드를 제공하며, 의료 진단·치료·처방을 목적으로 하지 않습니다. '
                       '증상이 지속되거나 악화되면 반드시 의료 전문가의 진료를 받으시기 바랍니다.',
-                      style: TextStyle(
+                      style: AppTypography.r12.copyWith(
                         color: AppColors.textSecondary,
                         fontSize: 13,
                         height: 1.5,
@@ -415,13 +398,12 @@ class _DetailCaution extends StatelessWidget {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text('· ', style: TextStyle(color: AppColors.textSecondary)),
+        Text('· ', style: AppTypography.r14.copyWith(color: AppColors.textSecondary)),
         Expanded(
           child: Text(
             text,
-            style: const TextStyle(
+            style: AppTypography.r14.copyWith(
               color: AppColors.textSecondary,
-              fontSize: 14,
               height: 1.4,
             ),
           ),

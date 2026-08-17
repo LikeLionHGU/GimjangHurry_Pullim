@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'constants/app_colors.dart';
 import 'constants/app_theme.dart';
+import 'constants/app_typography.dart';
 import 'providers/app_provider.dart';
 import 'screens/main_shell.dart';
 import 'screens/onboard/onboarding_screen.dart';
@@ -73,15 +74,15 @@ class _SplashScreenState extends State<SplashScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
+    return Scaffold(
       body: Center(
         child: Text(
           'PULLIM',
-          style: TextStyle(
-            fontSize: 36,
-            fontWeight: FontWeight.w800,
+          style: AppTypography.b35.copyWith(
             color: AppColors.textPrimary,
+            fontWeight: FontWeight.w800,
             letterSpacing: 3,
+            fontSize: 36,
           ),
         ),
       ),

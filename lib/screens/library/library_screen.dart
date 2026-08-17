@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../constants/app_colors.dart';
 import '../../constants/app_strings.dart';
+import '../../constants/app_typography.dart';
 import '../../models/course_model.dart';
 import '../../services/database_helper.dart';
 import '../../widgets/common_widgets.dart';
@@ -59,12 +60,11 @@ class _LibraryScreenState extends State<LibraryScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
+                Text(
                   AppStrings.savedCourses,
-                  style: TextStyle(
+                  style: AppTypography.sb24.copyWith(
                     color: AppColors.textPrimary,
                     fontSize: 22,
-                    fontWeight: FontWeight.w700,
                   ),
                 ),
                 const SizedBox(height: 20),
@@ -94,11 +94,10 @@ class _LibraryScreenState extends State<LibraryScreen> {
                         Icon(Icons.history,
                             color: AppColors.textSecondary, size: 20),
                         const SizedBox(width: 10),
-                        const Text(
+                        Text(
                           AppStrings.historyAll,
-                          style: TextStyle(
+                          style: AppTypography.r14.copyWith(
                             color: AppColors.textSecondary,
-                            fontSize: 14,
                           ),
                         ),
                         const Spacer(),
@@ -138,22 +137,22 @@ class _LibraryScreenState extends State<LibraryScreen> {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.symmetric(vertical: 60),
-      child: const Column(
+      child: Column(
         children: [
-          Icon(Icons.library_books_outlined,
+          const Icon(Icons.library_books_outlined,
               color: AppColors.textTertiary, size: 48),
-          SizedBox(height: 16),
+          const SizedBox(height: 16),
           Text(
             '저장된 코스가 없습니다',
-            style: TextStyle(
+            style: AppTypography.r14.copyWith(
               color: AppColors.textTertiary,
               fontSize: 15,
             ),
           ),
-          SizedBox(height: 8),
+          const SizedBox(height: 8),
           Text(
             '코스를 실행하고 저장해보세요',
-            style: TextStyle(
+            style: AppTypography.r12.copyWith(
               color: AppColors.textTertiary,
               fontSize: 13,
             ),

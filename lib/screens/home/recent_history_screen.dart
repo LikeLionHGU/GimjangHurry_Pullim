@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../../constants/app_colors.dart';
+import '../../constants/app_typography.dart';
 import '../../models/course_model.dart';
 import '../../services/database_helper.dart';
 import '../../services/course_loader.dart';
@@ -48,15 +49,15 @@ class _RecentHistoryScreenState extends State<RecentHistoryScreen> {
         child: _isLoading
             ? const Center(child: CircularProgressIndicator())
             : _courses.isEmpty
-                ? const Center(
+                ? Center(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(Icons.fitness_center,
+                        const Icon(Icons.fitness_center,
                             color: AppColors.textTertiary, size: 48),
-                        SizedBox(height: 16),
+                        const SizedBox(height: 16),
                         Text('운동 기록이 없습니다',
-                            style: TextStyle(
+                            style: AppTypography.r14.copyWith(
                                 color: AppColors.textTertiary, fontSize: 15)),
                       ],
                     ),
@@ -94,19 +95,17 @@ class _RecentHistoryScreenState extends State<RecentHistoryScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(course.name,
-                      style: const TextStyle(
-                          color: AppColors.textPrimary,
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600)),
+                      style: AppTypography.sb16.copyWith(
+                          color: AppColors.textPrimary)),
                   const SizedBox(height: 4),
                   Text('${course.totalMove}단계 · ${course.formattedTime}',
-                      style: const TextStyle(
+                      style: AppTypography.r12.copyWith(
                           color: AppColors.textTertiary, fontSize: 13)),
                   if (dateStr.isNotEmpty) ...[
                     const SizedBox(height: 4),
                     Text(dateStr,
-                        style: const TextStyle(
-                            color: AppColors.textTertiary, fontSize: 12)),
+                        style: AppTypography.r12.copyWith(
+                            color: AppColors.textTertiary)),
                   ],
                 ],
               ),
@@ -124,16 +123,16 @@ class _RecentHistoryScreenState extends State<RecentHistoryScreen> {
       builder: (ctx) => AlertDialog(
         backgroundColor: AppColors.cardBackground,
         title: Text(courseModel.name,
-            style: const TextStyle(color: AppColors.textPrimary, fontSize: 18)),
+            style: AppTypography.b18.copyWith(color: AppColors.textPrimary)),
         content: Text(
           '${courseModel.totalMove}단계 · ${courseModel.formattedTime}\n\n이 코스를 다시 실행하시겠습니까?',
-          style: const TextStyle(color: AppColors.textSecondary),
+          style: AppTypography.r14.copyWith(color: AppColors.textSecondary),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('취소',
-                style: TextStyle(color: AppColors.textTertiary)),
+            child: Text('취소',
+                style: AppTypography.r14.copyWith(color: AppColors.textTertiary)),
           ),
           TextButton(
             onPressed: () async {
@@ -151,8 +150,8 @@ class _RecentHistoryScreenState extends State<RecentHistoryScreen> {
                 ).then((_) => _loadCourses());
               }
             },
-            child: const Text('시작하기',
-                style: TextStyle(color: AppColors.primary)),
+            child: Text('시작하기',
+                style: AppTypography.r14.copyWith(color: AppColors.primary)),
           ),
         ],
       ),

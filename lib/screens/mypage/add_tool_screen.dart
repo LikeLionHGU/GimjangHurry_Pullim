@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../constants/app_colors.dart';
+import '../../constants/app_typography.dart';
 import '../../assets/tool_assets.dart';
 import '../../services/tool_registration_service.dart';
 
@@ -13,7 +14,6 @@ class AddToolScreen extends StatefulWidget {
 }
 
 class _AddToolScreenState extends State<AddToolScreen> {
-  static const _accentColor = Color(0xFFBBFF00);
   final _service = ToolRegistrationService();
 
   ToolCategory _selectedCategory = ToolCategory.foamRoller;
@@ -38,9 +38,12 @@ class _AddToolScreenState extends State<AddToolScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('도구 추가'),
+        title: Text(
+          '도구 추가',
+          style: AppTypography.sb18.copyWith(color: AppColors.textPrimary),
+        ),
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
+          icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
           onPressed: () => Navigator.pop(context),
         ),
       ),
@@ -50,12 +53,9 @@ class _AddToolScreenState extends State<AddToolScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
+              Text(
                 '추가할 도구를 선택하세요',
-                style: TextStyle(
-                  fontSize: 14,
-                  color: Colors.grey,
-                ),
+                style: AppTypography.r14.copyWith(color: AppColors.textSecondary),
               ),
               const SizedBox(height: 20),
 
@@ -77,18 +77,17 @@ class _AddToolScreenState extends State<AddToolScreen> {
                               : AppColors.surface,
                           border: Border.all(
                             color: isSelected
-                                ? _accentColor
+                                ? AppColors.primary
                                 : AppColors.border,
                           ),
                           borderRadius: BorderRadius.circular(20),
                         ),
                         child: Text(
                           category.label,
-                          style: TextStyle(
+                          style: AppTypography.sb16.copyWith(
                             color: isSelected
-                                ? _accentColor
-                                : Colors.grey,
-                            fontWeight: FontWeight.w600,
+                                ? AppColors.primary
+                                : AppColors.textSecondary,
                           ),
                         ),
                       ),
@@ -136,9 +135,9 @@ class _AddToolScreenState extends State<AddToolScreen> {
                                   color: AppColors.surface,
                                   border: Border.all(
                                     color: isSelected
-                                        ? _accentColor
+                                        ? AppColors.primary
                                         : isOwned
-                                            ? Colors.grey
+                                            ? AppColors.textSecondary
                                             : Colors.transparent,
                                     width: 2,
                                   ),
@@ -150,7 +149,7 @@ class _AddToolScreenState extends State<AddToolScreen> {
                                   fit: BoxFit.contain,
                                   errorBuilder: (_, __, ___) => const Icon(
                                     Icons.fitness_center,
-                                    color: Colors.grey,
+                                    color: AppColors.textSecondary,
                                   ),
                                 ),
                               ),
@@ -160,11 +159,11 @@ class _AddToolScreenState extends State<AddToolScreen> {
                               isOwned
                                   ? '${tool.shape.label} ✓'
                                   : tool.shape.label,
-                              style: TextStyle(
-                                fontSize: 11,
+                              style: AppTypography.r12.copyWith(
                                 color: isOwned
-                                    ? Colors.grey
-                                    : Colors.white,
+                                    ? AppColors.textSecondary
+                                    : AppColors.textPrimary,
+                                fontSize: 11,
                               ),
                               textAlign: TextAlign.center,
                               overflow: TextOverflow.ellipsis,
@@ -189,11 +188,11 @@ class _AddToolScreenState extends State<AddToolScreen> {
                       : null,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: _selectedIndexes.isNotEmpty
-                        ? _accentColor
+                        ? AppColors.primary
                         : AppColors.surface,
-                    foregroundColor: Colors.black,
+                    foregroundColor: AppColors.background,
                     disabledBackgroundColor: AppColors.surface,
-                    disabledForegroundColor: Colors.grey,
+                    disabledForegroundColor: AppColors.textSecondary,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
@@ -202,8 +201,7 @@ class _AddToolScreenState extends State<AddToolScreen> {
                     _isSaving
                         ? '저장 중...'
                         : '${_selectedIndexes.length}개 도구 추가하기',
-                    style: const TextStyle(
-                        fontSize: 16, fontWeight: FontWeight.bold),
+                    style: AppTypography.b16,
                   ),
                 ),
               ),

@@ -5,6 +5,8 @@
 import 'package:flutter/material.dart';
 import '../../assets/body_assets.dart';
 import '../../assets/tool_assets.dart';
+import '../../constants/app_colors.dart';
+import '../../constants/app_typography.dart';
 import '../../course_generator/course_generator_library.dart';
 import '../../services/tool_registration_service.dart';
 import 'course_result_screen.dart';
@@ -149,7 +151,7 @@ class _CourseGenerationScreenState extends State<CourseGenerationScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: AppColors.background,
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
@@ -158,35 +160,27 @@ class _CourseGenerationScreenState extends State<CourseGenerationScreen> {
             children: [
               // 뒤로가기
               IconButton(
-                icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
+                icon: const Icon(Icons.arrow_back_ios, color: AppColors.textPrimary),
                 onPressed: () => Navigator.pop(context),
                 padding: EdgeInsets.zero,
                 alignment: Alignment.centerLeft,
               ),
               const SizedBox(height: 24),
               // 코스 생성 타이틀
-              const Text(
+              Text(
                 '코스 생성',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                ),
+                style: AppTypography.sb24.copyWith(color: AppColors.textPrimary),
               ),
               const SizedBox(height: 8),
-              const Text(
+              Text(
                 '아래 항목을 확인하고 코스를 생성하세요.',
-                style: TextStyle(color: Colors.grey, fontSize: 14),
+                style: AppTypography.r14.copyWith(color: AppColors.textSecondary),
               ),
               const SizedBox(height: 28),
               // 사용시간
-              const Text(
+              Text(
                 '사용시간',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
+                style: AppTypography.b18.copyWith(color: AppColors.textPrimary),
               ),
               const SizedBox(height: 12),
               _buildTimeSelector(),
@@ -196,18 +190,14 @@ class _CourseGenerationScreenState extends State<CourseGenerationScreen> {
               const SizedBox(height: 32),
               // 부위 선택 (자세 측정 기반이면 읽기 전용 요약만 표시)
               if (_isPostureBased) ...[
-                const Text(
+                Text(
                   '측정 기반 추천 부위',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: AppTypography.b18.copyWith(color: AppColors.textPrimary),
                 ),
                 const SizedBox(height: 4),
-                const Text(
+                Text(
                   '자세 점검 결과를 기반으로 선택된 부위입니다.',
-                  style: TextStyle(color: Colors.grey, fontSize: 14),
+                  style: AppTypography.r14.copyWith(color: AppColors.textSecondary),
                 ),
                 const SizedBox(height: 16),
                 _buildToggleButtons(),
@@ -216,42 +206,34 @@ class _CourseGenerationScreenState extends State<CourseGenerationScreen> {
                 const SizedBox(height: 16),
                 _buildPostureBasedPartsSummary(),
               ] else ...[
-                const Text(
+                Text(
                   '불편한 부위 선택',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: AppTypography.b18.copyWith(color: AppColors.textPrimary),
                 ),
                 const SizedBox(height: 4),
-                const Text(
+                Text(
                   '전면/후면 선택 후 부위를 지정하세요.',
-                  style: TextStyle(color: Colors.grey, fontSize: 14),
+                  style: AppTypography.r14.copyWith(color: AppColors.textSecondary),
                 ),
                 const SizedBox(height: 16),
                 _buildToggleButtons(),
                 const SizedBox(height: 16),
                 _buildBodyImageWithSpots(),
                 const SizedBox(height: 24),
-                const Text(
+                Text(
                   '피로도 입력',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: AppTypography.b18.copyWith(color: AppColors.textPrimary),
                 ),
                 const SizedBox(height: 12),
                 if (_fatigueLevels.isEmpty)
-                  const Padding(
-                    padding: EdgeInsets.symmetric(vertical: 10),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 10),
                     child: Center(
                       child: Text(
                         '전면/후면 선택 부위를 지정하세요.',
-                        style: TextStyle(color: Colors.grey, fontSize: 14),
-                      )
-                    )
+                        style: AppTypography.r14.copyWith(color: AppColors.textSecondary),
+                      ),
+                    ),
                   )
                 else
                   ..._fatigueLevels.keys.map(_buildFatigueSlider),
@@ -286,14 +268,13 @@ class _CourseGenerationScreenState extends State<CourseGenerationScreen> {
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(20),
                     border: Border.all(
-                      color: isActive ? const Color(0xFFBBFF00) : Colors.grey[700]!,
+                      color: isActive ? AppColors.primary : AppColors.toolSelectBox,
                     ),
                   ),
                   child: Text(
                     '$minutes분',
-                    style: TextStyle(
-                      color: isActive ? const Color(0xFFBBFF00) : Colors.grey,
-                      fontWeight: FontWeight.w600,
+                    style: AppTypography.sb16.copyWith(
+                      color: isActive ? AppColors.primary : AppColors.textSecondary,
                     ),
                   ),
                 ),
@@ -312,8 +293,8 @@ class _CourseGenerationScreenState extends State<CourseGenerationScreen> {
                   borderRadius: BorderRadius.circular(20),
                   border: Border.all(
                     color: _showCustomTimeSlider || !_timeOptions.contains(_availableTime)
-                        ? const Color(0xFFBBFF00)
-                        : Colors.grey[700]!,
+                        ? AppColors.primary
+                        : AppColors.toolSelectBox,
                   ),
                 ),
                 child: Text(
@@ -322,11 +303,10 @@ class _CourseGenerationScreenState extends State<CourseGenerationScreen> {
                       : !_timeOptions.contains(_availableTime)
                           ? '${_availableTime ~/ 60}분'
                           : '+',
-                  style: TextStyle(
+                  style: AppTypography.sb16.copyWith(
                     color: _showCustomTimeSlider || !_timeOptions.contains(_availableTime)
-                        ? const Color(0xFFBBFF00)
-                        : Colors.grey,
-                    fontWeight: FontWeight.w600,
+                        ? AppColors.primary
+                        : AppColors.textSecondary,
                   ),
                 ),
               ),
@@ -337,14 +317,14 @@ class _CourseGenerationScreenState extends State<CourseGenerationScreen> {
           const SizedBox(height: 16),
           Row(
             children: [
-              const Text('10', style: TextStyle(color: Color(0xFFBBFF00), fontSize: 12)),
+              Text('10', style: AppTypography.r12.copyWith(color: AppColors.primary)),
               Expanded(
                 child: SliderTheme(
                   data: SliderThemeData(
-                    activeTrackColor: const Color(0xFFBBFF00),
-                    inactiveTrackColor: Colors.grey[800],
+                    activeTrackColor: AppColors.primary,
+                    inactiveTrackColor: AppColors.toolSelectBox,
                     thumbShape: _NumberedThumbShape(value: _customTimeMinutes.round()),
-                    overlayColor: const Color(0xFFBBFF00).withValues(alpha: 0.2),
+                    overlayColor: AppColors.primary.withValues(alpha: 0.2),
                     trackHeight: 3,
                   ),
                   child: Slider(
@@ -360,7 +340,7 @@ class _CourseGenerationScreenState extends State<CourseGenerationScreen> {
                   ),
                 ),
               ),
-              const Text('60', style: TextStyle(color: Color(0xFFBBFF00), fontSize: 12)),
+              Text('60', style: AppTypography.r12.copyWith(color: AppColors.primary)),
               const SizedBox(width: 12),
               GestureDetector(
                 onTap: () => setState(() {
@@ -371,14 +351,13 @@ class _CourseGenerationScreenState extends State<CourseGenerationScreen> {
                   padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: const Color(0xFFBBFF00)),
+                    border: Border.all(color: AppColors.primary),
                   ),
-                  child: const Text(
+                  child: Text(
                     '확인',
-                    style: TextStyle(
-                      color: Color(0xFFBBFF00),
+                    style: AppTypography.sb16.copyWith(
+                      color: AppColors.primary,
                       fontSize: 13,
-                      fontWeight: FontWeight.w600,
                     ),
                   ),
                 ),
@@ -420,17 +399,16 @@ class _CourseGenerationScreenState extends State<CourseGenerationScreen> {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
         decoration: BoxDecoration(
-          color: isActive ? const Color(0xFFBBFF00) : Colors.transparent,
+          color: isActive ? AppColors.primary : Colors.transparent,
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
-            color: isActive ? const Color(0xFFBBFF00) : Colors.grey,
+            color: isActive ? AppColors.primary : AppColors.textSecondary,
           ),
         ),
         child: Text(
           label,
-          style: TextStyle(
-            color: isActive ? Colors.black : Colors.grey,
-            fontWeight: FontWeight.w600,
+          style: AppTypography.sb16.copyWith(
+            color: isActive ? AppColors.background : AppColors.textSecondary,
           ),
         ),
       ),
@@ -445,7 +423,7 @@ class _CourseGenerationScreenState extends State<CourseGenerationScreen> {
     return ClipRRect(
       borderRadius: BorderRadius.circular(12),
       child: Container(
-        color: const Color(0xFF1A1A1A),
+        color: AppColors.secondary,
         child: LayoutBuilder(
           builder: (context, constraints) {
             return Stack(
@@ -525,12 +503,12 @@ class _CourseGenerationScreenState extends State<CourseGenerationScreen> {
           decoration: BoxDecoration(
             shape: BoxShape.circle,
             color: isSelected
-                ? const Color(0xFFBBFF00).withValues(alpha: 0.4)
-                : Colors.white.withValues(alpha: 0.15),
+                ? AppColors.primary40
+                : AppColors.textPrimary.withValues(alpha: 0.15),
             border: Border.all(
               color: isSelected
-                  ? const Color(0xFFBBFF00)
-                  : Colors.white.withValues(alpha: 0.6),
+                  ? AppColors.primary
+                  : AppColors.textPrimary.withValues(alpha: 0.6),
               width: 2,
             ),
           ),
@@ -541,8 +519,8 @@ class _CourseGenerationScreenState extends State<CourseGenerationScreen> {
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 color: isSelected
-                    ? const Color(0xFFBBFF00)
-                    : Colors.white.withValues(alpha: 0.9),
+                    ? AppColors.primary
+                    : AppColors.textPrimary.withValues(alpha: 0.9),
               ),
             ),
           ),
@@ -564,29 +542,28 @@ class _CourseGenerationScreenState extends State<CourseGenerationScreen> {
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
               decoration: BoxDecoration(
-                border: Border.all(color: const Color(0xFFBBFF00)),
+                border: Border.all(color: AppColors.primary),
                 borderRadius: BorderRadius.circular(16),
               ),
               child: Text(
                 label,
                 textAlign: TextAlign.center,
-                style: const TextStyle(
-                  color: Color(0xFFBBFF00),
-                  fontSize: 12,
+                style: AppTypography.r12.copyWith(
+                  color: AppColors.primary,
                   fontWeight: FontWeight.w500,
                 ),
               ),
             ),
           ),
           const SizedBox(width: 8),
-          const Text('1', style: TextStyle(color: Colors.grey, fontSize: 12)),
+          Text('1', style: AppTypography.r12.copyWith(color: AppColors.textSecondary)),
           Expanded(
             child: SliderTheme(
               data: SliderThemeData(
-                activeTrackColor: const Color(0xFFBBFF00),
-                inactiveTrackColor: Colors.grey[800],
+                activeTrackColor: AppColors.primary,
+                inactiveTrackColor: AppColors.toolSelectBox,
                 thumbShape: _NumberedThumbShape(value: level.round()),
-                overlayColor: const Color(0xFFBBFF00).withValues(alpha: 0.2),
+                overlayColor: AppColors.primary.withValues(alpha: 0.2),
                 trackHeight: 3,
               ),
               child: Slider(
@@ -602,8 +579,7 @@ class _CourseGenerationScreenState extends State<CourseGenerationScreen> {
               ),
             ),
           ),
-          const Text('10',
-              style: TextStyle(color: Color(0xFFBBFF00), fontSize: 12)),
+          Text('10', style: AppTypography.r12.copyWith(color: AppColors.primary)),
         ],
       ),
     );
@@ -620,16 +596,15 @@ class _CourseGenerationScreenState extends State<CourseGenerationScreen> {
         return Container(
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
           decoration: BoxDecoration(
-            color: const Color(0xFFBBFF00).withValues(alpha: 0.15),
-            border: Border.all(color: const Color(0xFFBBFF00)),
+            color: AppColors.primary15,
+            border: Border.all(color: AppColors.primary),
             borderRadius: BorderRadius.circular(20),
           ),
           child: Text(
             '$label (Lv.$level)',
-            style: const TextStyle(
-              color: Color(0xFFBBFF00),
+            style: AppTypography.sb16.copyWith(
+              color: AppColors.primary,
               fontSize: 13,
-              fontWeight: FontWeight.w600,
             ),
           ),
         );
@@ -644,15 +619,15 @@ class _CourseGenerationScreenState extends State<CourseGenerationScreen> {
       return const Center(
         child: Padding(
           padding: EdgeInsets.symmetric(vertical: 16),
-          child: CircularProgressIndicator(color: Color(0xFFBBFF00)),
+          child: CircularProgressIndicator(color: AppColors.primary),
         ),
       );
     }
 
     if (_registeredToolIndexes.isEmpty) {
-      return const Text(
+      return Text(
         '등록된 도구가 없습니다.',
-        style: TextStyle(color: Colors.grey, fontSize: 14),
+        style: AppTypography.r14.copyWith(color: AppColors.textSecondary),
       );
     }
 
@@ -664,13 +639,9 @@ class _CourseGenerationScreenState extends State<CourseGenerationScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
+        Text(
           '오늘 사용할 도구',
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-          ),
+          style: AppTypography.b18.copyWith(color: AppColors.textPrimary),
         ),
         const SizedBox(height: 12),
         SizedBox(
@@ -690,11 +661,11 @@ class _CourseGenerationScreenState extends State<CourseGenerationScreen> {
                       width: 68,
                       height: 68,
                       decoration: BoxDecoration(
-                        color: Colors.grey[900],
+                        color: AppColors.secondary,
                         border: Border.all(
                           color: isSelected
-                              ? const Color(0xFFBBFF00)
-                              : Colors.grey[700]!,
+                              ? AppColors.primary
+                              : AppColors.toolSelectBox,
                           width: 2,
                         ),
                         borderRadius: BorderRadius.circular(12),
@@ -708,9 +679,8 @@ class _CourseGenerationScreenState extends State<CourseGenerationScreen> {
                     const SizedBox(height: 6),
                     Text(
                       tool.shape.label,
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: isSelected ? Colors.white : Colors.grey,
+                      style: AppTypography.r12.copyWith(
+                        color: isSelected ? AppColors.textPrimary : AppColors.textSecondary,
                       ),
                     ),
                   ],
@@ -750,18 +720,16 @@ class _CourseGenerationScreenState extends State<CourseGenerationScreen> {
         onPressed: isEnabled ? _onGeneratePressed : null,
         style: ElevatedButton.styleFrom(
           backgroundColor:
-              isEnabled ? const Color(0xFFBBFF00) : Colors.grey[800],
-          foregroundColor: Colors.black,
+              isEnabled ? AppColors.primary : AppColors.toolSelectBox,
+          foregroundColor: AppColors.background,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
           ),
         ),
         child: Text(
           '코스 생성하기',
-          style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.bold,
-            color: isEnabled ? Colors.black : Colors.grey,
+          style: AppTypography.b16.copyWith(
+            color: isEnabled ? AppColors.background : AppColors.textSecondary,
           ),
         ),
       ),
@@ -825,7 +793,7 @@ class _CourseLoadingScreenState extends State<_CourseLoadingScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('코스 생성에 실패했습니다: $e'),
-            backgroundColor: Colors.red[700],
+            backgroundColor: AppColors.error,
           ),
         );
         Navigator.pop(context);
@@ -835,16 +803,12 @@ class _CourseLoadingScreenState extends State<_CourseLoadingScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
-      backgroundColor: Colors.black,
+    return Scaffold(
+      backgroundColor: AppColors.background,
       body: Center(
         child: Text(
           '로딩중',
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: 20,
-            fontWeight: FontWeight.w600,
-          ),
+          style: AppTypography.b20.copyWith(color: AppColors.textPrimary),
         ),
       ),
     );
@@ -879,18 +843,17 @@ class _NumberedThumbShape extends SliderComponentShape {
     required Size sizeWithOverflow,
   }) {
     final canvas = context.canvas;
-    const accentColor = Color(0xFFBBFF00);
 
     // 외부 링 (stroke)
     final ringPaint = Paint()
-      ..color = accentColor
+      ..color = AppColors.primary
       ..style = PaintingStyle.stroke
       ..strokeWidth = 3;
     canvas.drawCircle(center, _thumbRadius, ringPaint);
 
     // 내부 배경 (검정)
     final fillPaint = Paint()
-      ..color = const Color(0xFF000000)
+      ..color = AppColors.background
       ..style = PaintingStyle.fill;
     canvas.drawCircle(center, _thumbRadius - 2, fillPaint);
 
@@ -898,9 +861,10 @@ class _NumberedThumbShape extends SliderComponentShape {
     final textSpan = TextSpan(
       text: this.value.toString(),
       style: const TextStyle(
-        color: accentColor,
+        color: AppColors.primary,
         fontSize: 14,
         fontWeight: FontWeight.bold,
+        fontFamily: 'NotoSansKR',
       ),
     );
     final textPainter = TextPainter(

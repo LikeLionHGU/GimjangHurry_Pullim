@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../constants/app_colors.dart';
+import '../../constants/app_typography.dart';
 import '../../models/course_model.dart';
 import '../../services/database_helper.dart';
 import '../../services/course_loader.dart';
@@ -48,19 +49,19 @@ class _LibraryAllScreenState extends State<LibraryAllScreen> {
         child: _isLoading
             ? const Center(child: CircularProgressIndicator())
             : _savedCourses.isEmpty
-                ? const Center(
+                ? Center(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(Icons.bookmark_border,
+                        const Icon(Icons.bookmark_border,
                             color: AppColors.textTertiary, size: 48),
-                        SizedBox(height: 16),
+                        const SizedBox(height: 16),
                         Text('저장된 코스가 없습니다',
-                            style: TextStyle(
+                            style: AppTypography.r14.copyWith(
                                 color: AppColors.textTertiary, fontSize: 15)),
-                        SizedBox(height: 8),
+                        const SizedBox(height: 8),
                         Text('코스 실행 중 저장 버튼을 눌러보세요',
-                            style: TextStyle(
+                            style: AppTypography.r12.copyWith(
                                 color: AppColors.textTertiary, fontSize: 13)),
                       ],
                     ),
@@ -90,16 +91,16 @@ class _LibraryAllScreenState extends State<LibraryAllScreen> {
       builder: (ctx) => AlertDialog(
         backgroundColor: AppColors.cardBackground,
         title: Text(courseModel.name,
-            style: const TextStyle(color: AppColors.textPrimary, fontSize: 18)),
+            style: AppTypography.b18.copyWith(color: AppColors.textPrimary)),
         content: Text(
           '${courseModel.totalMove}단계 · ${courseModel.formattedTime}\n\n이 코스를 실행하시겠습니까?',
-          style: const TextStyle(color: AppColors.textSecondary),
+          style: AppTypography.r14.copyWith(color: AppColors.textSecondary),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('취소',
-                style: TextStyle(color: AppColors.textTertiary)),
+            child: Text('취소',
+                style: AppTypography.r14.copyWith(color: AppColors.textTertiary)),
           ),
           TextButton(
             onPressed: () async {
@@ -117,8 +118,8 @@ class _LibraryAllScreenState extends State<LibraryAllScreen> {
                 ).then((_) => _loadCourses());
               }
             },
-            child: const Text('시작하기',
-                style: TextStyle(color: AppColors.primary)),
+            child: Text('시작하기',
+                style: AppTypography.r14.copyWith(color: AppColors.primary)),
           ),
         ],
       ),

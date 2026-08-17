@@ -3,6 +3,8 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import '../../assets/body_assets.dart';
 import '../../assets/move_assets.dart';
+import '../../constants/app_colors.dart';
+import '../../constants/app_typography.dart';
 import '../../course_generator/models/course.dart';
 import '../../course_generator/models/course_step.dart';
 import 'course_complete_screen.dart';
@@ -186,7 +188,7 @@ class _CourseExecutionScreenState extends State<CourseExecutionScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: AppColors.background,
       body: SafeArea(
         child: Column(
           children: [
@@ -196,18 +198,14 @@ class _CourseExecutionScreenState extends State<CourseExecutionScreen> {
               child: Row(
                 children: [
                   IconButton(
-                    icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
+                    icon: const Icon(Icons.arrow_back_ios, color: AppColors.textPrimary),
                     onPressed: _onBackPressed,
                   ),
-                  const Expanded(
+                  Expanded(
                     child: Text(
                       '코스 실행',
                       textAlign: TextAlign.center,
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 18,
-                        fontWeight: FontWeight.w600,
-                      ),
+                      style: AppTypography.sb18.copyWith(color: AppColors.textPrimary),
                     ),
                   ),
                   const SizedBox(width: 48),
@@ -248,18 +246,14 @@ class _CourseExecutionScreenState extends State<CourseExecutionScreen> {
                 child: ElevatedButton(
                   onPressed: _isTimerMode ? _goToNextStep : _startTimer,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFFBBFF00),
+                    backgroundColor: AppColors.primary,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(30),
                     ),
                   ),
-                  child: const Text(
+                  child: Text(
                     '다음 단계',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black,
-                    ),
+                    style: AppTypography.b16.copyWith(color: AppColors.background),
                   ),
                 ),
               ),
@@ -277,26 +271,22 @@ class _CourseExecutionScreenState extends State<CourseExecutionScreen> {
       width: double.infinity,
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       decoration: BoxDecoration(
-        color: const Color(0xFF1A1A1A),
+        color: AppColors.secondary,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey[800]!),
+        border: Border.all(color: AppColors.toolSelectBox),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             widget.course.name,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-            ),
+            style: AppTypography.b16.copyWith(color: AppColors.textPrimary),
           ),
           const SizedBox(height: 4),
           Text(
             '총 $_totalSteps단계 · 예상시간 $totalMinutes분',
-            style: TextStyle(
-              color: Colors.grey[400],
+            style: AppTypography.r12.copyWith(
+              color: AppColors.textSecondary,
               fontSize: 13,
             ),
           ),
@@ -313,7 +303,10 @@ class _CourseExecutionScreenState extends State<CourseExecutionScreen> {
       children: [
         Text(
           '${_currentStepIndex + 1}단계/ $_totalSteps단계',
-          style: TextStyle(color: Colors.grey[400], fontSize: 13),
+          style: AppTypography.r12.copyWith(
+            color: AppColors.textSecondary,
+            fontSize: 13,
+          ),
         ),
         const SizedBox(height: 8),
         ClipRRect(
@@ -321,9 +314,8 @@ class _CourseExecutionScreenState extends State<CourseExecutionScreen> {
           child: LinearProgressIndicator(
             value: progress,
             minHeight: 6,
-            backgroundColor: Colors.grey[800],
-            valueColor:
-                const AlwaysStoppedAnimation<Color>(Color(0xFFBBFF00)),
+            backgroundColor: AppColors.toolSelectBox,
+            valueColor: const AlwaysStoppedAnimation<Color>(AppColors.primary),
           ),
         ),
       ],
@@ -342,34 +334,22 @@ class _CourseExecutionScreenState extends State<CourseExecutionScreen> {
         // 동작 이름
         Text(
           moveName,
-          style: const TextStyle(
-            color: Colors.white,
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-          ),
+          style: AppTypography.b20.copyWith(color: AppColors.textPrimary),
         ),
         const SizedBox(height: 4),
         // 시간
         Text(
           timeText,
-          style: const TextStyle(
-            color: Color(0xFFBBFF00),
-            fontSize: 32,
-            fontWeight: FontWeight.bold,
-          ),
+          style: AppTypography.b32.copyWith(color: AppColors.primary),
         ),
         const SizedBox(height: 20),
         // 이미지 스와이프 영역
         _buildImageSwiper(),
         const SizedBox(height: 24),
         // 이완 방법
-        const Text(
+        Text(
           '이완 방법',
-          style: TextStyle(
-            color: Color(0xFFBBFF00),
-            fontSize: 16,
-            fontWeight: FontWeight.bold,
-          ),
+          style: AppTypography.b16.copyWith(color: AppColors.primary),
         ),
         const SizedBox(height: 12),
         _buildDescription(),
@@ -387,7 +367,7 @@ class _CourseExecutionScreenState extends State<CourseExecutionScreen> {
         Container(
           height: 240,
           decoration: BoxDecoration(
-            color: const Color(0xFF1A1A1A),
+            color: AppColors.secondary,
             borderRadius: BorderRadius.circular(12),
           ),
           child: ClipRRect(
@@ -397,17 +377,17 @@ class _CourseExecutionScreenState extends State<CourseExecutionScreen> {
               children: [
                 // 페이지 1: 자세 사진 (placeholder)
                 Container(
-                  color: const Color(0xFF1A1A1A),
-                  child: const Center(
+                  color: AppColors.secondary,
+                  child: Center(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(Icons.image_outlined,
-                            color: Colors.grey, size: 48),
-                        SizedBox(height: 8),
+                        const Icon(Icons.image_outlined,
+                            color: AppColors.textSecondary, size: 48),
+                        const SizedBox(height: 8),
                         Text(
                           '자세 이미지 준비 중',
-                          style: TextStyle(color: Colors.grey, fontSize: 14),
+                          style: AppTypography.r14.copyWith(color: AppColors.textSecondary),
                         ),
                       ],
                     ),
@@ -415,23 +395,23 @@ class _CourseExecutionScreenState extends State<CourseExecutionScreen> {
                 ),
                 // 페이지 2: 부위 이미지
                 Container(
-                  color: const Color(0xFF1A1A1A),
+                  color: AppColors.secondary,
                   padding: const EdgeInsets.all(16),
                   child: bodyImage != null
                       ? Image.asset(
                           bodyImage,
                           fit: BoxFit.contain,
-                          errorBuilder: (_, __, ___) => const Center(
+                          errorBuilder: (_, __, ___) => Center(
                             child: Text(
                               '이미지 없음',
-                              style: TextStyle(color: Colors.grey),
+                              style: AppTypography.r14.copyWith(color: AppColors.textSecondary),
                             ),
                           ),
                         )
-                      : const Center(
+                      : Center(
                           child: Text(
                             '부위 이미지 없음',
-                            style: TextStyle(color: Colors.grey),
+                            style: AppTypography.r14.copyWith(color: AppColors.textSecondary),
                           ),
                         ),
                 ),
@@ -450,9 +430,9 @@ class _CourseExecutionScreenState extends State<CourseExecutionScreen> {
   Widget _buildDescription() {
     final move = _currentMove;
     if (move == null) {
-      return const Text(
+      return Text(
         '설명 없음',
-        style: TextStyle(color: Colors.grey),
+        style: AppTypography.r14.copyWith(color: AppColors.textSecondary),
       );
     }
 
@@ -461,9 +441,9 @@ class _CourseExecutionScreenState extends State<CourseExecutionScreen> {
       width: double.infinity,
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: const Color(0xFF1A1A1A),
+        color: AppColors.secondary,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey[800]!),
+        border: Border.all(color: AppColors.toolSelectBox),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -473,13 +453,14 @@ class _CourseExecutionScreenState extends State<CourseExecutionScreen> {
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text('• ',
-                    style: TextStyle(color: Colors.white, fontSize: 14)),
+                Text('• ', style: AppTypography.r14.copyWith(color: AppColors.textPrimary)),
                 Expanded(
                   child: Text(
                     line,
-                    style: const TextStyle(
-                        color: Colors.white, fontSize: 14, height: 1.4),
+                    style: AppTypography.r14.copyWith(
+                      color: AppColors.textPrimary,
+                      height: 1.4,
+                    ),
                   ),
                 ),
               ],
@@ -512,15 +493,14 @@ class _CourseExecutionScreenState extends State<CourseExecutionScreen> {
                 children: [
                   Text(
                     '남은 시간',
-                    style: TextStyle(color: Colors.grey[400], fontSize: 14),
+                    style: AppTypography.r14.copyWith(color: AppColors.textSecondary),
                   ),
                   const SizedBox(height: 4),
                   Text(
                     _formatTime(_remainingSeconds),
-                    style: const TextStyle(
-                      color: Colors.white,
+                    style: AppTypography.b35.copyWith(
+                      color: AppColors.textPrimary,
                       fontSize: 36,
-                      fontWeight: FontWeight.bold,
                     ),
                   ),
                 ],
@@ -570,24 +550,23 @@ class _CourseExecutionScreenState extends State<CourseExecutionScreen> {
             height: 56,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: isDisabled ? Colors.grey[900] : const Color(0xFF2A2A2A),
+              color: isDisabled ? AppColors.secondary : AppColors.secondary,
               border: Border.all(
-                color: isDisabled ? Colors.grey[700]! : Colors.grey[500]!,
+                color: isDisabled ? AppColors.toolSelectBox : AppColors.textSecondary,
                 width: 2,
               ),
             ),
             child: Icon(
               icon,
-              color: isDisabled ? Colors.grey[600] : Colors.white,
+              color: isDisabled ? AppColors.toolSelectBox : AppColors.textPrimary,
               size: 28,
             ),
           ),
           const SizedBox(height: 8),
           Text(
             label,
-            style: TextStyle(
-              color: isDisabled ? Colors.grey[600] : Colors.grey[400],
-              fontSize: 12,
+            style: AppTypography.r12.copyWith(
+              color: isDisabled ? AppColors.toolSelectBox : AppColors.textSecondary,
             ),
           ),
         ],
@@ -644,7 +623,7 @@ class _PageDotsIndicatorState extends State<_PageDotsIndicator> {
           height: 8,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
-            color: isActive ? Colors.white : Colors.grey[600],
+            color: isActive ? AppColors.textPrimary : AppColors.toolSelectBox,
           ),
         );
       }),
@@ -665,14 +644,14 @@ class _CircularTimerPainter extends CustomPainter {
 
     // 배경 원
     final bgPaint = Paint()
-      ..color = Colors.grey[800]!
+      ..color = AppColors.toolSelectBox
       ..style = PaintingStyle.stroke
       ..strokeWidth = 8;
     canvas.drawCircle(center, radius, bgPaint);
 
     // 진행 아크
     final progressPaint = Paint()
-      ..color = const Color(0xFFBBFF00)
+      ..color = AppColors.primary
       ..style = PaintingStyle.stroke
       ..strokeWidth = 8
       ..strokeCap = StrokeCap.round;

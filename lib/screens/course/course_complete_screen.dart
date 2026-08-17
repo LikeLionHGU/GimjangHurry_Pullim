@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import '../../constants/app_colors.dart';
+import '../../constants/app_typography.dart';
 import '../../course_generator/models/course.dart';
 import '../../models/course_model.dart';
 import '../../services/database_helper.dart';
@@ -163,7 +165,7 @@ class _CourseCompleteScreenState extends State<CourseCompleteScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: AppColors.background,
       appBar: _buildAppBar(),
       body: SafeArea(
         top: false, // AppBar handles the top safe area
@@ -199,19 +201,15 @@ class _CourseCompleteScreenState extends State<CourseCompleteScreen> {
   /// 표준 AppBar — "코스 완료" 중앙 정렬, 뒤로가기 아이콘.
   PreferredSizeWidget _buildAppBar() {
     return AppBar(
-      backgroundColor: Colors.black,
+      backgroundColor: AppColors.background,
       elevation: 0,
       centerTitle: true,
-      title: const Text(
+      title: Text(
         '코스 완료',
-        style: TextStyle(
-          color: Colors.white,
-          fontSize: 18,
-          fontWeight: FontWeight.bold,
-        ),
+        style: AppTypography.b18.copyWith(color: AppColors.textPrimary),
       ),
       leading: IconButton(
-        icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
+        icon: const Icon(Icons.arrow_back_ios, color: AppColors.textPrimary),
         onPressed: () => Navigator.pop(context),
       ),
     );
@@ -222,20 +220,15 @@ class _CourseCompleteScreenState extends State<CourseCompleteScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
+        Text(
           '운동 후 피로도 확인',
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
-          ),
+          style: AppTypography.sb24.copyWith(color: AppColors.textPrimary),
         ),
         const SizedBox(height: 12),
-        const Text(
+        Text(
           '운동 전과 비교해 피로도가 얼마나 달라졌는지\n각 부위의 현재 피로도를 1~10으로 선택해주세요.',
-          style: TextStyle(
-            color: Colors.grey,
-            fontSize: 14,
+          style: AppTypography.r14.copyWith(
+            color: AppColors.textSecondary,
             height: 1.5,
           ),
         ),
@@ -255,21 +248,14 @@ class _CourseCompleteScreenState extends State<CourseCompleteScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
+        Text(
           '오늘 코스 저장하기',
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-          ),
+          style: AppTypography.b20.copyWith(color: AppColors.textPrimary),
         ),
         const SizedBox(height: 8),
-        const Text(
+        Text(
           '지금 코스를 저장하고 다음 운동에도 사용해보세요.',
-          style: TextStyle(
-            color: Colors.grey,
-            fontSize: 14,
-          ),
+          style: AppTypography.r14.copyWith(color: AppColors.textSecondary),
         ),
         const SizedBox(height: 16),
         // Course Card
@@ -277,7 +263,7 @@ class _CourseCompleteScreenState extends State<CourseCompleteScreen> {
           width: double.infinity,
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: Colors.grey[900],
+            color: AppColors.secondary,
             borderRadius: BorderRadius.circular(16),
           ),
           child: Row(
@@ -288,17 +274,13 @@ class _CourseCompleteScreenState extends State<CourseCompleteScreen> {
                   children: [
                     Text(
                       widget.course.name,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                      ),
+                      style: AppTypography.b16.copyWith(color: AppColors.textPrimary),
                     ),
                     const SizedBox(height: 6),
                     Text(
                       '총 $stepsCount단계 · 예상시간 $durationMinutes분',
-                      style: const TextStyle(
-                        color: Colors.grey,
+                      style: AppTypography.r12.copyWith(
+                        color: AppColors.textSecondary,
                         fontSize: 13,
                       ),
                     ),
@@ -312,10 +294,10 @@ class _CourseCompleteScreenState extends State<CourseCompleteScreen> {
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF2A2A00),
+                    color: AppColors.primary15,
                     borderRadius: BorderRadius.circular(10),
                     border: Border.all(
-                      color: const Color(0xFF4A4A00),
+                      color: AppColors.primary40,
                       width: 1,
                     ),
                   ),
@@ -325,15 +307,14 @@ class _CourseCompleteScreenState extends State<CourseCompleteScreen> {
                           height: 16,
                           child: CircularProgressIndicator(
                             strokeWidth: 2,
-                            color: Color(0xFFBBFF00),
+                            color: AppColors.primary,
                           ),
                         )
                       : Text(
                           _isSaved ? '저장 완료' : '저장',
-                          style: const TextStyle(
-                            fontSize: 14,
+                          style: AppTypography.r14.copyWith(
+                            color: AppColors.primary,
                             fontWeight: FontWeight.bold,
-                            color: Color(0xFFBBFF00),
                           ),
                         ),
                 ),
@@ -346,10 +327,7 @@ class _CourseCompleteScreenState extends State<CourseCompleteScreen> {
           const SizedBox(height: 8),
           Text(
             _saveError!,
-            style: const TextStyle(
-              color: Colors.redAccent,
-              fontSize: 12,
-            ),
+            style: AppTypography.r12.copyWith(color: AppColors.error),
           ),
         ],
       ],
@@ -369,18 +347,14 @@ class _CourseCompleteScreenState extends State<CourseCompleteScreen> {
             child: ElevatedButton(
               onPressed: _onComplete,
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFFBBFF00),
+                backgroundColor: AppColors.primary,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(30),
                 ),
               ),
-              child: const Text(
+              child: Text(
                 '홈으로 이동',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black,
-                ),
+                style: AppTypography.b16.copyWith(color: AppColors.background),
               ),
             ),
           ),
@@ -393,13 +367,12 @@ class _CourseCompleteScreenState extends State<CourseCompleteScreen> {
                   (_) => false,
                 );
               },
-              child: const Text(
+              child: Text(
                 '자세 다시 점검하러 가기',
-                style: TextStyle(
-                  color: Colors.grey,
-                  fontSize: 14,
+                style: AppTypography.r14.copyWith(
+                  color: AppColors.textSecondary,
                   decoration: TextDecoration.underline,
-                  decorationColor: Colors.grey,
+                  decorationColor: AppColors.textSecondary,
                 ),
               ),
             ),
@@ -422,29 +395,28 @@ class _CourseCompleteScreenState extends State<CourseCompleteScreen> {
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
               decoration: BoxDecoration(
-                border: Border.all(color: const Color(0xFFBBFF00)),
+                border: Border.all(color: AppColors.primary),
                 borderRadius: BorderRadius.circular(16),
               ),
               child: Text(
                 label,
                 textAlign: TextAlign.center,
-                style: const TextStyle(
-                  color: Color(0xFFBBFF00),
-                  fontSize: 12,
+                style: AppTypography.r12.copyWith(
+                  color: AppColors.primary,
                   fontWeight: FontWeight.w500,
                 ),
               ),
             ),
           ),
           const SizedBox(width: 8),
-          const Text('1', style: TextStyle(color: Colors.grey, fontSize: 14)),
+          Text('1', style: AppTypography.r14.copyWith(color: AppColors.textSecondary)),
           Expanded(
             child: SliderTheme(
               data: SliderThemeData(
-                activeTrackColor: const Color(0xFFBBFF00).withValues(alpha: 0.5),
-                inactiveTrackColor: const Color(0xFFBBFF00).withValues(alpha: 0.5),
+                activeTrackColor: AppColors.primary.withValues(alpha: 0.5),
+                inactiveTrackColor: AppColors.primary.withValues(alpha: 0.5),
                 thumbShape: _NumberedThumbShape(value: level.round()),
-                overlayColor: const Color(0xFFBBFF00).withValues(alpha: 0.2),
+                overlayColor: AppColors.primary.withValues(alpha: 0.2),
                 trackHeight: 2,
               ),
               child: Slider(
@@ -460,8 +432,7 @@ class _CourseCompleteScreenState extends State<CourseCompleteScreen> {
               ),
             ),
           ),
-          const Text('10',
-              style: TextStyle(color: Color(0xFFBBFF00), fontSize: 14)),
+          Text('10', style: AppTypography.r14.copyWith(color: AppColors.primary)),
         ],
       ),
     );
@@ -496,11 +467,10 @@ class _NumberedThumbShape extends SliderComponentShape {
     required Size sizeWithOverflow,
   }) {
     final canvas = context.canvas;
-    const accentColor = Color(0xFFBBFF00);
 
     // Filled circle
     final fillPaint = Paint()
-      ..color = accentColor
+      ..color = AppColors.primary
       ..style = PaintingStyle.fill;
     canvas.drawCircle(center, _thumbRadius, fillPaint);
 
@@ -508,9 +478,10 @@ class _NumberedThumbShape extends SliderComponentShape {
     final textSpan = TextSpan(
       text: this.value.toString(),
       style: const TextStyle(
-        color: Colors.black,
+        color: AppColors.background,
         fontSize: 14,
         fontWeight: FontWeight.bold,
+        fontFamily: 'NotoSansKR',
       ),
     );
     final tp = TextPainter(

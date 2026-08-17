@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import '../../assets/move_assets.dart';
 import '../../assets/tool_assets.dart';
+import '../../constants/app_colors.dart';
+import '../../constants/app_typography.dart';
 import '../../course_generator/models/course.dart';
 import '../../course_generator/models/course_step.dart';
 import '../../models/course_model.dart';
@@ -25,7 +27,7 @@ class CourseResultScreen extends StatelessWidget {
     final totalMinutes = course.totalDuration ~/ 60;
 
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: AppColors.background,
       body: SafeArea(
         child: Column(
           children: [
@@ -35,18 +37,14 @@ class CourseResultScreen extends StatelessWidget {
               child: Row(
                 children: [
                   IconButton(
-                    icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
+                    icon: const Icon(Icons.arrow_back_ios, color: AppColors.textPrimary),
                     onPressed: () => Navigator.pop(context),
                   ),
-                  const Expanded(
+                  Expanded(
                     child: Text(
                       '코스 생성 결과',
                       textAlign: TextAlign.center,
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 18,
-                        fontWeight: FontWeight.w600,
-                      ),
+                      style: AppTypography.sb18.copyWith(color: AppColors.textPrimary),
                     ),
                   ),
                   const SizedBox(width: 48), // 뒤로가기 버튼과 대칭
@@ -63,21 +61,16 @@ class CourseResultScreen extends StatelessWidget {
                   children: [
                     const SizedBox(height: 24),
                     // 헤딩
-                    const Text(
+                    Text(
                       '코스가 준비되었습니다',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                      ),
+                      style: AppTypography.sb24.copyWith(color: AppColors.textPrimary),
                     ),
                     const SizedBox(height: 12),
                     // 코스 요약
                     Text(
                       course.summary,
-                      style: const TextStyle(
-                        color: Colors.grey,
-                        fontSize: 14,
+                      style: AppTypography.r14.copyWith(
+                        color: AppColors.textSecondary,
                         height: 1.5,
                       ),
                     ),
@@ -89,27 +82,23 @@ class CourseResultScreen extends StatelessWidget {
                       padding: const EdgeInsets.symmetric(
                           horizontal: 20, vertical: 16),
                       decoration: BoxDecoration(
-                        color: const Color(0xFF1A1A1A),
+                        color: AppColors.secondary,
                         borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: Colors.grey[800]!),
+                        border: Border.all(color: AppColors.toolSelectBox),
                       ),
                       child: Row(
                         children: [
                           const Icon(Icons.access_time,
-                              color: Colors.grey, size: 20),
+                              color: AppColors.textSecondary, size: 20),
                           const SizedBox(width: 8),
-                          const Text(
+                          Text(
                             '총 소요시간',
-                            style: TextStyle(color: Colors.grey, fontSize: 14),
+                            style: AppTypography.r14.copyWith(color: AppColors.textSecondary),
                           ),
                           const Spacer(),
                           Text(
                             '$totalMinutes분',
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
-                            ),
+                            style: AppTypography.b20.copyWith(color: AppColors.textPrimary),
                           ),
                         ],
                       ),
@@ -117,13 +106,9 @@ class CourseResultScreen extends StatelessWidget {
                     const SizedBox(height: 28),
 
                     // ── 단계구성 섹션 ──
-                    const Text(
+                    Text(
                       '단계구성',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
+                      style: AppTypography.b18.copyWith(color: AppColors.textPrimary),
                     ),
                     const SizedBox(height: 16),
                     ...List.generate(course.steps.length, (index) {
@@ -136,15 +121,15 @@ class CourseResultScreen extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         const Icon(Icons.warning_amber_rounded,
-                            color: Colors.amber, size: 20),
+                            color: AppColors.error, size: 20),
                         const SizedBox(width: 8),
                         Expanded(
                           child: Text(
                             '과도한 통증이 느껴지면 즉시 중단하세요.\n이 코스는 의료 진단·치료가 아닙니다.',
-                            style: TextStyle(
-                              color: Colors.grey[500],
-                              fontSize: 13,
+                            style: AppTypography.r12.copyWith(
+                              color: AppColors.textSecondary,
                               height: 1.5,
+                              fontSize: 13,
                             ),
                           ),
                         ),
@@ -193,17 +178,13 @@ class CourseResultScreen extends StatelessWidget {
                       ),
                     );
                   },
-                  icon: const Icon(Icons.play_arrow, color: Colors.black),
-                  label: const Text(
+                  icon: const Icon(Icons.play_arrow, color: AppColors.background),
+                  label: Text(
                     '코스 시작하기',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black,
-                    ),
+                    style: AppTypography.b16.copyWith(color: AppColors.background),
                   ),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFFBBFF00),
+                    backgroundColor: AppColors.primary,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(30),
                     ),
@@ -234,7 +215,7 @@ class CourseResultScreen extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         decoration: BoxDecoration(
-          color: const Color(0xFF1A1A1A),
+          color: AppColors.secondary,
           borderRadius: BorderRadius.circular(12),
         ),
         child: Row(
@@ -246,16 +227,15 @@ class CourseResultScreen extends StatelessWidget {
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 border: Border.all(
-                  color: const Color(0xFFBBFF00),
+                  color: AppColors.primary,
                   width: 2,
                 ),
               ),
               child: Center(
                 child: Text(
                   '$order',
-                  style: const TextStyle(
-                    color: Color(0xFFBBFF00),
-                    fontSize: 14,
+                  style: AppTypography.r14.copyWith(
+                    color: AppColors.primary,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -269,17 +249,13 @@ class CourseResultScreen extends StatelessWidget {
                 children: [
                   Text(
                     toolCategoryName,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                    ),
+                    style: AppTypography.sb16.copyWith(color: AppColors.textPrimary),
                   ),
                   const SizedBox(height: 2),
                   Text(
                     moveName,
-                    style: TextStyle(
-                      color: Colors.grey[400],
+                    style: AppTypography.r12.copyWith(
+                      color: AppColors.textSecondary,
                       fontSize: 13,
                     ),
                   ),
@@ -290,12 +266,12 @@ class CourseResultScreen extends StatelessWidget {
             Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(Icons.access_time, color: Colors.grey[500], size: 16),
+                const Icon(Icons.access_time, color: AppColors.textSecondary, size: 16),
                 const SizedBox(width: 4),
                 Text(
                   timeText,
-                  style: TextStyle(
-                    color: Colors.grey[400],
+                  style: AppTypography.r12.copyWith(
+                    color: AppColors.textSecondary,
                     fontSize: 13,
                   ),
                 ),

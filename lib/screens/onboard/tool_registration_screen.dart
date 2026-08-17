@@ -5,6 +5,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../assets/tool_assets.dart';
+import '../../constants/app_colors.dart';
+import '../../constants/app_typography.dart';
 import '../../providers/app_provider.dart';
 import '../../services/tool_registration_service.dart';
 import '../main_shell.dart';
@@ -20,8 +22,6 @@ class ToolRegistrationScreen extends StatefulWidget {
 }
 
 class _ToolRegistrationScreenState extends State<ToolRegistrationScreen> {
-  static const _accentColor = Color(0xFFBBFF00);
-
   final _service = ToolRegistrationService();
 
   /// 현재 선택된 카테고리 탭.
@@ -51,29 +51,24 @@ class _ToolRegistrationScreenState extends State<ToolRegistrationScreen> {
               const SizedBox(height: 8),
 
               // 타이틀
-              const Text(
+              Text(
                 '도구 등록',
-                style: TextStyle(
+                style: AppTypography.sb24.copyWith(
+                  color: AppColors.textPrimary,
                   fontSize: 28,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
                 ),
               ),
               const SizedBox(height: 8),
-              const Text(
+              Text(
                 '보유한 도구를 선택해 등록하세요.\n여러 개 추가할 수 있습니다.',
-                style: TextStyle(fontSize: 14, color: Colors.grey),
+                style: AppTypography.r14.copyWith(color: AppColors.textSecondary),
               ),
               const SizedBox(height: 24),
 
               // 카테고리 탭 영역
-              const Text(
+              Text(
                 '도구 종류 / 형태',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                ),
+                style: AppTypography.b16.copyWith(color: AppColors.textPrimary),
               ),
               const SizedBox(height: 12),
               _buildCategoryTabs(),
@@ -87,13 +82,9 @@ class _ToolRegistrationScreenState extends State<ToolRegistrationScreen> {
               // 등록된 도구 영역
               if (_selectedIndexes.isNotEmpty) ...[
                 const SizedBox(height: 12),
-                const Text(
+                Text(
                   '등록된 도구',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
+                  style: AppTypography.b16.copyWith(color: AppColors.textPrimary),
                 ),
                 const SizedBox(height: 8),
                 _buildSelectedToolsRow(),
@@ -126,17 +117,16 @@ class _ToolRegistrationScreenState extends State<ToolRegistrationScreen> {
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               decoration: BoxDecoration(
-                color: isSelected ? Colors.transparent : Colors.grey[850],
+                color: isSelected ? Colors.transparent : AppColors.secondary,
                 border: Border.all(
-                  color: isSelected ? _accentColor : Colors.grey[700]!,
+                  color: isSelected ? AppColors.primary : AppColors.toolSelectBox,
                 ),
                 borderRadius: BorderRadius.circular(20),
               ),
               child: Text(
                 category.label,
-                style: TextStyle(
-                  color: isSelected ? _accentColor : Colors.grey,
-                  fontWeight: FontWeight.w600,
+                style: AppTypography.sb16.copyWith(
+                  color: isSelected ? AppColors.primary : AppColors.textSecondary,
                 ),
               ),
             ),
@@ -169,9 +159,9 @@ class _ToolRegistrationScreenState extends State<ToolRegistrationScreen> {
               Expanded(
                 child: Container(
                   decoration: BoxDecoration(
-                    color: Colors.grey[900],
+                    color: AppColors.secondary,
                     border: Border.all(
-                      color: isSelected ? _accentColor : Colors.transparent,
+                      color: isSelected ? AppColors.primary : Colors.transparent,
                       width: 2,
                     ),
                     borderRadius: BorderRadius.circular(12),
@@ -186,7 +176,7 @@ class _ToolRegistrationScreenState extends State<ToolRegistrationScreen> {
               const SizedBox(height: 4),
               Text(
                 tool.shape.label,
-                style: const TextStyle(fontSize: 12, color: Colors.white),
+                style: AppTypography.r12.copyWith(color: AppColors.textPrimary),
                 textAlign: TextAlign.center,
                 overflow: TextOverflow.ellipsis,
               ),
@@ -221,7 +211,7 @@ class _ToolRegistrationScreenState extends State<ToolRegistrationScreen> {
                 width: 56,
                 height: 56,
                 decoration: BoxDecoration(
-                  color: Colors.grey[900],
+                  color: AppColors.secondary,
                   borderRadius: BorderRadius.circular(12),
                 ),
                 padding: const EdgeInsets.all(6),
@@ -230,7 +220,10 @@ class _ToolRegistrationScreenState extends State<ToolRegistrationScreen> {
               const SizedBox(height: 4),
               Text(
                 tool.shape.label,
-                style: const TextStyle(fontSize: 10, color: Colors.white),
+                style: AppTypography.r12.copyWith(
+                  color: AppColors.textPrimary,
+                  fontSize: 10,
+                ),
               ),
             ],
           );
@@ -252,17 +245,17 @@ class _ToolRegistrationScreenState extends State<ToolRegistrationScreen> {
       child: ElevatedButton(
         onPressed: isEnabled ? _onRegister : null,
         style: ElevatedButton.styleFrom(
-          backgroundColor: isEnabled ? _accentColor : Colors.grey[800],
-          foregroundColor: Colors.black,
-          disabledBackgroundColor: Colors.grey[800],
-          disabledForegroundColor: Colors.grey,
+          backgroundColor: isEnabled ? AppColors.primary : AppColors.toolSelectBox,
+          foregroundColor: AppColors.background,
+          disabledBackgroundColor: AppColors.toolSelectBox,
+          disabledForegroundColor: AppColors.textSecondary,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
           ),
         ),
         child: Text(
           _isSaving ? '저장 중...' : '도구 등록하고 시작하기',
-          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+          style: AppTypography.b16,
         ),
       ),
     );
@@ -312,25 +305,23 @@ class _OnboardingPostureScreen extends StatelessWidget {
         child: Column(
           children: [
             // 상단 안내
-            const Padding(
-              padding: EdgeInsets.fromLTRB(24, 32, 24, 0),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(24, 32, 24, 0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     '자세 점검',
-                    style: TextStyle(
-                      color: Colors.white,
+                    style: AppTypography.sb24.copyWith(
+                      color: AppColors.textPrimary,
                       fontSize: 26,
-                      fontWeight: FontWeight.w700,
                     ),
                   ),
-                  SizedBox(height: 8),
+                  const SizedBox(height: 8),
                   Text(
                     '정면과 측면 자세를 촬영하면\n맞춤 코스를 더 정확하게 만들 수 있습니다.',
-                    style: TextStyle(
-                      color: Colors.grey,
-                      fontSize: 14,
+                    style: AppTypography.r14.copyWith(
+                      color: AppColors.textSecondary,
                       height: 1.5,
                     ),
                   ),
@@ -346,11 +337,11 @@ class _OnboardingPostureScreen extends StatelessWidget {
               height: 120,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: const Color(0xFFBBFF00).withValues(alpha: 0.15),
+                color: AppColors.primary15,
               ),
               child: const Icon(
                 Icons.accessibility_new,
-                color: Color(0xFFBBFF00),
+                color: AppColors.primary,
                 size: 56,
               ),
             ),
@@ -374,20 +365,17 @@ class _OnboardingPostureScreen extends StatelessWidget {
                             builder: (_) => const PostureGuideScreen(),
                           ),
                         );
-                        // 자세 측정 완료 후 결과 화면의 "코스 시작하기"에서 홈으로 이동됨
-                        // 뒤로가기 시에는 이 화면에 머무름
                       },
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFFBBFF00),
-                        foregroundColor: Colors.black,
+                        backgroundColor: AppColors.primary,
+                        foregroundColor: AppColors.background,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
                         ),
                       ),
-                      child: const Text(
+                      child: Text(
                         '자세 측정 시작하기',
-                        style: TextStyle(
-                            fontSize: 16, fontWeight: FontWeight.bold),
+                        style: AppTypography.b16,
                       ),
                     ),
                   ),
@@ -406,13 +394,12 @@ class _OnboardingPostureScreen extends StatelessWidget {
                           (_) => false,
                         );
                       },
-                      child: const Text(
+                      child: Text(
                         '나중에 하기',
-                        style: TextStyle(
-                          color: Colors.grey,
-                          fontSize: 14,
+                        style: AppTypography.r14.copyWith(
+                          color: AppColors.textSecondary,
                           decoration: TextDecoration.underline,
-                          decorationColor: Colors.grey,
+                          decorationColor: AppColors.textSecondary,
                         ),
                       ),
                     ),

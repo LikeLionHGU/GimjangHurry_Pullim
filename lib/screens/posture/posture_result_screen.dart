@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import '../../constants/app_colors.dart';
+import '../../constants/app_typography.dart';
 import '../../models/posture_result_model.dart';
 import '../main_shell.dart';
 
@@ -65,10 +66,8 @@ class _PostureResultScreenState extends State<PostureResultScreen> {
                         children: [
                           Text(
                             _showFront ? '자세 분석 · 정면' : '자세 분석 · 측면',
-                            style: const TextStyle(
+                            style: AppTypography.b16.copyWith(
                               color: AppColors.textPrimary,
-                              fontSize: 16,
-                              fontWeight: FontWeight.w700,
                             ),
                           ),
                           const SizedBox(height: 12),
@@ -171,7 +170,7 @@ class _PostureResultScreenState extends State<PostureResultScreen> {
         ),
         child: Text(
           label,
-          style: TextStyle(
+          style: AppTypography.r12.copyWith(
             color: isActive ? AppColors.background : AppColors.textSecondary,
             fontSize: 13,
             fontWeight: FontWeight.w600,
@@ -185,9 +184,9 @@ class _PostureResultScreenState extends State<PostureResultScreen> {
   Widget _buildScoreSection() {
     return Column(
       children: [
-        const Text(
+        Text(
           '전체 자세 점수',
-          style: TextStyle(color: AppColors.textSecondary, fontSize: 14),
+          style: AppTypography.r14.copyWith(color: AppColors.textSecondary),
         ),
         const SizedBox(height: 16),
         Container(
@@ -200,18 +199,17 @@ class _PostureResultScreenState extends State<PostureResultScreen> {
           child: Center(
             child: Text(
               '${widget.score}',
-              style: TextStyle(
+              style: AppTypography.b35.copyWith(
                 color: _scoreColor,
                 fontSize: 38,
-                fontWeight: FontWeight.w700,
               ),
             ),
           ),
         ),
         const SizedBox(height: 8),
-        const Text(
+        Text(
           '평가 가능한 항목만 합산해 100점으로 환산합니다. (전체 축: 5개)',
-          style: TextStyle(color: AppColors.textTertiary, fontSize: 11),
+          style: AppTypography.r12.copyWith(color: AppColors.textTertiary, fontSize: 11),
           textAlign: TextAlign.center,
         ),
       ],
@@ -325,9 +323,8 @@ class _PostureResultScreenState extends State<PostureResultScreen> {
           Expanded(
             child: Text(
               'AI 기반 자세 참고 분석 결과입니다. 의료적 진단을 대신하지 않습니다.',
-              style: TextStyle(
+              style: AppTypography.r12.copyWith(
                 color: AppColors.textTertiary,
-                fontSize: 12,
                 height: 1.4,
               ),
             ),
@@ -444,7 +441,7 @@ class _AnalysisCard extends StatelessWidget {
               Expanded(
                 child: Text(
                   title,
-                  style: const TextStyle(
+                  style: AppTypography.r14.copyWith(
                     color: AppColors.textPrimary,
                     fontSize: 15,
                     fontWeight: FontWeight.w600,
@@ -460,7 +457,7 @@ class _AnalysisCard extends StatelessWidget {
                 ),
                 child: Text(
                   statusText,
-                  style: TextStyle(
+                  style: AppTypography.r12.copyWith(
                     color: statusColor,
                     fontSize: 11,
                     fontWeight: FontWeight.w700,
@@ -474,10 +471,9 @@ class _AnalysisCard extends StatelessWidget {
           // 수치
           Text(
             '$value$unit',
-            style: TextStyle(
+            style: AppTypography.sb24.copyWith(
               color: statusColor,
               fontSize: 22,
-              fontWeight: FontWeight.w700,
             ),
           ),
           const SizedBox(height: 4),
@@ -485,9 +481,8 @@ class _AnalysisCard extends StatelessWidget {
           // 설명
           Text(
             description,
-            style: const TextStyle(
+            style: AppTypography.r12.copyWith(
               color: AppColors.textTertiary,
-              fontSize: 12,
               height: 1.4,
             ),
           ),

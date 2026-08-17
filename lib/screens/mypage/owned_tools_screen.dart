@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../constants/app_colors.dart';
+import '../../constants/app_typography.dart';
 import '../../assets/tool_assets.dart' as tool_assets;
 import '../../services/tool_registration_service.dart';
 import 'add_tool_screen.dart';
@@ -50,20 +51,19 @@ class _OwnedToolsScreenState extends State<OwnedToolsScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
+                    Text(
                       '보유 도구',
-                      style: TextStyle(
+                      style: AppTypography.sb24.copyWith(
                         color: AppColors.textPrimary,
                         fontSize: 22,
-                        fontWeight: FontWeight.w700,
                       ),
                     ),
                     const SizedBox(height: 24),
                     if (_ownedTools.isEmpty)
-                      const Center(
+                      Center(
                         child: Text(
                           '등록된 도구가 없습니다',
-                          style: TextStyle(color: AppColors.textTertiary, fontSize: 14),
+                          style: AppTypography.r14.copyWith(color: AppColors.textTertiary),
                         ),
                       )
                     else
@@ -97,9 +97,8 @@ class _OwnedToolsScreenState extends State<OwnedToolsScreen> {
                               const SizedBox(height: 6),
                               Text(
                                 tool.shape.label,
-                                style: const TextStyle(
+                                style: AppTypography.r12.copyWith(
                                   color: AppColors.textSecondary,
-                                  fontSize: 12,
                                 ),
                               ),
                             ],
@@ -130,11 +129,10 @@ class _OwnedToolsScreenState extends State<OwnedToolsScreen> {
                                   ),
                                 ),
                                 const SizedBox(height: 6),
-                                const Text(
+                                Text(
                                   '추가',
-                                  style: TextStyle(
+                                  style: AppTypography.r12.copyWith(
                                     color: AppColors.textTertiary,
-                                    fontSize: 12,
                                   ),
                                 ),
                               ],

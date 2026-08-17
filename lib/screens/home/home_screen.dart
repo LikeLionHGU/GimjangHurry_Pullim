@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import '../../constants/app_colors.dart';
+import '../../constants/app_typography.dart';
 import '../../models/course_model.dart';
 import '../../providers/app_provider.dart';
 import '../../services/database_helper.dart';
@@ -138,11 +139,10 @@ class _HomeScreenState extends State<HomeScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
+              Text(
                 'PULLIM',
-                style: TextStyle(
+                style: AppTypography.sb24.copyWith(
                   color: AppColors.textPrimary,
-                  fontSize: 24,
                   fontWeight: FontWeight.w800,
                   letterSpacing: 2,
                 ),
@@ -184,11 +184,7 @@ class _HomeScreenState extends State<HomeScreen> {
             const Spacer(),
             Text(
               monthName,
-              style: const TextStyle(
-                color: AppColors.textPrimary,
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-              ),
+              style: AppTypography.sb16.copyWith(color: AppColors.textPrimary),
             ),
             const Spacer(),
             GestureDetector(
@@ -219,9 +215,8 @@ class _HomeScreenState extends State<HomeScreen> {
               children: [
                 Text(
                   dayLabel,
-                  style: TextStyle(
+                  style: AppTypography.r12.copyWith(
                     color: isToday ? AppColors.primary : AppColors.textTertiary,
-                    fontSize: 12,
                     fontWeight: FontWeight.w500,
                   ),
                 ),
@@ -240,13 +235,12 @@ class _HomeScreenState extends State<HomeScreen> {
                   child: Center(
                     child: Text(
                       '${day.day}',
-                      style: TextStyle(
+                      style: AppTypography.r14.copyWith(
                         color: isToday
                             ? AppColors.background
                             : hasExercise
                                 ? AppColors.primary
                                 : AppColors.textPrimary,
-                        fontSize: 14,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
@@ -280,17 +274,17 @@ class _HomeScreenState extends State<HomeScreen> {
                 color: AppColors.primary, size: 22),
           ),
           const SizedBox(width: 14),
-          const Text('연속 운동',
-              style: TextStyle(color: AppColors.textSecondary, fontSize: 14)),
+          Text('연속 운동',
+              style: AppTypography.r14.copyWith(color: AppColors.textSecondary)),
           const Spacer(),
           Text('$_streakDays',
-              style: const TextStyle(
+              style: AppTypography.sb24.copyWith(
                   color: AppColors.primary,
                   fontSize: 28,
                   fontWeight: FontWeight.w700)),
           const SizedBox(width: 4),
-          const Text('일차',
-              style: TextStyle(color: AppColors.textSecondary, fontSize: 14)),
+          Text('일차',
+              style: AppTypography.r14.copyWith(color: AppColors.textSecondary)),
         ],
       ),
     );
@@ -303,11 +297,8 @@ class _HomeScreenState extends State<HomeScreen> {
       children: [
         Row(
           children: [
-            const Text('최근 운동',
-                style: TextStyle(
-                    color: AppColors.textPrimary,
-                    fontSize: 18,
-                    fontWeight: FontWeight.w700)),
+            Text('최근 운동',
+                style: AppTypography.b18.copyWith(color: AppColors.textPrimary)),
             const Spacer(),
             GestureDetector(
               onTap: () {
@@ -316,8 +307,8 @@ class _HomeScreenState extends State<HomeScreen> {
                   MaterialPageRoute(builder: (_) => const RecentHistoryScreen()),
                 ).then((_) => _loadData());
               },
-              child: const Text('더보기 >',
-                  style: TextStyle(color: AppColors.textTertiary, fontSize: 13)),
+              child: Text('더보기 >',
+                  style: AppTypography.r12.copyWith(color: AppColors.textTertiary, fontSize: 13)),
             ),
           ],
         ),
@@ -330,9 +321,9 @@ class _HomeScreenState extends State<HomeScreen> {
               color: AppColors.cardBackground,
               borderRadius: BorderRadius.circular(12),
             ),
-            child: const Center(
+            child: Center(
               child: Text('아직 운동 기록이 없습니다',
-                  style: TextStyle(color: AppColors.textTertiary, fontSize: 14)),
+                  style: AppTypography.r14.copyWith(color: AppColors.textTertiary)),
             ),
           )
         else
@@ -364,21 +355,16 @@ class _HomeScreenState extends State<HomeScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(course.name,
-                      style: const TextStyle(
-                          color: AppColors.textPrimary,
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600)),
+                      style: AppTypography.sb16.copyWith(color: AppColors.textPrimary)),
                   const SizedBox(height: 4),
                   Text('${course.totalMove}단계 · ${course.formattedTime}',
-                      style: const TextStyle(
-                          color: AppColors.textTertiary, fontSize: 13)),
+                      style: AppTypography.r12.copyWith(color: AppColors.textTertiary, fontSize: 13)),
                 ],
               ),
             ),
             if (dateStr.isNotEmpty)
               Text(dateStr,
-                  style: const TextStyle(
-                      color: AppColors.textTertiary, fontSize: 12),
+                  style: AppTypography.r12.copyWith(color: AppColors.textTertiary),
                   textAlign: TextAlign.right),
             const SizedBox(width: 8),
             const Icon(Icons.chevron_right, color: AppColors.textTertiary),
@@ -395,16 +381,16 @@ class _HomeScreenState extends State<HomeScreen> {
       builder: (ctx) => AlertDialog(
         backgroundColor: AppColors.cardBackground,
         title: Text(courseModel.name,
-            style: const TextStyle(color: AppColors.textPrimary, fontSize: 18)),
+            style: AppTypography.b18.copyWith(color: AppColors.textPrimary)),
         content: Text(
           '${courseModel.totalMove}단계 · ${courseModel.formattedTime}\n\n이 코스를 실행하시겠습니까?',
-          style: const TextStyle(color: AppColors.textSecondary),
+          style: AppTypography.r14.copyWith(color: AppColors.textSecondary),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('취소',
-                style: TextStyle(color: AppColors.textTertiary)),
+            child: Text('취소',
+                style: AppTypography.r14.copyWith(color: AppColors.textTertiary)),
           ),
           TextButton(
             onPressed: () async {
@@ -422,8 +408,8 @@ class _HomeScreenState extends State<HomeScreen> {
                 ).then((_) => _loadData());
               }
             },
-            child: const Text('시작하기',
-                style: TextStyle(color: AppColors.primary)),
+            child: Text('시작하기',
+                style: AppTypography.r14.copyWith(color: AppColors.primary)),
           ),
         ],
       ),
@@ -456,13 +442,12 @@ class _HomeScreenState extends State<HomeScreen> {
                     child: const Icon(Icons.add, color: AppColors.background),
                   ),
                   const SizedBox(height: 16),
-                  const Text('코스 생성하기',
-                      style: TextStyle(color: AppColors.background,
-                          fontSize: 16, fontWeight: FontWeight.w700)),
+                  Text('코스 생성하기',
+                      style: AppTypography.b16.copyWith(color: AppColors.background)),
                   const SizedBox(height: 4),
-                  const Text('나에게 맞는 맞춤\n코스를 만들어보세요.',
-                      style: TextStyle(
-                          color: AppColors.background, fontSize: 12, height: 1.4)),
+                  Text('나에게 맞는 맞춤\n코스를 만들어보세요.',
+                      style: AppTypography.r12.copyWith(
+                          color: AppColors.background, height: 1.4)),
                   const SizedBox(height: 12),
                   const Align(
                       alignment: Alignment.bottomRight,
@@ -495,13 +480,12 @@ class _HomeScreenState extends State<HomeScreen> {
                         color: AppColors.primary, size: 20),
                   ),
                   const SizedBox(height: 16),
-                  const Text('점검 기반 코스',
-                      style: TextStyle(color: AppColors.textPrimary,
-                          fontSize: 16, fontWeight: FontWeight.w700)),
+                  Text('점검 기반 코스',
+                      style: AppTypography.b16.copyWith(color: AppColors.textPrimary)),
                   const SizedBox(height: 4),
-                  const Text('데이터 기반 맞춤\n코스를 만들어보세요.',
-                      style: TextStyle(
-                          color: AppColors.textTertiary, fontSize: 12, height: 1.4)),
+                  Text('데이터 기반 맞춤\n코스를 만들어보세요.',
+                      style: AppTypography.r12.copyWith(
+                          color: AppColors.textTertiary, height: 1.4)),
                   const SizedBox(height: 12),
                   const Align(
                       alignment: Alignment.bottomRight,
