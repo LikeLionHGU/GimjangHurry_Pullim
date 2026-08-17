@@ -18,6 +18,7 @@ class ResponseParser {
     final errors = <String>[];
     final warnings = <String>[];
 
+    final name = json['name'] as String;
     final rawSteps = json['steps'] as List<dynamic>;
     final totalDuration = json['totalDuration'] as int;
     final summary = json['summary'] as String;
@@ -89,9 +90,11 @@ class ResponseParser {
     }
 
     return Course(
+      name: name,
       steps: steps,
       totalDuration: computedTotal,
       summary: summary,
+      request: request,
     );
   }
 }

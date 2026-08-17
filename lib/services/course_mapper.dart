@@ -1,0 +1,58 @@
+import '../assets/body_assets.dart';
+import '../course_generator/models/course.dart';
+import '../course_generator/models/course_step.dart';
+import '../models/course_model.dart';
+import '../models/step_model.dart';
+
+/// AI 코스 생성 객체 → DB 모델 변환 유틸리티.
+class CourseMapper {
+  const CourseMapper._();
+
+  /// [Course] → [CourseModel] 변환.
+  /// DB 저장 전 사용한다. courseId는 null (INSERT 시 자동 생성).
+  static CourseModel toCourseModel(Course course) {
+    // request에서 부위별 피로도 맵 생성: "{face}_{part}" → level
+    final fatigueMap = <String, int>{};
+    final request = course.request;
+    if (request != null) {
+      for (final entry in request.fatigueEntries) {
+        final face = entry.face == BodyFace.front ? 'front' : 'back';
+        final part = entry.part.name;
+        final key = '${face}_$part';
+        // 같은 키가 겹치면 높은 쪽
+        final current = fatigueMap[key] ?? 0;
+        if (entry.level > current) {
+          fatigueMap[key] = entry.level;
+        }
+      }
+    }
+
+    return CourseModel(
+      name: course.name,
+      totalTime: course.totalDuration,
+      totalMove: course.steps.length,
+      summary: course.summary,
+      before: fatigueMap,
+      after: Map<String, int>.from(fatigueMap), // 초기값은 before와 동일
+    );
+  }
+
+  /// [CourseStep] 리스트 → [StepModel] 리스트 변환.
+  /// [courseId]는 CourseModel INSERT 후 반환된 ID를 전달한다.
+  static List<StepModel> toStepModels(
+    List<CourseStep> steps, {
+    required int courseId,
+  }) {
+    return List.generate(steps.length, (i) {
+      final step = steps[i];
+      return StepModel(
+        courseId: courseId,
+        moveId: step.moveIndex,
+        toolId: step.toolIndex,
+        order: i + 1,
+        reason: step.reason,
+        time: step.duration,
+      );
+    });
+  }
+}

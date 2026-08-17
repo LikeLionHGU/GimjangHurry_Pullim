@@ -371,6 +371,47 @@ const Map<int, Body> kBodies = <int, Body>{
   ),
 };
 
+// ─────────── 부위별 이미지 경로 ───────────
+
+/// assets/images/body 내 이미지 기본 경로.
+const String _bodyImageBase = 'assets/images/body';
+
+/// (BodyFace, BodyPart) → 이미지 에셋 경로.
+/// front 전용 : chest, abdomen, pelvis, shin, sole
+/// back  전용 : upperBack, waist, hip, calf, heel
+/// 공용      : neck, shoulder, arm, thigh
+const Map<(BodyFace, BodyPart), String> kBodyPartImages = {
+  // 전면
+  (BodyFace.front, BodyPart.neck): '$_bodyImageBase/front_neck.png',
+  (BodyFace.front, BodyPart.shoulder): '$_bodyImageBase/front_shoulder.png',
+  (BodyFace.front, BodyPart.chest): '$_bodyImageBase/front_chest.png',
+  (BodyFace.front, BodyPart.arm): '$_bodyImageBase/front_arm.png',
+  (BodyFace.front, BodyPart.abdomen): '$_bodyImageBase/front_abdomen.png',
+  (BodyFace.front, BodyPart.pelvis): '$_bodyImageBase/front_pelvis.png',
+  (BodyFace.front, BodyPart.thigh): '$_bodyImageBase/front_thigh.png',
+  (BodyFace.front, BodyPart.shin): '$_bodyImageBase/front_shin.png',
+  (BodyFace.front, BodyPart.sole): '$_bodyImageBase/front_sole.png',
+  // 후면
+  (BodyFace.back, BodyPart.neck): '$_bodyImageBase/back_neck.png',
+  (BodyFace.back, BodyPart.shoulder): '$_bodyImageBase/back_shoulder.png',
+  (BodyFace.back, BodyPart.arm): '$_bodyImageBase/back_arm.png',
+  (BodyFace.back, BodyPart.upperBack): '$_bodyImageBase/back_upperBack.png',
+  (BodyFace.back, BodyPart.waist): '$_bodyImageBase/back_waist.png',
+  (BodyFace.back, BodyPart.hip): '$_bodyImageBase/back_hip.png',
+  (BodyFace.back, BodyPart.thigh): '$_bodyImageBase/back_thigh.png',
+  (BodyFace.back, BodyPart.calf): '$_bodyImageBase/back_calf.png',
+  (BodyFace.back, BodyPart.heel): '$_bodyImageBase/back_heel.png',
+};
+
+/// Body 객체로부터 해당 부위 이미지 에셋 경로를 반환.
+String? bodyImageOf(Body body) => kBodyPartImages[(body.forb, body.part)];
+
+/// BodyFace + BodyPart 조합으로 이미지 에셋 경로를 반환.
+String? bodyPartImageOf(BodyFace face, BodyPart part) =>
+    kBodyPartImages[(face, part)];
+
+// ─────────── 조회 헬퍼 ───────────
+
 /// 인덱스로 단건 조회.
 Body? bodyOf(int index) => kBodies[index];
 

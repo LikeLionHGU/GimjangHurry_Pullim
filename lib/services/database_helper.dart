@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 import '../models/user_model.dart';
@@ -57,6 +58,9 @@ class DatabaseHelper {
         name TEXT NOT NULL,
         total_time INTEGER NOT NULL,
         total_move INTEGER NOT NULL,
+        summary TEXT,
+        before TEXT,
+        after TEXT,
         save INTEGER NOT NULL DEFAULT 0,
         executed_at TEXT,
         status TEXT NOT NULL DEFAULT 'pending',
@@ -72,8 +76,6 @@ class DatabaseHelper {
         move_id INTEGER NOT NULL,
         tool_id INTEGER NOT NULL,
         order_num INTEGER NOT NULL,
-        before_fatigue INTEGER NOT NULL DEFAULT 5,
-        after_fatigue INTEGER NOT NULL DEFAULT 5,
         reason TEXT,
         time INTEGER NOT NULL,
         FOREIGN KEY (course_id) REFERENCES courses(course_id)
@@ -141,6 +143,35 @@ class DatabaseHelper {
       orderBy: 'executed_at DESC',
     );
     return maps.map((m) => CourseModel.fromMap(m)).toList();
+  }
+
+  Future<CourseModel?> getSavedCourseById(int courseId) async {
+    final db = await database;
+    final maps = await db.query(
+      'courses',
+      where: 'course_id = ?',
+      whereArgs: [courseId],
+    );
+    if (maps.isEmpty) return null;
+    return CourseModel.fromMap(maps.first);
+  }
+
+  Future<void> updateCourseCompletion({
+    required int courseId,
+    required Map<String, int> after,
+  }) async {
+    final db = await database;
+    await db.update(
+      'courses',
+      {
+        'after': jsonEncode(after),
+        'status': 'completed',
+        'progress': 100,
+        'executed_at': DateTime.now().toIso8601String(),
+      },
+      where: 'course_id = ?',
+      whereArgs: [courseId],
+    );
   }
 
   Future<List<CourseModel>> getCompletedCourses() async {
@@ -263,13 +294,33 @@ class DatabaseHelper {
     return (completedCount / totalCount) * 100;
   }
 
-  /// 평균 피로도 감소
+  /// 평균 피로도 감소.
+  /// courses 테이블의 before/after (JSON) 컬럼에서 부위별 피로도 차이의 평균을 계산한다.
   Future<double> getAverageFatigueReduction() async {
     final db = await database;
-    final result = await db.rawQuery(
-      'SELECT AVG(before_fatigue - after_fatigue) as avg_reduction FROM steps WHERE after_fatigue > 0',
+    final maps = await db.query(
+      'courses',
+      columns: ['before', 'after'],
+      where: "status = 'completed' AND before IS NOT NULL AND after IS NOT NULL",
     );
-    if (result.isEmpty || result.first['avg_reduction'] == null) return 0.0;
-    return (result.first['avg_reduction'] as num).toDouble();
+    if (maps.isEmpty) return 0.0;
+
+    int totalReduction = 0;
+    int count = 0;
+    for (final map in maps) {
+      final beforeStr = map['before'] as String?;
+      final afterStr = map['after'] as String?;
+      if (beforeStr == null || afterStr == null) continue;
+      final beforeMap = Map<String, dynamic>.from(jsonDecode(beforeStr) as Map);
+      final afterMap = Map<String, dynamic>.from(jsonDecode(afterStr) as Map);
+      for (final key in beforeMap.keys) {
+        final b = (beforeMap[key] as num?)?.toInt() ?? 0;
+        final a = (afterMap[key] as num?)?.toInt() ?? b;
+        totalReduction += (b - a);
+        count++;
+      }
+    }
+    if (count == 0) return 0.0;
+    return totalReduction / count;
   }
 }
