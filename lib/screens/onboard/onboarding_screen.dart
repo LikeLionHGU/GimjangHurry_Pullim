@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import '../constants/app_colors.dart';
-import '../widgets/common_widgets.dart';
+import '../../constants/app_colors.dart';
+import '../../widgets/common_widgets.dart';
 import 'tool_registration_screen.dart';
 
 /// 온보딩 화면 - 서비스 소개 + 이용 흐름 + 주의사항 + "도구 등록하고 시작하기" 버튼

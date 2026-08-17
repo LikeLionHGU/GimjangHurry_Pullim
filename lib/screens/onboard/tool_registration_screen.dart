@@ -3,10 +3,10 @@
 // 등록 완료 후 홈 화면으로 이동한다.
 
 import 'package:flutter/material.dart';
-import '../assets/tool_assets.dart';
-import '../services/tool_registration_service.dart';
-import 'main_shell.dart';
-import 'posture/posture_guide_screen.dart';
+import '../../assets/tool_assets.dart';
+import '../../services/tool_registration_service.dart';
+import '../main_shell.dart';
+import '../posture/posture_guide_screen.dart';
 
 /// 온보딩용 도구 등록 화면.
 /// 첫 실행 시에만 표시되며, 등록 완료 후 홈 화면으로 이동한다.

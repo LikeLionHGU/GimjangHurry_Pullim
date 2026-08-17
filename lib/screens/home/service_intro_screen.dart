@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../constants/app_colors.dart';
 import '../../widgets/common_widgets.dart';
-import '../tool_registration_screen.dart';
+import '../onboard/tool_registration_screen.dart';
 
 class ServiceIntroScreen extends StatelessWidget {
   const ServiceIntroScreen({super.key});

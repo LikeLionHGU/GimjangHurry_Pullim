@@ -3,10 +3,11 @@
 // 생성 버튼을 누르면 로딩 화면으로 전환되어 AI 코스 생성을 수행한다.
 
 import 'package:flutter/material.dart';
-import '../assets/body_assets.dart';
-import '../assets/tool_assets.dart';
-import '../course_generator/course_generator_library.dart';
-import '../services/tool_registration_service.dart';
+import '../../assets/body_assets.dart';
+import '../../assets/tool_assets.dart';
+import '../../course_generator/course_generator_library.dart';
+import '../../services/tool_registration_service.dart';
+import 'course_result_screen.dart';
 
 /// face + part 조합 키.
 typedef _FatigueKey = ({BodyFace face, BodyPart part});
@@ -32,14 +33,14 @@ const _centerParts = <BodyPart>{
   BodyPart.hip,
 };
 
-class BodySelectionScreen extends StatefulWidget {
-  const BodySelectionScreen({super.key});
+class CourseGenerationScreen extends StatefulWidget {
+  const CourseGenerationScreen({super.key});
 
   @override
-  State<BodySelectionScreen> createState() => _BodySelectionScreenState();
+  State<CourseGenerationScreen> createState() => _CourseGenerationScreenState();
 }
 
-class _BodySelectionScreenState extends State<BodySelectionScreen> {
+class _CourseGenerationScreenState extends State<CourseGenerationScreen> {
   bool _isFront = true;
 
   /// 사용시간 (초). 기본 3분.
@@ -681,12 +682,25 @@ class _CourseLoadingScreenState extends State<_CourseLoadingScreen> {
       debugPrint('=====================');
 
       generator.dispose();
+
+      if (mounted) {
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(
+            builder: (_) => CourseResultScreen(course: course),
+          ),
+        );
+      }
     } catch (e) {
       debugPrint('❌ 코스 생성 오류: $e');
-    }
-
-    if (mounted) {
-      Navigator.of(context).pushNamedAndRemoveUntil('/', (_) => false);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('코스 생성에 실패했습니다: $e'),
+            backgroundColor: Colors.red[700],
+          ),
+        );
+        Navigator.pop(context);
+      }
     }
   }
 

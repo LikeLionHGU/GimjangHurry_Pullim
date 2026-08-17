@@ -5,7 +5,7 @@ import 'constants/app_theme.dart';
 import 'providers/app_provider.dart';
 import 'screens/auth/login_screen.dart';
 import 'screens/main_shell.dart';
-import 'screens/onboarding_screen.dart';
+import 'screens/onboard/onboarding_screen.dart';
 import 'course_generator/env_loader.dart';
 import 'services/tool_registration_service.dart';
 

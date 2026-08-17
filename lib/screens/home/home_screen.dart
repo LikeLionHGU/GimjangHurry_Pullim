@@ -3,7 +3,7 @@ import 'package:intl/intl.dart';
 import '../../constants/app_colors.dart';
 import '../../models/course_model.dart';
 import '../../services/database_helper.dart';
-import '../body_selection_screen.dart';
+import '../course/course_generation_screen.dart';
 import '../posture/posture_guide_screen.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -321,7 +321,7 @@ class _HomeScreenState extends State<HomeScreen> {
             onTap: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (_) => const BodySelectionScreen()),
+                MaterialPageRoute(builder: (_) => const CourseGenerationScreen()),
               );
             },
             child: Container(
