@@ -3,6 +3,15 @@ import 'dart:convert';
 /// 코스 상태
 enum CourseStatus { pending, running, completed, cancelled }
 
+/// 코스 생성 소스 (선택 기반 / 측정 기반).
+enum CourseSource {
+  manual('선택 기반'),
+  posture('측정 기반');
+
+  const CourseSource(this.label);
+  final String label;
+}
+
 /// 코스 모델
 class CourseModel {
   final int? courseId;
@@ -16,6 +25,7 @@ class CourseModel {
   final DateTime? executedAt;
   final CourseStatus status;
   final int progress; // 0~100 퍼센트
+  final CourseSource source;
 
   CourseModel({
     this.courseId,
@@ -29,6 +39,7 @@ class CourseModel {
     this.executedAt,
     this.status = CourseStatus.pending,
     this.progress = 0,
+    this.source = CourseSource.manual,
   });
 
   String get formattedTime {
@@ -49,6 +60,7 @@ class CourseModel {
       'executed_at': executedAt?.toIso8601String(),
       'status': status.name,
       'progress': progress,
+      'source': source.name,
     };
   }
 
@@ -74,6 +86,10 @@ class CourseModel {
         orElse: () => CourseStatus.pending,
       ),
       progress: map['progress'] as int? ?? 0,
+      source: CourseSource.values.firstWhere(
+        (e) => e.name == (map['source'] as String?),
+        orElse: () => CourseSource.manual,
+      ),
     );
   }
 
@@ -89,6 +105,7 @@ class CourseModel {
     DateTime? executedAt,
     CourseStatus? status,
     int? progress,
+    CourseSource? source,
   }) {
     return CourseModel(
       courseId: courseId ?? this.courseId,
@@ -102,6 +119,7 @@ class CourseModel {
       executedAt: executedAt ?? this.executedAt,
       status: status ?? this.status,
       progress: progress ?? this.progress,
+      source: source ?? this.source,
     );
   }
 }

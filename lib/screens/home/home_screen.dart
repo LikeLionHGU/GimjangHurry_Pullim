@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 import '../../constants/app_colors.dart';
 import '../../models/course_model.dart';
+import '../../providers/app_provider.dart';
 import '../../services/database_helper.dart';
 import '../../services/course_loader.dart';
+import '../../services/posture_to_release_service.dart';
 import '../course/course_generation_screen.dart';
 import '../course/course_execution_screen.dart';
 import '../posture/posture_guide_screen.dart';
@@ -75,6 +78,54 @@ class _HomeScreenState extends State<HomeScreen> {
         _streakDays = _calculateStreak(dates);
         _exerciseDates = dates;
       });
+    }
+  }
+
+  /// 점검 기반 코스: 최신 측정 결과를 분석하여 코스 생성 화면으로 이동.
+  Future<void> _onPostureBasedCourse() async {
+    final userId = context.read<AppProvider>().currentUser?.userId ?? 1;
+    final service = PostureToReleaseService();
+
+    // 로딩 표시
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => const Center(child: CircularProgressIndicator()),
+    );
+
+    try {
+      final entries = await service.recommendFromLatest(userId);
+      service.dispose();
+
+      if (!mounted) return;
+      Navigator.pop(context); // 로딩 닫기
+
+      if (entries.isEmpty) {
+        // 측정 기록이 없으면 자세 점검 가이드로 이동
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => const PostureGuideScreen()),
+        );
+        return;
+      }
+
+      // 추천 부위가 선택된 채로 코스 생성 화면 이동
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => CourseGenerationScreen(initialFatigueEntries: entries),
+        ),
+      );
+    } catch (e) {
+      service.dispose();
+      if (!mounted) return;
+      Navigator.pop(context); // 로딩 닫기
+
+      // 실패 시에도 자세 점검 가이드로 fallback
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (_) => const PostureGuideScreen()),
+      );
     }
   }
 
@@ -425,10 +476,7 @@ class _HomeScreenState extends State<HomeScreen> {
         const SizedBox(width: 12),
         Expanded(
           child: GestureDetector(
-            onTap: () {
-              Navigator.push(context,
-                  MaterialPageRoute(builder: (_) => const PostureGuideScreen()));
-            },
+            onTap: () => _onPostureBasedCourse(),
             child: Container(
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(

@@ -3,6 +3,7 @@ import '../../assets/move_assets.dart';
 import '../../assets/tool_assets.dart';
 import '../../course_generator/models/course.dart';
 import '../../course_generator/models/course_step.dart';
+import '../../models/course_model.dart';
 import '../../services/course_mapper.dart';
 import '../../services/database_helper.dart';
 import 'course_execution_screen.dart';
@@ -10,9 +11,14 @@ import 'course_execution_screen.dart';
 /// 코스 생성 결과 화면.
 /// 생성된 [Course] 객체의 정보를 표시하고, "코스 시작하기" 버튼을 제공한다.
 class CourseResultScreen extends StatelessWidget {
-  const CourseResultScreen({super.key, required this.course});
+  const CourseResultScreen({
+    super.key,
+    required this.course,
+    this.isPostureBased = false,
+  });
 
   final Course course;
+  final bool isPostureBased;
 
   @override
   Widget build(BuildContext context) {
@@ -160,7 +166,12 @@ class CourseResultScreen extends StatelessWidget {
                   onPressed: () async {
                     // 코스 정보를 DB에 저장
                     final db = DatabaseHelper();
-                    final courseModel = CourseMapper.toCourseModel(course);
+                    final courseModel = CourseMapper.toCourseModel(
+                      course,
+                      source: isPostureBased
+                          ? CourseSource.posture
+                          : CourseSource.manual,
+                    );
                     final courseId = await db.insertCourse(courseModel);
                     final stepModels = CourseMapper.toStepModels(
                       course.steps,
@@ -177,6 +188,7 @@ class CourseResultScreen extends StatelessWidget {
                         builder: (_) => CourseExecutionScreen(
                           course: course,
                           courseId: courseId,
+                          isPostureBased: isPostureBased,
                         ),
                       ),
                     );

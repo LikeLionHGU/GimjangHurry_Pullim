@@ -10,10 +10,16 @@ import 'course_complete_screen.dart';
 /// 코스 실행 화면.
 /// 각 스텝을 순서대로 동작 정보 → 타이머 → 다음 스텝 흐름으로 진행한다.
 class CourseExecutionScreen extends StatefulWidget {
-  const CourseExecutionScreen({super.key, required this.course, required this.courseId});
+  const CourseExecutionScreen({
+    super.key,
+    required this.course,
+    required this.courseId,
+    this.isPostureBased = false,
+  });
 
   final Course course;
   final int courseId;
+  final bool isPostureBased;
 
   @override
   State<CourseExecutionScreen> createState() => _CourseExecutionScreenState();
@@ -153,7 +159,11 @@ class _CourseExecutionScreenState extends State<CourseExecutionScreen> {
       Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (_) => CourseCompleteScreen(course: widget.course, courseId: widget.courseId),
+          builder: (_) => CourseCompleteScreen(
+            course: widget.course,
+            courseId: widget.courseId,
+            isPostureBased: widget.isPostureBased,
+          ),
         ),
       );
       return;
