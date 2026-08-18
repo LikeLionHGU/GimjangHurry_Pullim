@@ -2,13 +2,14 @@ import 'package:flutter/material.dart';
 import '../../constants/app_colors.dart';
 import '../../constants/app_typography.dart';
 import '../../course_generator/models/course.dart';
-import '../../models/course_model.dart';
+import '../../models/execution_model.dart';
+import '../../services/course_mapper.dart';
 import '../../services/database_helper.dart';
 import '../main_shell.dart';
 import '../posture/posture_guide_screen.dart';
 
 /// 코스 완료 화면.
-/// 코스 실행 후 부위별 피로도를 재입력받고, DB에 after 피로도/status/progress를 업데이트한다.
+/// 코스 실행 후 부위별 피로도를 재입력받고, course_executions에 실행 기록을 저장한다.
 /// 추가로 코스를 저장(isSaved)할 수 있는 섹션을 제공한다.
 class CourseCompleteScreen extends StatefulWidget {
   const CourseCompleteScreen({
@@ -16,11 +17,15 @@ class CourseCompleteScreen extends StatefulWidget {
     required this.course,
     required this.courseId,
     this.isPostureBased = false,
+    this.isReplay = false,
+    this.isAlreadySaved = false,
   });
 
   final Course course;
   final int courseId;
   final bool isPostureBased;
+  final bool isReplay;
+  final bool isAlreadySaved;
 
   @override
   State<CourseCompleteScreen> createState() => _CourseCompleteScreenState();
@@ -43,36 +48,32 @@ class _CourseCompleteScreenState extends State<CourseCompleteScreen> {
   void initState() {
     super.initState();
     // before 피로도를 초기값으로 설정 (1~10 범위로 clamp, 없으면 5)
-    final request = widget.course.request;
     _fatigueLevels = {};
-    if (request != null) {
-      for (final entry in request.fatigueEntries) {
-        final face = entry.face.name; // 'front' or 'back'
-        final part = entry.part.name;
-        final key = '${face}_$part';
-        final level = entry.level.toDouble().clamp(1.0, 10.0);
-        // 겹치면 높은 쪽
-        final current = _fatigueLevels[key] ?? 0.0;
-        if (level > current) {
-          _fatigueLevels[key] = level;
-        }
+    if (!widget.isReplay) {
+      final beforeMap = CourseMapper.extractBeforeFatigue(widget.course);
+      for (final entry in beforeMap.entries) {
+        _fatigueLevels[entry.key] = entry.value.toDouble().clamp(1.0, 10.0);
       }
-    }
-    // 값이 0인 경우(초기 비교용 기본값)를 5로 교체
-    for (final key in _fatigueLevels.keys.toList()) {
-      if (_fatigueLevels[key]! < 1.0) {
-        _fatigueLevels[key] = 5.0;
+      // 값이 0인 경우(초기 비교용 기본값)를 5로 교체
+      for (final key in _fatigueLevels.keys.toList()) {
+        if (_fatigueLevels[key]! < 1.0) {
+          _fatigueLevels[key] = 5.0;
+        }
       }
     }
 
     // 기존 저장 상태 확인
-    DatabaseHelper().getSavedCourseById(widget.courseId).then((course) {
-      if (course != null && course.isSaved && mounted) {
-        setState(() {
-          _isSaved = true;
-        });
-      }
-    });
+    if (widget.isAlreadySaved) {
+      _isSaved = true;
+    } else {
+      DatabaseHelper().getCourseById(widget.courseId).then((course) {
+        if (course != null && course.isSaved && mounted) {
+          setState(() {
+            _isSaved = true;
+          });
+        }
+      });
+    }
   }
 
   /// 부위 키에서 한글 라벨을 생성한다.
@@ -108,7 +109,7 @@ class _CourseCompleteScreenState extends State<CourseCompleteScreen> {
 
     try {
       final db = DatabaseHelper();
-      final course = await db.getSavedCourseById(widget.courseId);
+      final course = await db.getCourseById(widget.courseId);
       if (course != null) {
         final updated = course.copyWith(isSaved: true);
         await db.updateCourse(updated);
@@ -127,33 +128,30 @@ class _CourseCompleteScreenState extends State<CourseCompleteScreen> {
     }
   }
 
-  /// 홈 이동 로직 — after 피로도 저장 후 네비게이션.
+  /// 홈 이동 로직 — 실행 기록 저장 후 네비게이션.
   Future<void> _onComplete() async {
-    // after 피로도 맵 생성 (측정 기반이면 빈 맵)
-    final afterMap = widget.isPostureBased
+    final db = DatabaseHelper();
+
+    // before 피로도 맵 생성
+    final beforeMap = widget.isReplay
+        ? <String, int>{}
+        : CourseMapper.extractBeforeFatigue(widget.course);
+
+    // after 피로도 맵 생성 (측정 기반이거나 재실행이면 빈 맵)
+    final afterMap = (widget.isPostureBased || widget.isReplay)
         ? <String, int>{}
         : _fatigueLevels.map(
             (key, value) => MapEntry(key, value.round()),
           );
 
-    // DB 업데이트
-    final db = DatabaseHelper();
-    final courses = await db.getSavedCourseById(widget.courseId);
-    if (courses != null) {
-      final updated = courses.copyWith(
-        after: afterMap,
-        status: CourseStatus.completed,
-        progress: 100,
-        executedAt: DateTime.now(),
-      );
-      await db.updateCourse(updated);
-    } else {
-      // fallback: 직접 업데이트
-      await db.updateCourseCompletion(
-        courseId: widget.courseId,
-        after: afterMap,
-      );
-    }
+    // 실행 기록 삽입
+    final execution = ExecutionModel(
+      courseId: widget.courseId,
+      executedAt: DateTime.now(),
+      before: beforeMap,
+      after: afterMap,
+    );
+    await db.insertExecution(execution);
 
     if (!mounted) return;
     Navigator.of(context).pushAndRemoveUntil(
@@ -172,10 +170,9 @@ class _CourseCompleteScreenState extends State<CourseCompleteScreen> {
       backgroundColor: AppColors.background,
       appBar: _buildAppBar(),
       body: SafeArea(
-        top: false, // AppBar handles the top safe area
+        top: false,
         child: Column(
           children: [
-            // ── 스크롤 가능한 본문 ──
             Expanded(
               child: SingleChildScrollView(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -183,7 +180,7 @@ class _CourseCompleteScreenState extends State<CourseCompleteScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const SizedBox(height: 16),
-                    if (!widget.isPostureBased) ...[
+                    if (!widget.isPostureBased && !widget.isReplay) ...[
                       _buildFatigueSection(),
                       const SizedBox(height: 40),
                     ],
@@ -193,8 +190,6 @@ class _CourseCompleteScreenState extends State<CourseCompleteScreen> {
                 ),
               ),
             ),
-
-            // ── 고정 하단 버튼 ──
             _buildBottomButton(),
           ],
         ),
@@ -202,7 +197,6 @@ class _CourseCompleteScreenState extends State<CourseCompleteScreen> {
     );
   }
 
-  /// 표준 AppBar — "코스 완료" 중앙 정렬, 뒤로가기 아이콘.
   PreferredSizeWidget _buildAppBar() {
     return AppBar(
       backgroundColor: AppColors.background,
@@ -219,7 +213,6 @@ class _CourseCompleteScreenState extends State<CourseCompleteScreen> {
     );
   }
 
-  /// 피로도 확인 섹션 — 제목 + 설명 + 슬라이더 목록.
   Widget _buildFatigueSection() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -244,7 +237,6 @@ class _CourseCompleteScreenState extends State<CourseCompleteScreen> {
     );
   }
 
-  /// 코스 저장 섹션 — 제목 + 설명 + 코스 카드(저장 버튼 포함).
   Widget _buildSaveCourseSection() {
     final stepsCount = widget.course.steps.length;
     final durationMinutes = widget.course.totalDuration ~/ 60;
@@ -262,7 +254,6 @@ class _CourseCompleteScreenState extends State<CourseCompleteScreen> {
           style: AppTypography.r14.copyWith(color: AppColors.textSecondary),
         ),
         const SizedBox(height: 16),
-        // Course Card
         Container(
           width: double.infinity,
           padding: const EdgeInsets.all(16),
@@ -292,7 +283,6 @@ class _CourseCompleteScreenState extends State<CourseCompleteScreen> {
                 ),
               ),
               const SizedBox(width: 12),
-              // Save pill button
               GestureDetector(
                 onTap: _isSaved || _isSaving ? null : _onSaveCourse,
                 child: Container(
@@ -326,7 +316,6 @@ class _CourseCompleteScreenState extends State<CourseCompleteScreen> {
             ],
           ),
         ),
-        // Error message
         if (_saveError != null) ...[
           const SizedBox(height: 8),
           Text(
@@ -338,7 +327,6 @@ class _CourseCompleteScreenState extends State<CourseCompleteScreen> {
     );
   }
 
-  /// 하단 "홈으로 이동" 버튼.
   Widget _buildBottomButton() {
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 8, 20, 16),
@@ -472,13 +460,11 @@ class _NumberedThumbShape extends SliderComponentShape {
   }) {
     final canvas = context.canvas;
 
-    // Filled circle
     final fillPaint = Paint()
       ..color = AppColors.primary
       ..style = PaintingStyle.fill;
     canvas.drawCircle(center, _thumbRadius, fillPaint);
 
-    // Number text
     final textSpan = TextSpan(
       text: this.value.toString(),
       style: const TextStyle(

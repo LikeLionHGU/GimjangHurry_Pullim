@@ -17,11 +17,15 @@ class CourseExecutionScreen extends StatefulWidget {
     required this.course,
     required this.courseId,
     this.isPostureBased = false,
+    this.isReplay = false,
+    this.isAlreadySaved = false,
   });
 
   final Course course;
   final int courseId;
   final bool isPostureBased;
+  final bool isReplay;
+  final bool isAlreadySaved;
 
   @override
   State<CourseExecutionScreen> createState() => _CourseExecutionScreenState();
@@ -165,6 +169,8 @@ class _CourseExecutionScreenState extends State<CourseExecutionScreen> {
             course: widget.course,
             courseId: widget.courseId,
             isPostureBased: widget.isPostureBased,
+            isReplay: widget.isReplay,
+            isAlreadySaved: widget.isAlreadySaved,
           ),
         ),
       );

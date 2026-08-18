@@ -3,9 +3,10 @@ import 'package:intl/intl.dart';
 import '../../constants/app_colors.dart';
 import '../../constants/app_typography.dart';
 import '../../models/course_model.dart';
+import '../../models/execution_model.dart';
 import '../../services/database_helper.dart';
 import '../../services/course_loader.dart';
-import '../course/course_execution_screen.dart';
+import '../course/course_summary_screen.dart';
 
 /// 최근 운동 내역 전체 페이지
 class RecentHistoryScreen extends StatefulWidget {
@@ -17,7 +18,7 @@ class RecentHistoryScreen extends StatefulWidget {
 
 class _RecentHistoryScreenState extends State<RecentHistoryScreen> {
   final DatabaseHelper _db = DatabaseHelper();
-  List<CourseModel> _courses = [];
+  List<(CourseModel, ExecutionModel)> _executions = [];
   bool _isLoading = true;
 
   @override
@@ -28,9 +29,9 @@ class _RecentHistoryScreenState extends State<RecentHistoryScreen> {
 
   Future<void> _loadCourses() async {
     setState(() => _isLoading = true);
-    final courses = await _db.getCompletedCourses();
+    final executions = await _db.getAllExecutions();
     setState(() {
-      _courses = courses;
+      _executions = executions;
       _isLoading = false;
     });
   }
@@ -48,7 +49,7 @@ class _RecentHistoryScreenState extends State<RecentHistoryScreen> {
       body: SafeArea(
         child: _isLoading
             ? const Center(child: CircularProgressIndicator())
-            : _courses.isEmpty
+            : _executions.isEmpty
                 ? Center(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -64,21 +65,19 @@ class _RecentHistoryScreenState extends State<RecentHistoryScreen> {
                   )
                 : ListView.separated(
                     padding: const EdgeInsets.all(24),
-                    itemCount: _courses.length,
+                    itemCount: _executions.length,
                     separatorBuilder: (_, __) => const SizedBox(height: 12),
                     itemBuilder: (context, index) {
-                      final course = _courses[index];
-                      return _buildItem(course);
+                      final (course, execution) = _executions[index];
+                      return _buildItem(course, execution);
                     },
                   ),
       ),
     );
   }
 
-  Widget _buildItem(CourseModel course) {
-    final dateStr = course.executedAt != null
-        ? DateFormat('yyyy.MM.dd  a h:mm').format(course.executedAt!)
-        : '';
+  Widget _buildItem(CourseModel course, ExecutionModel execution) {
+    final dateStr = DateFormat('yyyy.MM.dd  a h:mm').format(execution.executedAt);
 
     return GestureDetector(
       onTap: () => _showExecuteDialog(course),
@@ -101,12 +100,10 @@ class _RecentHistoryScreenState extends State<RecentHistoryScreen> {
                   Text('${course.totalMove}단계 · ${course.formattedTime}',
                       style: AppTypography.r12.copyWith(
                           color: AppColors.textTertiary, fontSize: 13)),
-                  if (dateStr.isNotEmpty) ...[
-                    const SizedBox(height: 4),
-                    Text(dateStr,
-                        style: AppTypography.r12.copyWith(
-                            color: AppColors.textTertiary)),
-                  ],
+                  const SizedBox(height: 4),
+                  Text(dateStr,
+                      style: AppTypography.r12.copyWith(
+                          color: AppColors.textTertiary)),
                 ],
               ),
             ),
@@ -137,15 +134,15 @@ class _RecentHistoryScreenState extends State<RecentHistoryScreen> {
           TextButton(
             onPressed: () async {
               Navigator.pop(ctx);
-              final newId = await CourseLoader.duplicateForReplay(courseModel.courseId!);
-              final course = await CourseLoader.loadFromDb(newId);
+              final course = await CourseLoader.loadFromDb(courseModel.courseId!);
               if (course != null && mounted) {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (_) => CourseExecutionScreen(
+                    builder: (_) => CourseSummaryScreen(
                       course: course,
-                      courseId: newId,
+                      courseId: courseModel.courseId!,
+                      isAlreadySaved: courseModel.isSaved,
                     ),
                   ),
                 ).then((_) => _loadCourses());

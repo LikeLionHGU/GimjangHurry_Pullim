@@ -15,7 +15,18 @@ class CourseMapper {
     Course course, {
     CourseSource source = CourseSource.manual,
   }) {
-    // request에서 부위별 피로도 맵 생성: "{face}_{part}" → level
+    return CourseModel(
+      name: course.name,
+      totalTime: course.totalDuration,
+      totalMove: course.steps.length,
+      summary: course.summary,
+      source: source,
+    );
+  }
+
+  /// [Course]에서 before 피로도 맵을 추출한다.
+  /// 첫 실행 시 ExecutionModel.before에 사용.
+  static Map<String, int> extractBeforeFatigue(Course course) {
     final fatigueMap = <String, int>{};
     final request = course.request;
     if (request != null) {
@@ -23,23 +34,13 @@ class CourseMapper {
         final face = entry.face == BodyFace.front ? 'front' : 'back';
         final part = entry.part.name;
         final key = '${face}_$part';
-        // 같은 키가 겹치면 높은 쪽
         final current = fatigueMap[key] ?? 0;
         if (entry.level > current) {
           fatigueMap[key] = entry.level;
         }
       }
     }
-
-    return CourseModel(
-      name: course.name,
-      totalTime: course.totalDuration,
-      totalMove: course.steps.length,
-      summary: course.summary,
-      before: fatigueMap,
-      after: Map<String, int>.from(fatigueMap), // 초기값은 before와 동일
-      source: source,
-    );
+    return fatigueMap;
   }
 
   /// [CourseStep] 리스트 → [StepModel] 리스트 변환.

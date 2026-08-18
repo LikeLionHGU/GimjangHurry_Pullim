@@ -4,6 +4,7 @@ import 'package:path/path.dart';
 import '../models/user_model.dart';
 import '../models/course_model.dart';
 import '../models/step_model.dart';
+import '../models/execution_model.dart';
 import '../models/posture_result_model.dart';
 
 class DatabaseHelper {
@@ -25,7 +26,7 @@ class DatabaseHelper {
 
     return await openDatabase(
       path,
-      version: 2,
+      version: 3,
       onCreate: _onCreate,
       onUpgrade: _onUpgrade,
     );
@@ -43,7 +44,6 @@ class DatabaseHelper {
     ''');
 
     // OWNED_TOOL 테이블 (사용자 보유 도구)
-    // tool_id는 tool_assets의 인덱스(1~12)를 직접 참조한다.
     await db.execute('''
       CREATE TABLE owned_tools (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -52,7 +52,7 @@ class DatabaseHelper {
       )
     ''');
 
-    // COURSE 테이블
+    // COURSE 테이블 — 코스 정체성만 저장
     await db.execute('''
       CREATE TABLE courses (
         course_id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -60,12 +60,8 @@ class DatabaseHelper {
         total_time INTEGER NOT NULL,
         total_move INTEGER NOT NULL,
         summary TEXT,
-        before TEXT,
-        after TEXT,
         save INTEGER NOT NULL DEFAULT 0,
-        executed_at TEXT,
         status TEXT NOT NULL DEFAULT 'pending',
-        progress INTEGER NOT NULL DEFAULT 0,
         source TEXT NOT NULL DEFAULT 'manual'
       )
     ''');
@@ -80,6 +76,18 @@ class DatabaseHelper {
         order_num INTEGER NOT NULL,
         reason TEXT,
         time INTEGER NOT NULL,
+        FOREIGN KEY (course_id) REFERENCES courses(course_id)
+      )
+    ''');
+
+    // COURSE_EXECUTIONS 테이블 — 실행 기록
+    await db.execute('''
+      CREATE TABLE course_executions (
+        execution_id INTEGER PRIMARY KEY AUTOINCREMENT,
+        course_id INTEGER NOT NULL,
+        executed_at TEXT NOT NULL,
+        before_data TEXT,
+        after_data TEXT,
         FOREIGN KEY (course_id) REFERENCES courses(course_id)
       )
     ''');
@@ -104,6 +112,86 @@ class DatabaseHelper {
       await db.execute(
         "ALTER TABLE courses ADD COLUMN source TEXT NOT NULL DEFAULT 'manual'",
       );
+    }
+    if (oldVersion < 3) {
+      // course_executions 테이블 생성
+      await db.execute('''
+        CREATE TABLE IF NOT EXISTS course_executions (
+          execution_id INTEGER PRIMARY KEY AUTOINCREMENT,
+          course_id INTEGER NOT NULL,
+          executed_at TEXT NOT NULL,
+          before_data TEXT,
+          after_data TEXT,
+          FOREIGN KEY (course_id) REFERENCES courses(course_id)
+        )
+      ''');
+
+      // 기존 완료된 코스의 실행 데이터를 executions로 마이그레이션
+      final completedCourses = await db.query(
+        'courses',
+        where: "status = 'completed' AND executed_at IS NOT NULL",
+      );
+      for (final row in completedCourses) {
+        await db.insert('course_executions', {
+          'course_id': row['course_id'],
+          'executed_at': row['executed_at'],
+          'before_data': row['before'],
+          'after_data': row['after'],
+        });
+      }
+
+      // 중복 코스 정리: 같은 이름+같은 스텝 구성의 코스들을 하나로 합침
+      // 이름이 같은 completed 코스들을 그룹화
+      final allCourses = await db.query('courses', orderBy: 'course_id ASC');
+      final grouped = <String, List<Map<String, dynamic>>>{};
+      for (final c in allCourses) {
+        final key = '${c['name']}_${c['total_time']}_${c['total_move']}';
+        grouped.putIfAbsent(key, () => []).add(c);
+      }
+
+      for (final group in grouped.values) {
+        if (group.length <= 1) continue;
+        // 첫 번째를 대표 코스로 유지, 나머지 삭제
+        final primary = group.first;
+        final primaryId = primary['course_id'] as int;
+
+        // 대표 코스가 저장 상태가 아닌데 그룹 내 저장된 게 있으면 대표에 반영
+        final hasSaved = group.any((c) => (c['save'] as int) == 1);
+        if (hasSaved) {
+          await db.update(
+            'courses',
+            {'save': 1},
+            where: 'course_id = ?',
+            whereArgs: [primaryId],
+          );
+        }
+
+        // 대표가 completed가 아닌데 그룹 내에 completed가 있으면 반영
+        final hasCompleted = group.any((c) => c['status'] == 'completed');
+        if (hasCompleted) {
+          await db.update(
+            'courses',
+            {'status': 'completed'},
+            where: 'course_id = ?',
+            whereArgs: [primaryId],
+          );
+        }
+
+        for (int i = 1; i < group.length; i++) {
+          final dupId = group[i]['course_id'] as int;
+          // executions의 course_id를 대표로 변경
+          await db.update(
+            'course_executions',
+            {'course_id': primaryId},
+            where: 'course_id = ?',
+            whereArgs: [dupId],
+          );
+          // 중복 코스의 steps 삭제
+          await db.delete('steps', where: 'course_id = ?', whereArgs: [dupId]);
+          // 중복 코스 삭제
+          await db.delete('courses', where: 'course_id = ?', whereArgs: [dupId]);
+        }
+      }
     }
   }
 
@@ -150,12 +238,12 @@ class DatabaseHelper {
     final maps = await db.query(
       'courses',
       where: 'save = 1',
-      orderBy: 'executed_at DESC',
+      orderBy: 'course_id DESC',
     );
     return maps.map((m) => CourseModel.fromMap(m)).toList();
   }
 
-  Future<CourseModel?> getSavedCourseById(int courseId) async {
+  Future<CourseModel?> getCourseById(int courseId) async {
     final db = await database;
     final maps = await db.query(
       'courses',
@@ -166,50 +254,14 @@ class DatabaseHelper {
     return CourseModel.fromMap(maps.first);
   }
 
-  Future<void> updateCourseCompletion({
-    required int courseId,
-    required Map<String, int> after,
-  }) async {
-    final db = await database;
-    await db.update(
-      'courses',
-      {
-        'after': jsonEncode(after),
-        'status': 'completed',
-        'progress': 100,
-        'executed_at': DateTime.now().toIso8601String(),
-      },
-      where: 'course_id = ?',
-      whereArgs: [courseId],
-    );
-  }
-
-  Future<List<CourseModel>> getCompletedCourses() async {
-    final db = await database;
-    final maps = await db.query(
-      'courses',
-      where: "status = 'completed'",
-      orderBy: 'executed_at DESC',
-    );
-    return maps.map((m) => CourseModel.fromMap(m)).toList();
-  }
-
-  Future<List<CourseModel>> getRecentCourses({int limit = 3}) async {
-    final db = await database;
-    final maps = await db.query(
-      'courses',
-      where: "status = 'completed'",
-      orderBy: 'executed_at DESC',
-      limit: limit,
-    );
-    return maps.map((m) => CourseModel.fromMap(m)).toList();
-  }
+  /// 하위 호환 — 기존 호출처를 위해 유지.
+  Future<CourseModel?> getSavedCourseById(int courseId) => getCourseById(courseId);
 
   Future<int> updateCourse(CourseModel course) async {
     final db = await database;
     return await db.update(
       'courses',
-      course.toMap(),
+      course.toMap()..remove('course_id'),
       where: 'course_id = ?',
       whereArgs: [course.courseId],
     );
@@ -217,8 +269,142 @@ class DatabaseHelper {
 
   Future<int> deleteCourse(int courseId) async {
     final db = await database;
+    await db.delete('course_executions', where: 'course_id = ?', whereArgs: [courseId]);
     await db.delete('steps', where: 'course_id = ?', whereArgs: [courseId]);
     return await db.delete('courses', where: 'course_id = ?', whereArgs: [courseId]);
+  }
+
+  /// 한번이라도 실행 완료된 코스 목록 (실행 기록이 존재하는 코스).
+  Future<List<CourseModel>> getCompletedCourses() async {
+    final db = await database;
+    final maps = await db.rawQuery('''
+      SELECT DISTINCT c.* FROM courses c
+      INNER JOIN course_executions e ON c.course_id = e.course_id
+      ORDER BY c.course_id DESC
+    ''');
+    return maps.map((m) => CourseModel.fromMap(m)).toList();
+  }
+
+  // ==================== COURSE EXECUTIONS ====================
+
+  Future<int> insertExecution(ExecutionModel execution) async {
+    final db = await database;
+    final map = {
+      'course_id': execution.courseId,
+      'executed_at': execution.executedAt.toIso8601String(),
+      'before_data': jsonEncode(execution.before),
+      'after_data': jsonEncode(execution.after),
+    };
+    final id = await db.insert('course_executions', map);
+
+    // 코스 상태를 completed로 업데이트
+    await db.update(
+      'courses',
+      {'status': 'completed'},
+      where: 'course_id = ?',
+      whereArgs: [execution.courseId],
+    );
+
+    return id;
+  }
+
+  /// 특정 코스의 실행 기록 (최신순).
+  Future<List<ExecutionModel>> getExecutionsByCourse(int courseId) async {
+    final db = await database;
+    final maps = await db.query(
+      'course_executions',
+      where: 'course_id = ?',
+      whereArgs: [courseId],
+      orderBy: 'executed_at DESC',
+    );
+    return maps.map((m) => _executionFromDbMap(m)).toList();
+  }
+
+  /// 최근 실행 기록 (코스 정보 포함, 최신순).
+  /// 반환: List of (CourseModel, ExecutionModel) 쌍.
+  Future<List<(CourseModel, ExecutionModel)>> getRecentExecutions({int limit = 3}) async {
+    final db = await database;
+    final maps = await db.rawQuery('''
+      SELECT c.*, e.execution_id, e.executed_at AS exec_at,
+             e.before_data, e.after_data
+      FROM course_executions e
+      INNER JOIN courses c ON c.course_id = e.course_id
+      ORDER BY e.executed_at DESC
+      LIMIT ?
+    ''', [limit]);
+
+    return maps.map((m) {
+      final course = CourseModel.fromMap(m);
+      final execution = ExecutionModel(
+        executionId: m['execution_id'] as int?,
+        courseId: m['course_id'] as int,
+        executedAt: DateTime.parse(m['exec_at'] as String),
+        before: m['before_data'] != null && (m['before_data'] as String).isNotEmpty
+            ? Map<String, int>.from(jsonDecode(m['before_data'] as String) as Map)
+            : const {},
+        after: m['after_data'] != null && (m['after_data'] as String).isNotEmpty
+            ? Map<String, int>.from(jsonDecode(m['after_data'] as String) as Map)
+            : const {},
+      );
+      return (course, execution);
+    }).toList();
+  }
+
+  /// 전체 실행 기록 (코스 정보 포함, 최신순) — 최근 운동 전체 페이지용.
+  Future<List<(CourseModel, ExecutionModel)>> getAllExecutions() async {
+    final db = await database;
+    final maps = await db.rawQuery('''
+      SELECT c.*, e.execution_id, e.executed_at AS exec_at,
+             e.before_data, e.after_data
+      FROM course_executions e
+      INNER JOIN courses c ON c.course_id = e.course_id
+      ORDER BY e.executed_at DESC
+    ''');
+
+    return maps.map((m) {
+      final course = CourseModel.fromMap(m);
+      final execution = ExecutionModel(
+        executionId: m['execution_id'] as int?,
+        courseId: m['course_id'] as int,
+        executedAt: DateTime.parse(m['exec_at'] as String),
+        before: m['before_data'] != null && (m['before_data'] as String).isNotEmpty
+            ? Map<String, int>.from(jsonDecode(m['before_data'] as String) as Map)
+            : const {},
+        after: m['after_data'] != null && (m['after_data'] as String).isNotEmpty
+            ? Map<String, int>.from(jsonDecode(m['after_data'] as String) as Map)
+            : const {},
+      );
+      return (course, execution);
+    }).toList();
+  }
+
+  /// 운동한 날짜 Set (캘린더/스트릭 표시용).
+  Future<Set<DateTime>> getExerciseDates() async {
+    final db = await database;
+    final maps = await db.query(
+      'course_executions',
+      columns: ['executed_at'],
+    );
+    final dates = <DateTime>{};
+    for (final m in maps) {
+      final dt = DateTime.parse(m['executed_at'] as String);
+      dates.add(DateTime(dt.year, dt.month, dt.day));
+    }
+    return dates;
+  }
+
+  ExecutionModel _executionFromDbMap(Map<String, dynamic> map) {
+    return ExecutionModel(
+      executionId: map['execution_id'] as int?,
+      courseId: map['course_id'] as int,
+      executedAt: DateTime.parse(map['executed_at'] as String),
+      before: map['before_data'] != null && (map['before_data'] as String).isNotEmpty
+          ? Map<String, int>.from(jsonDecode(map['before_data'] as String) as Map)
+          : const {},
+      after: map['after_data'] != null && (map['after_data'] as String).isNotEmpty
+          ? Map<String, int>.from(jsonDecode(map['after_data'] as String) as Map)
+          : const {},
+    );
   }
 
   // ==================== STEPS ====================
@@ -282,45 +468,33 @@ class DatabaseHelper {
 
   // ==================== STATISTICS (마이페이지용) ====================
 
-  /// 총 실행 횟수
+  /// 총 실행 횟수 — executions 테이블의 row 수.
   Future<int> getTotalExecutions() async {
     final db = await database;
     final result = await db.rawQuery(
-      "SELECT COUNT(*) as cnt FROM courses WHERE status = 'completed'",
+      'SELECT COUNT(*) as cnt FROM course_executions',
     );
     return Sqflite.firstIntValue(result) ?? 0;
   }
 
-  /// 완료율 (완료된 코스 / 전체 코스)
-  Future<double> getCompletionRate() async {
-    final db = await database;
-    final total = await db.rawQuery('SELECT COUNT(*) as cnt FROM courses');
-    final completed = await db.rawQuery(
-      "SELECT COUNT(*) as cnt FROM courses WHERE status = 'completed'",
-    );
-    final totalCount = Sqflite.firstIntValue(total) ?? 0;
-    final completedCount = Sqflite.firstIntValue(completed) ?? 0;
-    if (totalCount == 0) return 0.0;
-    return (completedCount / totalCount) * 100;
-  }
-
   /// 평균 피로도 감소.
-  /// courses 테이블의 before/after (JSON) 컬럼에서 부위별 피로도 차이의 평균을 계산한다.
+  /// course_executions의 before_data/after_data에서 부위별 피로도 차이의 평균을 계산.
   Future<double> getAverageFatigueReduction() async {
     final db = await database;
     final maps = await db.query(
-      'courses',
-      columns: ['before', 'after'],
-      where: "status = 'completed' AND before IS NOT NULL AND after IS NOT NULL",
+      'course_executions',
+      columns: ['before_data', 'after_data'],
+      where: "before_data IS NOT NULL AND after_data IS NOT NULL AND before_data != '{}' AND after_data != '{}'",
     );
     if (maps.isEmpty) return 0.0;
 
     int totalReduction = 0;
     int count = 0;
     for (final map in maps) {
-      final beforeStr = map['before'] as String?;
-      final afterStr = map['after'] as String?;
+      final beforeStr = map['before_data'] as String?;
+      final afterStr = map['after_data'] as String?;
       if (beforeStr == null || afterStr == null) continue;
+      if (beforeStr == '{}' || afterStr == '{}') continue;
       final beforeMap = Map<String, dynamic>.from(jsonDecode(beforeStr) as Map);
       final afterMap = Map<String, dynamic>.from(jsonDecode(afterStr) as Map);
       for (final key in beforeMap.keys) {

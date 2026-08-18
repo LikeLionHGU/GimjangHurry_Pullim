@@ -4,13 +4,14 @@ import '../../constants/app_colors.dart';
 import '../../constants/app_strings.dart';
 import '../../constants/app_typography.dart';
 import '../../models/course_model.dart';
+import '../../models/execution_model.dart';
 import '../../assets/tool_assets.dart' as tool_assets;
 import '../../providers/app_provider.dart';
 import '../../services/database_helper.dart';
 import '../../services/course_loader.dart';
 import '../../services/tool_registration_service.dart';
 import '../../widgets/common_widgets.dart';
-import '../course/course_execution_screen.dart';
+import '../course/course_summary_screen.dart';
 import '../posture/posture_guide_screen.dart';
 import '../home/recent_history_screen.dart';
 import 'add_tool_screen.dart';
@@ -28,10 +29,10 @@ class _MypageScreenState extends State<MypageScreen> {
   final ToolRegistrationService _toolService = ToolRegistrationService();
 
   int _totalExec = 0;
-  double _completionRate = 0;
+  int _savedCoursesCount = 0;
   double _avgFatigueReduction = 0;
   List<tool_assets.Tool> _ownedTools = [];
-  List<CourseModel> _recentCourses = [];
+  List<(CourseModel, ExecutionModel)> _recentExecutions = [];
   bool _isLoading = true;
 
   @override
@@ -44,9 +45,9 @@ class _MypageScreenState extends State<MypageScreen> {
     setState(() => _isLoading = true);
 
     final totalExec = await _db.getTotalExecutions();
-    final completionRate = await _db.getCompletionRate();
     final avgReduction = await _db.getAverageFatigueReduction();
-    final recentCourses = await _db.getRecentCourses(limit: 3);
+    final recentExecutions = await _db.getRecentExecutions(limit: 3);
+    final savedCourses = await _db.getSavedCourses();
 
     // 보유 도구: SharedPreferences에서 인덱스 가져와서 tool_assets로 매핑
     final toolIndexes = await _toolService.getRegisteredTools();
@@ -54,10 +55,10 @@ class _MypageScreenState extends State<MypageScreen> {
 
     setState(() {
       _totalExec = totalExec;
-      _completionRate = completionRate;
+      _savedCoursesCount = savedCourses.length;
       _avgFatigueReduction = avgReduction;
       _ownedTools = ownedTools;
-      _recentCourses = recentCourses;
+      _recentExecutions = recentExecutions;
       _isLoading = false;
     });
   }
@@ -158,8 +159,8 @@ class _MypageScreenState extends State<MypageScreen> {
         ),
         const SizedBox(width: 10),
         StatCard(
-          label: AppStrings.completionRate,
-          value: '${_completionRate.toStringAsFixed(0)}%',
+          label: '저장 코스',
+          value: '$_savedCoursesCount개',
         ),
         const SizedBox(width: 10),
         StatCard(
@@ -289,7 +290,7 @@ class _MypageScreenState extends State<MypageScreen> {
           ],
         ),
         const SizedBox(height: 16),
-        if (_recentCourses.isEmpty)
+        if (_recentExecutions.isEmpty)
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 24),
             child: Center(
@@ -300,10 +301,11 @@ class _MypageScreenState extends State<MypageScreen> {
             ),
           )
         else
-          ..._recentCourses.map((course) {
-                final timeStr = course.executedAt != null
-                    ? '${course.executedAt!.month}/${course.executedAt!.day} ${course.executedAt!.hour}:${course.executedAt!.minute.toString().padLeft(2, '0')}'
-                    : '';
+          ..._recentExecutions.map((record) {
+                final course = record.$1;
+                final execution = record.$2;
+                final timeStr =
+                    '${execution.executedAt.month}/${execution.executedAt.day} ${execution.executedAt.hour}:${execution.executedAt.minute.toString().padLeft(2, '0')}';
                 return Padding(
                   padding: const EdgeInsets.only(bottom: 12),
                   child: CourseItemCard(
@@ -339,15 +341,15 @@ class _MypageScreenState extends State<MypageScreen> {
           TextButton(
             onPressed: () async {
               Navigator.pop(ctx);
-              final newId = await CourseLoader.duplicateForReplay(courseModel.courseId!);
-              final course = await CourseLoader.loadFromDb(newId);
+              final course = await CourseLoader.loadFromDb(courseModel.courseId!);
               if (course != null && mounted) {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (_) => CourseExecutionScreen(
+                    builder: (_) => CourseSummaryScreen(
                       course: course,
-                      courseId: newId,
+                      courseId: courseModel.courseId!,
+                      isAlreadySaved: courseModel.isSaved,
                     ),
                   ),
                 ).then((_) => _loadData());

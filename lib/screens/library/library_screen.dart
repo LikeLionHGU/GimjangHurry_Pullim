@@ -6,7 +6,7 @@ import '../../models/course_model.dart';
 import '../../services/database_helper.dart';
 import '../../services/course_loader.dart';
 import '../../widgets/common_widgets.dart';
-import '../course/course_execution_screen.dart';
+import '../course/course_summary_screen.dart';
 import 'library_all_screen.dart';
 
 class LibraryScreen extends StatefulWidget {
@@ -123,15 +123,15 @@ class _LibraryScreenState extends State<LibraryScreen> {
               child: ElevatedButton(
                 onPressed: () async {
                   final courseModel = _savedCourses[_selectedIndex!];
-                  final newId = await CourseLoader.duplicateForReplay(courseModel.courseId!);
-                  final course = await CourseLoader.loadFromDb(newId);
+                  final course = await CourseLoader.loadFromDb(courseModel.courseId!);
                   if (course != null && mounted) {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (_) => CourseExecutionScreen(
+                        builder: (_) => CourseSummaryScreen(
                           course: course,
-                          courseId: newId,
+                          courseId: courseModel.courseId!,
+                          isAlreadySaved: courseModel.isSaved,
                         ),
                       ),
                     ).then((_) => _loadCourses());

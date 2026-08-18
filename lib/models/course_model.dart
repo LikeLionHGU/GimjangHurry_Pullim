@@ -1,7 +1,5 @@
-import 'dart:convert';
-
 /// 코스 상태
-enum CourseStatus { pending, running, completed, cancelled }
+enum CourseStatus { pending, completed }
 
 /// 코스 생성 소스 (선택 기반 / 측정 기반).
 enum CourseSource {
@@ -12,19 +10,16 @@ enum CourseSource {
   final String label;
 }
 
-/// 코스 모델
+/// 코스 모델 — 코스의 정체성(구조)만 담당.
+/// 실행 기록(시간, 피로도)은 [ExecutionModel]이 담당한다.
 class CourseModel {
   final int? courseId;
   final String name;
   final int totalTime; // 초 단위
   final int totalMove;
   final String? summary;
-  final Map<String, int> before;
-  final Map<String, int> after;
   final bool isSaved;
-  final DateTime? executedAt;
   final CourseStatus status;
-  final int progress; // 0~100 퍼센트
   final CourseSource source;
 
   CourseModel({
@@ -33,12 +28,8 @@ class CourseModel {
     required this.totalTime,
     required this.totalMove,
     this.summary,
-    this.before = const {},
-    this.after = const {},
     this.isSaved = false,
-    this.executedAt,
     this.status = CourseStatus.pending,
-    this.progress = 0,
     this.source = CourseSource.manual,
   });
 
@@ -54,12 +45,8 @@ class CourseModel {
       'total_time': totalTime,
       'total_move': totalMove,
       'summary': summary,
-      'before': jsonEncode(before),
-      'after': jsonEncode(after),
       'save': isSaved ? 1 : 0,
-      'executed_at': executedAt?.toIso8601String(),
       'status': status.name,
-      'progress': progress,
       'source': source.name,
     };
   }
@@ -71,21 +58,11 @@ class CourseModel {
       totalTime: map['total_time'] as int,
       totalMove: map['total_move'] as int,
       summary: map['summary'] as String?,
-      before: map['before'] != null
-          ? Map<String, int>.from(jsonDecode(map['before'] as String) as Map)
-          : const {},
-      after: map['after'] != null
-          ? Map<String, int>.from(jsonDecode(map['after'] as String) as Map)
-          : const {},
       isSaved: (map['save'] as int) == 1,
-      executedAt: map['executed_at'] != null
-          ? DateTime.parse(map['executed_at'] as String)
-          : null,
       status: CourseStatus.values.firstWhere(
         (e) => e.name == map['status'],
         orElse: () => CourseStatus.pending,
       ),
-      progress: map['progress'] as int? ?? 0,
       source: CourseSource.values.firstWhere(
         (e) => e.name == (map['source'] as String?),
         orElse: () => CourseSource.manual,
@@ -99,12 +76,8 @@ class CourseModel {
     int? totalTime,
     int? totalMove,
     String? summary,
-    Map<String, int>? before,
-    Map<String, int>? after,
     bool? isSaved,
-    DateTime? executedAt,
     CourseStatus? status,
-    int? progress,
     CourseSource? source,
   }) {
     return CourseModel(
@@ -113,12 +86,8 @@ class CourseModel {
       totalTime: totalTime ?? this.totalTime,
       totalMove: totalMove ?? this.totalMove,
       summary: summary ?? this.summary,
-      before: before ?? this.before,
-      after: after ?? this.after,
       isSaved: isSaved ?? this.isSaved,
-      executedAt: executedAt ?? this.executedAt,
       status: status ?? this.status,
-      progress: progress ?? this.progress,
       source: source ?? this.source,
     );
   }

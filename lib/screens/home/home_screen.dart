@@ -4,12 +4,13 @@ import 'package:provider/provider.dart';
 import '../../constants/app_colors.dart';
 import '../../constants/app_typography.dart';
 import '../../models/course_model.dart';
+import '../../models/execution_model.dart';
 import '../../providers/app_provider.dart';
 import '../../services/database_helper.dart';
 import '../../services/course_loader.dart';
 import '../../services/posture_to_release_service.dart';
 import '../course/course_generation_screen.dart';
-import '../course/course_execution_screen.dart';
+import '../course/course_summary_screen.dart';
 import '../posture/posture_guide_screen.dart';
 import 'recent_history_screen.dart';
 
@@ -22,7 +23,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   final DatabaseHelper _db = DatabaseHelper();
-  List<CourseModel> _recentCourses = [];
+  List<(CourseModel, ExecutionModel)> _recentExecutions = [];
   int _streakDays = 0;
   Set<DateTime> _exerciseDates = {};
 
@@ -61,21 +62,12 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> _loadData() async {
-    final recent = await _db.getRecentCourses(limit: 3);
-    final completed = await _db.getCompletedCourses();
-
-    // 운동한 날짜 Set 구성
-    final dates = <DateTime>{};
-    for (final course in completed) {
-      if (course.executedAt != null) {
-        final d = course.executedAt!;
-        dates.add(DateTime(d.year, d.month, d.day));
-      }
-    }
+    final recent = await _db.getRecentExecutions(limit: 3);
+    final dates = await _db.getExerciseDates();
 
     if (mounted) {
       setState(() {
-        _recentCourses = recent;
+        _recentExecutions = recent;
         _streakDays = _calculateStreak(dates);
         _exerciseDates = dates;
       });
@@ -102,11 +94,8 @@ class _HomeScreenState extends State<HomeScreen> {
       Navigator.pop(context); // 로딩 닫기
 
       if (entries.isEmpty) {
-        // 측정 기록이 없으면 자세 점검 가이드로 이동
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (_) => const PostureGuideScreen()),
-        );
+        // 측정 기록이 없으면 모달 표시
+        _showPostureCheckRequiredDialog();
         return;
       }
 
@@ -122,12 +111,115 @@ class _HomeScreenState extends State<HomeScreen> {
       if (!mounted) return;
       Navigator.pop(context); // 로딩 닫기
 
-      // 실패 시에도 자세 점검 가이드로 fallback
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (_) => const PostureGuideScreen()),
-      );
+      // 실패 시에도 모달 표시
+      _showPostureCheckRequiredDialog();
     }
+  }
+
+  /// 자세 점검 데이터가 없을 때 표시하는 모달
+  void _showPostureCheckRequiredDialog() {
+    showDialog(
+      context: context,
+      barrierDismissible: true,
+      builder: (ctx) => Dialog(
+        backgroundColor: AppColors.cardBackground,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+        ),
+        insetPadding: const EdgeInsets.symmetric(horizontal: 32),
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // 닫기 버튼
+              Align(
+                alignment: Alignment.topRight,
+                child: GestureDetector(
+                  onTap: () => Navigator.pop(ctx),
+                  child: const Icon(
+                    Icons.close,
+                    color: AppColors.textPrimary,
+                    size: 24,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 8),
+              // 타이틀
+              Text(
+                '자세 점검이 필요해요',
+                style: AppTypography.sb24.copyWith(
+                  color: AppColors.textPrimary,
+                ),
+              ),
+              const SizedBox(height: 12),
+              // 설명
+              Text(
+                '맞춤 코스를 생성하려면 먼저 자세 점검 테스트를 완료해 주세요.',
+                style: AppTypography.r14.copyWith(
+                  color: AppColors.textSecondary,
+                  height: 1.5,
+                ),
+              ),
+              const SizedBox(height: 24),
+              // 버튼 영역
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton(
+                      onPressed: () => Navigator.pop(ctx),
+                      style: OutlinedButton.styleFrom(
+                        side: const BorderSide(color: AppColors.textPrimary),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                      ),
+                      child: Text(
+                        '취소',
+                        style: AppTypography.r14.copyWith(
+                          color: AppColors.textPrimary,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: () {
+                        Navigator.pop(ctx);
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const PostureGuideScreen(),
+                          ),
+                        );
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.primary,
+                        foregroundColor: AppColors.background,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                      ),
+                      child: Text(
+                        '점검하기',
+                        style: AppTypography.r14.copyWith(
+                          color: AppColors.background,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 
   @override
@@ -313,7 +405,7 @@ class _HomeScreenState extends State<HomeScreen> {
           ],
         ),
         const SizedBox(height: 12),
-        if (_recentCourses.isEmpty)
+        if (_recentExecutions.isEmpty)
           Container(
             width: double.infinity,
             padding: const EdgeInsets.symmetric(vertical: 24),
@@ -327,18 +419,16 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           )
         else
-          ..._recentCourses.map((course) => Padding(
+          ..._recentExecutions.map((record) => Padding(
                 padding: const EdgeInsets.only(bottom: 8),
-                child: _buildRecentItem(course),
+                child: _buildRecentItem(record.$1, record.$2),
               )),
       ],
     );
   }
 
-  Widget _buildRecentItem(CourseModel course) {
-    final dateStr = course.executedAt != null
-        ? DateFormat('yyyy.MM.dd\na h:mm').format(course.executedAt!)
-        : '';
+  Widget _buildRecentItem(CourseModel course, ExecutionModel execution) {
+    final dateStr = DateFormat('yyyy.MM.dd\na h:mm').format(execution.executedAt);
 
     return GestureDetector(
       onTap: () => _showCourseExecuteDialog(course),
@@ -378,41 +468,111 @@ class _HomeScreenState extends State<HomeScreen> {
   void _showCourseExecuteDialog(CourseModel courseModel) {
     showDialog(
       context: context,
-      builder: (ctx) => AlertDialog(
+      barrierDismissible: true,
+      builder: (ctx) => Dialog(
         backgroundColor: AppColors.cardBackground,
-        title: Text(courseModel.name,
-            style: AppTypography.b18.copyWith(color: AppColors.textPrimary)),
-        content: Text(
-          '${courseModel.totalMove}단계 · ${courseModel.formattedTime}\n\n이 코스를 실행하시겠습니까?',
-          style: AppTypography.r14.copyWith(color: AppColors.textSecondary),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: Text('취소',
-                style: AppTypography.r14.copyWith(color: AppColors.textTertiary)),
-          ),
-          TextButton(
-            onPressed: () async {
-              Navigator.pop(ctx);
-              final newId = await CourseLoader.duplicateForReplay(courseModel.courseId!);
-              final course = await CourseLoader.loadFromDb(newId);
-              if (course != null && mounted) {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => CourseExecutionScreen(
-                      course: course,
-                      courseId: newId,
+        insetPadding: const EdgeInsets.symmetric(horizontal: 32),
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // 닫기 버튼
+              Align(
+                alignment: Alignment.topRight,
+                child: GestureDetector(
+                  onTap: () => Navigator.pop(ctx),
+                  child: const Icon(
+                    Icons.close,
+                    color: AppColors.textPrimary,
+                    size: 24,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 8),
+              // 타이틀
+              Text(
+                '이 코스로 다시 시작할까요?',
+                style: AppTypography.sb24.copyWith(
+                  color: AppColors.textPrimary,
+                ),
+              ),
+              const SizedBox(height: 12),
+              // 설명
+              Text(
+                "'${courseModel.name}' (${courseModel.totalMove}단계 · ${courseModel.formattedTime}) 코스를 바로 시작합니다.",
+                style: AppTypography.r14.copyWith(
+                  color: AppColors.textSecondary,
+                  height: 1.5,
+                ),
+              ),
+              const SizedBox(height: 24),
+              // 버튼 영역
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton(
+                      onPressed: () => Navigator.pop(ctx),
+                      style: OutlinedButton.styleFrom(
+                        side: const BorderSide(color: AppColors.textPrimary),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                      ),
+                      child: Text(
+                        '취소',
+                        style: AppTypography.r14.copyWith(
+                          color: AppColors.textPrimary,
+                        ),
+                      ),
                     ),
                   ),
-                ).then((_) => _loadData());
-              }
-            },
-            child: Text('시작하기',
-                style: AppTypography.r14.copyWith(color: AppColors.primary)),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: () async {
+                        Navigator.pop(ctx);
+                        final course = await CourseLoader.loadFromDb(courseModel.courseId!);
+                        if (course != null && mounted) {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => CourseSummaryScreen(
+                                course: course,
+                                courseId: courseModel.courseId!,
+                                isAlreadySaved: courseModel.isSaved,
+                              ),
+                            ),
+                          ).then((_) => _loadData());
+                        }
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.primary,
+                        foregroundColor: AppColors.background,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                      ),
+                      child: Text(
+                        '시작하기',
+                        style: AppTypography.r14.copyWith(
+                          color: AppColors.background,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }

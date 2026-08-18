@@ -5,7 +5,7 @@ import '../../models/course_model.dart';
 import '../../services/database_helper.dart';
 import '../../services/course_loader.dart';
 import '../../widgets/common_widgets.dart';
-import '../course/course_execution_screen.dart';
+import '../course/course_summary_screen.dart';
 
 /// 저장된 코스 전체 목록 페이지
 class LibraryAllScreen extends StatefulWidget {
@@ -105,15 +105,15 @@ class _LibraryAllScreenState extends State<LibraryAllScreen> {
           TextButton(
             onPressed: () async {
               Navigator.pop(ctx);
-              final newId = await CourseLoader.duplicateForReplay(courseModel.courseId!);
-              final course = await CourseLoader.loadFromDb(newId);
+              final course = await CourseLoader.loadFromDb(courseModel.courseId!);
               if (course != null && mounted) {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (_) => CourseExecutionScreen(
+                    builder: (_) => CourseSummaryScreen(
                       course: course,
-                      courseId: newId,
+                      courseId: courseModel.courseId!,
+                      isAlreadySaved: courseModel.isSaved,
                     ),
                   ),
                 ).then((_) => _loadCourses());
