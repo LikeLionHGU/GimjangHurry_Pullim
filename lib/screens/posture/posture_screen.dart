@@ -6,6 +6,7 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 import '../../constants/app_colors.dart';
 import '../../constants/app_strings.dart';
+import '../../constants/app_typography.dart';
 import '../../models/posture_result_model.dart';
 import '../../providers/app_provider.dart';
 import '../../services/database_helper.dart';
@@ -496,7 +497,8 @@ class _PostureScreenState extends State<PostureScreen> {
       );
 
       final db = DatabaseHelper();
-      await db.insertPostureResult(result);
+      final resultId = await db.insertPostureResult(result);
+      debugPrint('자세 측정 결과 저장 완료: id=$resultId, score=$score');
 
       if (mounted) {
         nav.pushReplacement(
@@ -645,14 +647,14 @@ class _PostureScreenState extends State<PostureScreen> {
     if (!_isCameraReady || _cameraController == null) {
       return Container(
         color: AppColors.surface,
-        child: const Center(
+        child: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              CircularProgressIndicator(color: AppColors.primary),
-              SizedBox(height: 16),
+              const CircularProgressIndicator(color: AppColors.primary),
+              const SizedBox(height: 16),
               Text('카메라를 준비하고 있습니다...',
-                  style: TextStyle(color: AppColors.textSecondary, fontSize: 14)),
+                  style: AppTypography.r14.copyWith(color: AppColors.textSecondary)),
             ],
           ),
         ),
@@ -717,10 +719,9 @@ class _PostureScreenState extends State<PostureScreen> {
                   child: Center(
                     child: Text(
                       '$_countdown',
-                      style: const TextStyle(
+                      style: AppTypography.b40.copyWith(
                         color: AppColors.background,
                         fontSize: 48,
-                        fontWeight: FontWeight.w700,
                       ),
                     ),
                   ),
@@ -749,7 +750,7 @@ class _PostureScreenState extends State<PostureScreen> {
                     Expanded(
                       child: Text(
                         _statusMessage,
-                        style: TextStyle(
+                        style: AppTypography.r12.copyWith(
                           color: _isPersonInFrame ? AppColors.primary : AppColors.textPrimary,
                           fontSize: 13,
                           fontWeight: FontWeight.w500,
@@ -809,7 +810,7 @@ class _PostureScreenState extends State<PostureScreen> {
             _currentPhase == CapturePhase.front
                 ? '1/2 정면 촬영 · 프레임 안에 서면 자동 촬영됩니다'
                 : '2/2 측면 촬영 · 프레임 안에 서면 자동 촬영됩니다',
-            style: const TextStyle(color: AppColors.textTertiary, fontSize: 12),
+            style: AppTypography.r12.copyWith(color: AppColors.textTertiary),
           ),
         ],
       ),
@@ -871,7 +872,7 @@ class _PhaseChip extends StatelessWidget {
           ],
           Text(
             label,
-            style: TextStyle(
+            style: AppTypography.r12.copyWith(
               color: textColor,
               fontSize: 13,
               fontWeight: FontWeight.w600,

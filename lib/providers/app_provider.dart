@@ -36,35 +36,19 @@ class AppProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// 이름 기반 등록 (첫 접속 시 이름 입력)
   Future<void> login(String name, String email) async {
-    // 기존 유저 확인
-    var user = await _db.getUserByEmail(email);
-
-    if (user == null) {
-      // 새 유저 생성
-      final userId = await _db.insertUser(UserModel(
-        name: name,
-        email: email,
-      ));
-      user = UserModel(userId: userId, name: name, email: email);
-    }
+    final userId = await _db.insertUser(UserModel(
+      name: name,
+      email: email,
+    ));
+    final user = UserModel(userId: userId, name: name, email: email);
 
     _currentUser = user;
     _isLoggedIn = true;
 
-    // 로그인 상태 저장
     final prefs = await SharedPreferences.getInstance();
     await prefs.setInt('current_user_id', user.userId!);
-
-    notifyListeners();
-  }
-
-  Future<void> logout() async {
-    _currentUser = null;
-    _isLoggedIn = false;
-
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.remove('current_user_id');
 
     notifyListeners();
   }

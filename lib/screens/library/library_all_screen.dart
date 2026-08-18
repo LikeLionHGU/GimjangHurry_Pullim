@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
 import '../../constants/app_colors.dart';
+import '../../constants/app_typography.dart';
 import '../../models/course_model.dart';
 import '../../services/database_helper.dart';
+import '../../services/course_loader.dart';
 import '../../widgets/common_widgets.dart';
+import '../course/course_execution_screen.dart';
 
+/// 저장된 코스 전체 목록 페이지
 class LibraryAllScreen extends StatefulWidget {
   const LibraryAllScreen({super.key});
 
@@ -13,20 +17,20 @@ class LibraryAllScreen extends StatefulWidget {
 
 class _LibraryAllScreenState extends State<LibraryAllScreen> {
   final DatabaseHelper _db = DatabaseHelper();
-  List<CourseModel> _allCourses = [];
+  List<CourseModel> _savedCourses = [];
   bool _isLoading = true;
 
   @override
   void initState() {
     super.initState();
-    _loadAllCourses();
+    _loadCourses();
   }
 
-  Future<void> _loadAllCourses() async {
+  Future<void> _loadCourses() async {
     setState(() => _isLoading = true);
-    final courses = await _db.getCompletedCourses();
+    final courses = await _db.getSavedCourses();
     setState(() {
-      _allCourses = courses;
+      _savedCourses = courses;
       _isLoading = false;
     });
   }
@@ -35,7 +39,7 @@ class _LibraryAllScreenState extends State<LibraryAllScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('라이브러리'),
+        title: const Text('저장된 코스'),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () => Navigator.pop(context),
@@ -44,57 +48,79 @@ class _LibraryAllScreenState extends State<LibraryAllScreen> {
       body: SafeArea(
         child: _isLoading
             ? const Center(child: CircularProgressIndicator())
-            : _buildContent(),
+            : _savedCourses.isEmpty
+                ? Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(Icons.bookmark_border,
+                            color: AppColors.textTertiary, size: 48),
+                        const SizedBox(height: 16),
+                        Text('저장된 코스가 없습니다',
+                            style: AppTypography.r14.copyWith(
+                                color: AppColors.textTertiary, fontSize: 15)),
+                        const SizedBox(height: 8),
+                        Text('코스 실행 중 저장 버튼을 눌러보세요',
+                            style: AppTypography.r12.copyWith(
+                                color: AppColors.textTertiary, fontSize: 13)),
+                      ],
+                    ),
+                  )
+                : ListView.separated(
+                    padding: const EdgeInsets.all(24),
+                    itemCount: _savedCourses.length,
+                    separatorBuilder: (_, __) => const SizedBox(height: 12),
+                    itemBuilder: (context, index) {
+                      final course = _savedCourses[index];
+                      return CourseItemCard(
+                        title: course.name,
+                        toolInfo: course.summary ?? '',
+                        duration: course.formattedTime,
+                        steps: '${course.totalMove}단계',
+                        onTap: () => _showExecuteDialog(course),
+                      );
+                    },
+                  ),
       ),
     );
   }
 
-  Widget _buildContent() {
-    if (_allCourses.isEmpty) {
-      return const Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.history, color: AppColors.textTertiary, size: 48),
-            SizedBox(height: 16),
-            Text(
-              '실행 이력이 없습니다',
-              style: TextStyle(color: AppColors.textTertiary, fontSize: 15),
-            ),
-          ],
+  void _showExecuteDialog(CourseModel courseModel) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: AppColors.cardBackground,
+        title: Text(courseModel.name,
+            style: AppTypography.b18.copyWith(color: AppColors.textPrimary)),
+        content: Text(
+          '${courseModel.totalMove}단계 · ${courseModel.formattedTime}\n\n이 코스를 실행하시겠습니까?',
+          style: AppTypography.r14.copyWith(color: AppColors.textSecondary),
         ),
-      );
-    }
-
-    return SingleChildScrollView(
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
-            '저장된 코스 전체보기',
-            style: TextStyle(
-              color: AppColors.textPrimary,
-              fontSize: 22,
-              fontWeight: FontWeight.w700,
-            ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: Text('취소',
+                style: AppTypography.r14.copyWith(color: AppColors.textTertiary)),
           ),
-          const SizedBox(height: 20),
-          ...List.generate(_allCourses.length, (index) {
-            final course = _allCourses[index];
-            return Padding(
-              padding: const EdgeInsets.only(bottom: 12),
-              child: CourseItemCard(
-                title: course.name,
-                toolInfo: '폼롤러 + 마사지볼',
-                duration: course.formattedTime,
-                steps: '${course.totalMove}단계',
-                onTap: () {
-                  // TODO: 코스 상세 또는 재실행 (다른 팀원 구현)
-                },
-              ),
-            );
-          }),
+          TextButton(
+            onPressed: () async {
+              Navigator.pop(ctx);
+              final course = await CourseLoader.loadFromDb(courseModel.courseId!);
+              if (course != null && mounted) {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => CourseExecutionScreen(
+                      course: course,
+                      courseId: courseModel.courseId!,
+                    ),
+                  ),
+                ).then((_) => _loadCourses());
+              }
+            },
+            child: Text('시작하기',
+                style: AppTypography.r14.copyWith(color: AppColors.primary)),
+          ),
         ],
       ),
     );

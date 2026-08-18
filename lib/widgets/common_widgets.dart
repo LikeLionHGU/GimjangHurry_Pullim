@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../constants/app_colors.dart';
+import '../constants/app_typography.dart';
 
 /// 앱 전체에서 사용하는 공통 위젯 모음
 
@@ -43,10 +44,9 @@ class NumberBadge extends StatelessWidget {
       child: Center(
         child: Text(
           '$number',
-          style: TextStyle(
+          style: AppTypography.r14.copyWith(
             color: isActive ? AppColors.background : AppColors.textPrimary,
             fontWeight: FontWeight.w700,
-            fontSize: 14,
           ),
         ),
       ),
@@ -94,16 +94,12 @@ class CourseItemCard extends StatelessWidget {
                 children: [
                   Text(
                     title,
-                    style: const TextStyle(
-                      color: AppColors.textPrimary,
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                    ),
+                    style: AppTypography.sb16.copyWith(color: AppColors.textPrimary),
                   ),
                   const SizedBox(height: 4),
                   Text(
                     toolInfo,
-                    style: const TextStyle(
+                    style: AppTypography.r12.copyWith(
                       color: AppColors.textSecondary,
                       fontSize: 13,
                     ),
@@ -141,10 +137,7 @@ class _InfoChip extends StatelessWidget {
       ),
       child: Text(
         text,
-        style: const TextStyle(
-          color: AppColors.textSecondary,
-          fontSize: 12,
-        ),
+        style: AppTypography.r12.copyWith(color: AppColors.textSecondary),
       ),
     );
   }
@@ -192,10 +185,7 @@ class ToolCard extends StatelessWidget {
             const SizedBox(height: 8),
             Text(
               name,
-              style: const TextStyle(
-                color: AppColors.textSecondary,
-                fontSize: 12,
-              ),
+              style: AppTypography.r12.copyWith(color: AppColors.textSecondary),
             ),
           ],
         ),
@@ -225,7 +215,7 @@ class StatCard extends StatelessWidget {
           children: [
             Text(
               label,
-              style: const TextStyle(
+              style: AppTypography.r12.copyWith(
                 color: AppColors.primary,
                 fontSize: 11,
                 fontWeight: FontWeight.w500,
@@ -234,10 +224,9 @@ class StatCard extends StatelessWidget {
             const SizedBox(height: 8),
             Text(
               value,
-              style: const TextStyle(
+              style: AppTypography.sb24.copyWith(
                 color: AppColors.textPrimary,
                 fontSize: 22,
-                fontWeight: FontWeight.w700,
               ),
             ),
           ],

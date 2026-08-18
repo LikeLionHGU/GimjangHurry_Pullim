@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import '../../constants/app_colors.dart';
-import '../../models/tool_model.dart';
-import '../../providers/app_provider.dart';
-import '../../services/database_helper.dart';
-import '../../widgets/common_widgets.dart';
+import '../../constants/app_typography.dart';
+import '../../assets/tool_assets.dart' as tool_assets;
+import '../../services/tool_registration_service.dart';
+import 'add_tool_screen.dart';
 
 class OwnedToolsScreen extends StatefulWidget {
   const OwnedToolsScreen({super.key});
@@ -14,8 +13,8 @@ class OwnedToolsScreen extends StatefulWidget {
 }
 
 class _OwnedToolsScreenState extends State<OwnedToolsScreen> {
-  final DatabaseHelper _db = DatabaseHelper();
-  List<ToolModel> _ownedTools = [];
+  final ToolRegistrationService _toolService = ToolRegistrationService();
+  List<tool_assets.Tool> _ownedTools = [];
   bool _isLoading = true;
 
   @override
@@ -26,9 +25,8 @@ class _OwnedToolsScreenState extends State<OwnedToolsScreen> {
 
   Future<void> _loadTools() async {
     setState(() => _isLoading = true);
-    final provider = context.read<AppProvider>();
-    final userId = provider.currentUser?.userId ?? 1;
-    final tools = await _db.getOwnedTools(userId);
+    final indexes = await _toolService.getRegisteredTools();
+    final tools = tool_assets.toolsOf(indexes);
     setState(() {
       _ownedTools = tools;
       _isLoading = false;
@@ -39,7 +37,7 @@ class _OwnedToolsScreenState extends State<OwnedToolsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('마이페이지'),
+        title: const Text('보유 도구'),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () => Navigator.pop(context),
@@ -49,40 +47,99 @@ class _OwnedToolsScreenState extends State<OwnedToolsScreen> {
         child: _isLoading
             ? const Center(child: CircularProgressIndicator())
             : Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
+                    Text(
                       '보유 도구',
-                      style: TextStyle(
+                      style: AppTypography.sb24.copyWith(
                         color: AppColors.textPrimary,
                         fontSize: 22,
-                        fontWeight: FontWeight.w700,
                       ),
                     ),
                     const SizedBox(height: 24),
-                    Wrap(
-                      spacing: 16,
-                      runSpacing: 16,
-                      children: [
-                        ..._ownedTools.map((tool) => ToolCard(
-                              name: tool.shapeName,
-                              icon: tool.category == ToolCategory.foamRoller
-                                  ? Icons.sports_gymnastics
-                                  : Icons.circle,
-                            )),
-                        ToolCard(
-                          name: '',
-                          isAdd: true,
-                          onTap: () {
-                            Navigator.pop(context);
-                            // 돌아가서 추가 다이얼로그를 열게 함
-                          },
+                    if (_ownedTools.isEmpty)
+                      Center(
+                        child: Text(
+                          '등록된 도구가 없습니다',
+                          style: AppTypography.r14.copyWith(color: AppColors.textTertiary),
                         ),
-                      ],
-                    ),
+                      )
+                    else
+                      Wrap(
+                        spacing: 16,
+                        runSpacing: 16,
+                        children: [
+                          ..._ownedTools.map((tool) => Column(
+                            children: [
+                              Container(
+                                width: 90,
+                                height: 90,
+                                decoration: BoxDecoration(
+                                  color: AppColors.cardBackground,
+                                  borderRadius: BorderRadius.circular(12),
+                                  border: Border.all(color: AppColors.border),
+                                ),
+                                padding: const EdgeInsets.all(8),
+                                child: Image.asset(
+                                  tool.imagePath,
+                                  fit: BoxFit.contain,
+                                  errorBuilder: (_, __, ___) => Icon(
+                                    tool.category == tool_assets.ToolCategory.foamRoller
+                                        ? Icons.sports_gymnastics
+                                        : Icons.circle,
+                                    color: AppColors.textSecondary,
+                                    size: 32,
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(height: 6),
+                              Text(
+                                tool.shape.label,
+                                style: AppTypography.r12.copyWith(
+                                  color: AppColors.textSecondary,
+                                ),
+                              ),
+                            ],
+                          )),
+                          // 도구 추가 버튼
+                          GestureDetector(
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (_) => const AddToolScreen()),
+                              ).then((_) => _loadTools());
+                            },
+                            child: Column(
+                              children: [
+                                Container(
+                                  width: 90,
+                                  height: 90,
+                                  decoration: BoxDecoration(
+                                    color: AppColors.cardBackground,
+                                    borderRadius: BorderRadius.circular(12),
+                                    border: Border.all(color: AppColors.border),
+                                  ),
+                                  child: const Icon(
+                                    Icons.add_circle_outline,
+                                    color: AppColors.textTertiary,
+                                    size: 32,
+                                  ),
+                                ),
+                                const SizedBox(height: 6),
+                                Text(
+                                  '추가',
+                                  style: AppTypography.r12.copyWith(
+                                    color: AppColors.textTertiary,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
                   ],
                 ),
               ),

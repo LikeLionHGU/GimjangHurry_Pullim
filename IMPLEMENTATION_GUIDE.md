@@ -1,15 +1,27 @@
-# 풀림 - 근막 이완 코스 앱 구현 가이드
+# 풀림(PULLIM) - 근막 이완 코스 앱 구현 가이드
 
-## 내가 담당한 기능
+---
 
-| 기능 | 상태 | 설명 |
-|------|------|------|
-| 홈페이지 | 완료 | 서비스 소개, 이용 흐름, 주의사항 |
-| 라이브러리 | 완료 | 저장된 코스 목록, 이력 전체 보기 |
-| 마이페이지 | 완료 | 통계, 보유 도구, 최근 기록, 도구 추가 |
-| 자세 측정 | 완료 | Google ML Kit Pose Detection 연동 |
-| 로컬 DB | 완료 | sqflite 기반 전체 테이블 |
-| Google 로그인 | 완료 | Firebase Auth + Google Sign-In |
+## 앱 개요
+
+근막 이완 도구(폼롤러/마사지볼)를 활용한 셀프케어 루틴 앱.
+사용자의 보유 도구와 자세 분석 데이터를 기반으로 맞춤 이완 코스를 생성하고 실행합니다.
+
+---
+
+## 전체 앱 흐름
+
+```
+앱 시작
+  → Firebase 초기화 + .env 로드 + 온보딩 상태 확인
+  → 로그인 안됨 → Google 로그인 화면
+  → 로그인 됨 + 온보딩 미완료 → 온보딩 흐름
+      → 서비스 소개 (OnboardingScreen)
+      → 도구 등록 (ToolRegistrationScreen)
+      → 자세 측정 (PostureGuideScreen → PostureScreen → PostureResultScreen)
+      → 홈 화면 (MainShell)
+  → 로그인 됨 + 온보딩 완료 → 홈 화면 (MainShell)
+```
 
 ---
 
@@ -17,164 +29,225 @@
 
 ```
 lib/
-├── main.dart                          # 앱 진입점 (Firebase 초기화, Provider 설정)
+├── main.dart                              # 앱 진입점 (Firebase, .env, 온보딩 상태 체크)
 │
-├── constants/                         # 상수 정의
-│   ├── app_colors.dart                # 색상 (검정 배경 + 연두 액센트)
-│   ├── app_theme.dart                 # 다크 테마 설정
-│   └── app_strings.dart               # 한글 문자열 상수
+├── assets/                                # 에셋 데이터 정의 (팀원B 담당)
+│   ├── body_assets.dart                   # 신체 부위 에셋 (부위 이름, 좌표, 전면/후면)
+│   ├── move_assets.dart                   # 동작 에셋 (이완 동작 정보)
+│   └── tool_assets.dart                   # 도구 에셋 (인덱스 1~12, 카테고리/형태/이미지 경로)
 │
-├── models/                            # 데이터 모델 (ERD 기반)
-│   ├── user_model.dart                # 사용자
-│   ├── tool_model.dart                # 도구 (폼롤러/마사지볼) + OwnedTool
-│   ├── course_model.dart              # 코스
-│   ├── step_model.dart                # 코스 스텝
-│   ├── move_model.dart                # 동작 (에셋)
-│   ├── body_model.dart                # 신체 부위 (전면/후면 좌표 포함)
-│   └── posture_result_model.dart      # 자세 측정 결과
+├── constants/                             # 상수 정의
+│   ├── app_colors.dart                    # 색상 팔레트 (검정 배경 + 연두 액센트 #CDFF00)
+│   ├── app_strings.dart                   # 한글 문자열 상수
+│   └── app_theme.dart                     # 다크 테마 설정 (ThemeData)
 │
-├── services/                          # 비즈니스 로직
-│   ├── database_helper.dart           # 로컬 DB (sqflite) 전체 CRUD
-│   ├── auth_service.dart              # Google 로그인 처리
-│   └── pose_analyzer.dart             # ML Kit 포즈 분석 (각도 계산, 문제 감지)
+├── course_generator/                      # AI 코스 생성 모듈 (팀원B 담당)
+│   ├── course_generator.dart              # 코스 생성 메인 로직
+│   ├── course_generator_library.dart      # 라이브러리 export
+│   ├── env_loader.dart                    # .env 파일 로더 (API 키)
+│   ├── move_filter.dart                   # 동작 필터링
+│   ├── openai_client.dart                 # OpenAI API 클라이언트
+│   ├── prompt_builder.dart                # 프롬프트 빌더
+│   ├── response_parser.dart               # AI 응답 파서
+│   └── models/                            # 코스 생성용 모델
+│       ├── course.dart
+│       ├── course_request.dart
+│       ├── course_step.dart
+│       ├── fatigue_entry.dart
+│       └── models.dart
 │
-├── providers/                         # 상태 관리
-│   └── app_provider.dart              # 로그인 상태, 네비게이션 인덱스
+├── models/                                # 데이터 모델 (ERD 기반)
+│   ├── user_model.dart                    # 사용자 (user_id, name, email, created_at)
+│   ├── tool_model.dart                    # 도구 + OwnedTool (DB용, 카테고리/형태 enum)
+│   ├── course_model.dart                  # 코스 (name, total_time, status, progress)
+│   ├── step_model.dart                    # 코스 스텝 (order, before/after 피로도, time)
+│   ├── move_model.dart                    # 동작 (body, tool, name, description)
+│   ├── body_model.dart                    # 신체 부위 (전면/후면 좌표 포함)
+│   └── posture_result_model.dart          # 자세 측정 결과 (angles, issues, score)
 │
-├── widgets/                           # 공통 위젯
-│   └── common_widgets.dart            # SectionCard, CourseItemCard, ToolCard, StatCard 등
+├── providers/                             # 상태 관리
+│   └── app_provider.dart                  # 로그인 상태, 네비게이션 인덱스, 사용자 정보
 │
-└── screens/                           # 화면
-    ├── main_shell.dart                # BottomNavigationBar (홈/라이브러리/마이페이지)
-    ├── auth/
-    │   └── login_screen.dart          # 구글 로그인 화면
-    ├── home/
-    │   ├── home_screen.dart           # 홈 화면 (이용 흐름, 주의사항, 면책)
-    │   ├── service_intro_screen.dart  # 서비스 소개 상세 + 주의사항 상세
-    │   └── caution_screen.dart        # (export 파일)
-    ├── library/
-    │   ├── library_screen.dart        # 저장된 코스 목록
-    │   └── library_all_screen.dart    # 이력 전체 보기
-    ├── mypage/
-    │   ├── mypage_screen.dart         # 마이페이지 (통계, 도구, 기록, 도구추가 바텀시트)
-    │   └── owned_tools_screen.dart    # 보유 도구 전체 보기
-    └── posture/
-        ├── posture_screen.dart        # 카메라 + ML Kit 자세 측정
-        └── posture_result_screen.dart # 측정 결과 화면
+├── screens/                               # 화면
+│   ├── main_shell.dart                    # BottomNavigationBar (홈/라이브러리/마이페이지)
+│   ├── onboarding_screen.dart             # 온보딩: 서비스 소개 + 이용 흐름 + 주의사항
+│   ├── tool_registration_screen.dart      # 온보딩: 도구 등록 + 온보딩 자세측정 래퍼
+│   ├── body_selection_screen.dart         # 코스 생성: 부위 선택 (팀원B 담당)
+│   │
+│   ├── auth/
+│   │   └── login_screen.dart              # Google 로그인 화면
+│   │
+│   ├── home/
+│   │   ├── home_screen.dart               # 홈: PULLIM 로고 + 주간 캘린더 + 연속운동
+│   │   │                                  #      + 최근 운동 + 코스생성/점검기반 카드
+│   │   ├── service_intro_screen.dart      # 서비스 소개 상세
+│   │   └── caution_screen.dart            # 주의사항/면책 상세
+│   │
+│   ├── library/
+│   │   ├── library_screen.dart            # 라이브러리: 저장된 코스 목록 + 시작하기
+│   │   └── library_all_screen.dart        # 이력 전체 보기
+│   │
+│   ├── mypage/
+│   │   ├── mypage_screen.dart             # 마이페이지: 통계 + 보유 도구(이미지) + 최근 기록
+│   │   └── owned_tools_screen.dart        # 보유 도구 전체 보기
+│   │
+│   └── posture/
+│       ├── posture_guide_screen.dart      # 촬영 가이드 ("내 몸을 먼저 확인할게요")
+│       ├── posture_screen.dart            # 카메라 촬영 (정면→측면, 자동촬영, TTS 음성안내)
+│       └── posture_result_screen.dart     # 결과: 사진+스켈레톤, 정면/측면 탭, 점수, 항목별 분석
+│
+├── services/                              # 비즈니스 로직 / 데이터 레이어
+│   ├── auth_service.dart                  # Google Sign-In + Firebase Auth
+│   ├── database_helper.dart               # SQLite DB (sqflite) - 전체 CRUD
+│   ├── pose_analyzer.dart                 # ML Kit 포즈 분석 (각도 계산, 문제 감지, 점수)
+│   └── tool_registration_service.dart     # 도구 등록 (SharedPreferences + SQLite 이중 저장)
+│
+└── widgets/                               # 공통 위젯
+    └── common_widgets.dart                # SectionCard, NumberBadge, CourseItemCard,
+                                           # ToolCard, StatCard
 ```
 
 ---
 
-## 앱 흐름
+## 담당 분배
 
-```
-앱 시작
-  → 스플래시 (로딩)
-  → 로그인 안됨? → LoginScreen (구글 로그인)
-  → 로그인 됨? → MainShell
-                    ├── 홈 탭: 서비스 소개, 이용 흐름, 주의사항
-                    ├── 라이브러리 탭: 저장된 코스 목록, 시작하기
-                    └── 마이페이지 탭: 통계, 보유 도구, 자세 점검하기
-                                          └── PostureScreen (카메라 + ML Kit)
-                                              └── PostureResultScreen (결과)
-```
+| 담당자 | 기능 |
+|--------|------|
+| 나 | 홈페이지, 라이브러리, 마이페이지, 자세 측정, 로컬 DB, Google 로그인, 온보딩 통합 |
+| 팀원B | 도구 등록 UI, 코스 생성(AI), 부위 선택, 코스 실행, 에셋 데이터 |
 
 ---
 
-## 로컬 DB 테이블 구성
+## 로컬 DB 구조 (SQLite)
+
+### 테이블
 
 | 테이블 | 용도 |
 |--------|------|
-| users | 사용자 정보 (user_id, name, email, created_at) |
-| tools | 사전 정의 도구 11종 (폼롤러 6 + 마사지볼 5) |
-| owned_tools | 사용자가 보유한 도구 (user_id ↔ tool_id) |
-| courses | 생성/실행된 코스 |
-| steps | 코스 내 각 단계 (도구, 동작, 시간, 피로도 전/후) |
-| moves | 동작 에셋 10종 (이완 방법 설명 포함) |
-| posture_results | 자세 측정 결과 (각도, 문제부위, 요약) |
+| `users` | 사용자 (user_id, name, email, created_at) |
+| `tools` | 사전 정의 도구 11종 - 앱 최초 실행 시 자동 삽입 |
+| `owned_tools` | 사용자 보유 도구 (user_id ↔ tool_id) |
+| `courses` | 생성/실행된 코스 (name, total_time, status, progress) |
+| `steps` | 코스 내 각 단계 (move_id, tool_id, order, before/after 피로도) |
+| `moves` | 동작 에셋 10종 - 앱 최초 실행 시 자동 삽입 |
+| `posture_results` | 자세 측정 결과 (angles, issues, summary, score) |
 
-앱 최초 실행 시 `tools` 테이블에 11종, `moves` 테이블에 10종 기본 데이터가 자동 삽입됩니다.
+### 데이터 흐름
 
----
-
-## 자세 측정 동작 방식
-
-1. 카메라 권한 요청 → 전면 카메라 열기
-2. "자세 측정 시작" 버튼 누르면 카메라 스트림 시작
-3. ML Kit PoseDetector가 각 프레임에서 포즈 감지
-4. PoseAnalyzer가 관절 각도 계산 (어깨, 팔꿈치, 고관절, 무릎, 기울기)
-5. 10프레임 누적 후 평균 각도 산출
-6. 각도 기준으로 문제 부위 감지 (어깨 비대칭, 무릎 구부러짐 등)
-7. 결과를 DB에 저장하고 결과 화면으로 이동
-
----
-
-## 다른 팀원이 연결할 부분 (TODO)
-
-코드에 `// TODO` 주석으로 표시해놓음:
-
-| 위치 | 연결할 기능 |
-|------|-------------|
-| `service_intro_screen.dart` "도구 등록하고 시작하기" 버튼 | 온보딩 → 도구 등록 화면 |
-| `library_screen.dart` "시작하기" 버튼 | 코스 실행 화면 |
-| `library_all_screen.dart` 코스 아이템 onTap | 코스 재실행 또는 상세 |
-| `posture_result_screen.dart` "맞춤 코스 생성하기" 버튼 | 자세 기반 코스 생성 |
-
----
-
-## 빌드 전 필요한 설정
-
-### 1. Windows Developer Mode 활성화
 ```
-설정 → 개발자 설정 → 개발자 모드 ON
-```
-
-### 2. Firebase 설정
-- Firebase Console에서 프로젝트 생성
-- Android: `android/app/google-services.json` 추가
-- iOS: `ios/Runner/GoogleService-Info.plist` 추가
-- `flutterfire configure` 실행하거나 수동 설정
-
-### 3. Android 카메라 권한
-`android/app/src/main/AndroidManifest.xml`에 추가:
-```xml
-<uses-permission android:name="android.permission.CAMERA"/>
-<uses-permission android:name="android.permission.INTERNET"/>
-```
-
-### 4. Android minSdkVersion
-`android/app/build.gradle.kts`에서:
-```kotlin
-minSdk = 23  // ML Kit 최소 요구사항
-```
-
-### 5. 패키지 설치
-```bash
-flutter pub get
+온보딩 도구 등록 → SharedPreferences (인덱스) + SQLite owned_tools
+자세 측정 완료 → SQLite posture_results (score, angles, issues 저장)
+코스 실행 완료 → SQLite courses + steps (피로도 전/후 기록)
+마이페이지 → SQLite에서 통계 쿼리 (총 실행, 완료율, 평균 피로도 감소)
+홈 화면 → SQLite에서 최근 코스 조회
+라이브러리 → SQLite에서 저장/완료된 코스 조회
+보유 도구 → SharedPreferences에서 인덱스 → tool_assets로 이미지/이름 매핑
 ```
 
 ---
 
-## 사용된 주요 패키지
+## 자세 측정 기능 상세
+
+### 흐름
+```
+촬영 가이드 화면 (posture_guide_screen.dart)
+  → "촬영 시작하기" 버튼
+카메라 촬영 화면 (posture_screen.dart)
+  → 정면 촬영 (자동: 프레임 감지 → 안정 → 3초 카운트다운 → 촬영)
+  → 4초 전환 대기 + 음성 안내 ("옆으로 돌아서 주세요")
+  → 측면 촬영 (동일 로직)
+  → DB 저장 → 결과 화면 이동
+결과 화면 (posture_result_screen.dart)
+  → 사진 + 스켈레톤 오버레이
+  → 정면/측면 탭 전환
+  → 전체 자세 점수 (100점 만점)
+  → 항목별 분석 카드 (수치 + 정상/주의 뱃지 + 설명)
+  → "코스 시작하기" 버튼
+```
+
+### 핵심 기술
+- **Google ML Kit Pose Detection**: 실시간 포즈 감지 (스트림 모드)
+- **자동 촬영**: 전신 감지 + 프레임 안에 위치 + 15프레임 안정 → 3초 카운트다운
+- **TTS 음성 안내** (`flutter_tts`): 위치 가이드, 촬영 카운트다운, 단계 전환 음성
+- **분석 항목**:
+  - 정면: 어깨 높이 차이, 골반 기울기, 몸통 기울기, 머리 기울기, 머리 좌우 편위, 좌/우 무릎 정렬
+  - 측면: 거북목 각도, 머리 전방 이동량, 어깨 전방활주, 몸통 전후 기울기
+
+### 주요 플래그 (중복 촬영 방지)
+- `_frontCaptured`: 정면 촬영 완료 플래그
+- `_sideCaptured`: 측면 촬영 완료 플래그
+- `_waitingForPhaseTransition`: 정면→측면 전환 대기 중 (4초)
+- `_countingDown`: 카운트다운 진행 중
+- `_isCapturing`: 사진 촬영 처리 중
+
+---
+
+## 홈 화면
+
+- **PULLIM** 로고
+- **주간 캘린더**: `DateTime.now()` 기반, 일요일 시작, 오늘 연두색 강조
+- **연속 운동 N일차**: 총 실행 횟수 기반
+- **최근 운동**: DB에서 최근 완료 코스 1건
+- **코스 생성하기** (연두 카드): → 부위 선택 화면 (팀원B)
+- **점검 기반 코스** (다크 카드): → 자세 측정 가이드 화면
+
+---
+
+## 라이브러리
+
+- **저장된 코스 목록**: `courses` 테이블에서 `save = 1` 조회
+- **코스 선택 시**: 테두리 강조 + "시작하기" 버튼 표시
+- **이력 전체 보기**: 모든 완료 코스 스크롤 목록
+
+---
+
+## 마이페이지
+
+- **사용자 이름** (Provider에서 가져옴)
+- **자세 점검하기** 버튼 → 촬영 가이드 화면
+- **통계 3종** (DB 쿼리):
+  - 총 실행 횟수: `SELECT COUNT(*) FROM courses WHERE status = 'completed'`
+  - 완료율: 완료 / 전체 코스 비율
+  - 평균 피로도 감소: `AVG(before_fatigue - after_fatigue)`
+- **보유 도구**: SharedPreferences 인덱스 → tool_assets 이미지 표시
+- **최근 기록**: DB에서 최근 3건
+
+---
+
+## 사용된 패키지
 
 | 패키지 | 용도 |
 |--------|------|
-| firebase_core / firebase_auth | Firebase 초기화, 인증 |
-| google_sign_in | 구글 로그인 |
-| google_mlkit_pose_detection | 자세 측정 (포즈 감지) |
-| camera | 카메라 프리뷰 + 이미지 스트림 |
-| sqflite | 로컬 SQLite DB |
-| provider | 상태 관리 |
-| shared_preferences | 로그인 상태 유지 |
-| permission_handler | 카메라 권한 요청 |
-| intl | 날짜/시간 포맷 |
+| `firebase_core` / `firebase_auth` | Firebase 초기화, 인증 |
+| `google_sign_in` | Google 로그인 |
+| `google_mlkit_pose_detection` | 자세 측정 (포즈 감지) |
+| `camera` | 카메라 프리뷰 + 이미지 스트림 + 사진 촬영 |
+| `sqflite` + `path` | 로컬 SQLite DB |
+| `provider` | 상태 관리 |
+| `shared_preferences` | 로그인 유지, 온보딩 상태, 보유 도구 인덱스 |
+| `permission_handler` | 카메라 권한 요청 |
+| `flutter_tts` | 자세 측정 음성 안내 |
+| `intl` | 날짜 포맷 |
+| `http` | OpenAI API 호출 (팀원B) |
+| `flutter_dotenv` | .env 환경변수 로드 (팀원B) |
 
 ---
 
-## 디자인 특징
+## 디자인 스펙
 
-- **다크 테마** 전체 적용 (배경: #000000)
-- **액센트 색상**: 연두/라임 (#CDFF00) - GUI 디자인 그대로
+- **배경**: #000000 (순수 검정)
 - **카드 배경**: #1E1E1E
-- **BottomNavigationBar**: 홈 / 라이브러리 / 마이페이지 3탭
-- GUI에서 보이는 둥근 카드, 번호 뱃지, 도구 그리드 등 공통 위젯으로 구현
+- **Surface**: #1A1A1A
+- **액센트**: #CDFF00 (연두/라임)
+- **텍스트**: 흰색 → #B0B0B0 (보조) → #808080 (3차)
+- **BottomNavigationBar**: 3탭 (홈 / 라이브러리 / 마이페이지)
+- **버튼**: 연두 배경 + 검정 텍스트, 높이 56px, radius 12
+
+---
+
+## 빌드 참고
+
+- `minSdk = 23` (ML Kit 요구사항)
+- `AndroidManifest.xml`: CAMERA + INTERNET 권한 설정됨
+- `google-services.json`: Firebase Console에서 다운 → `android/app/`에 위치해야 함
+- 에뮬레이터 시간대: 한국(서울)으로 설정해야 날짜 정확
