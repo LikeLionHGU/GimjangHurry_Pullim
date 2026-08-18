@@ -26,27 +26,24 @@ class MainShell extends StatelessWidget {
         index: currentIndex,
         children: screens,
       ),
-      bottomNavigationBar: SizedBox(
-        height: 80,
-        child: BottomNavigationBar(
-          backgroundColor: const Color(0xFF141315),
-          currentIndex: currentIndex,
-          onTap: (index) => provider.setNavIndex(index),
-          items: const [
-            BottomNavigationBarItem(
-              icon: Icon(Icons.home_filled),
-              label: AppStrings.navHome,
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.library_books),
-              label: AppStrings.navLibrary,
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.person),
-              label: AppStrings.navMypage,
-            ),
-          ],
-        ),
+      bottomNavigationBar: BottomNavigationBar(
+        backgroundColor: const Color(0xFF141315),
+        currentIndex: currentIndex,
+        onTap: (index) => provider.setNavIndex(index),
+        items: const [
+          BottomNavigationBarItem(
+            icon: Icon(Icons.home_filled),
+            label: AppStrings.navHome,
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.library_books),
+            label: AppStrings.navLibrary,
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.person),
+            label: AppStrings.navMypage,
+          ),
+        ],
       ),
     );
   }

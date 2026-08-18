@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:sqflite/sqflite.dart';
 import '../../constants/app_colors.dart';
 import '../../constants/app_strings.dart';
 import '../../constants/app_typography.dart';
@@ -28,6 +29,8 @@ class _MypageScreenState extends State<MypageScreen> {
   final ToolRegistrationService _toolService = ToolRegistrationService();
 
   int _totalExec = 0;
+  int _allCourseCount = 0;
+  int _completedCount = 0;
   int _savedCoursesCount = 0;
   double _avgFatigueReduction = 0;
   List<tool_assets.Tool> _ownedTools = [];
@@ -48,11 +51,20 @@ class _MypageScreenState extends State<MypageScreen> {
     final recentExecutions = await _db.getRecentExecutions(limit: 3);
     final savedCourses = await _db.getSavedCourses();
 
+    // 완료율 계산용: 전체 코스 수 + 완료 코스 수
+    final db = await _db.database;
+    final allCount = Sqflite.firstIntValue(
+        await db.rawQuery('SELECT COUNT(*) as cnt FROM courses')) ?? 0;
+    final doneCount = Sqflite.firstIntValue(
+        await db.rawQuery("SELECT COUNT(*) as cnt FROM courses WHERE status = 'completed'")) ?? 0;
+
     final toolIndexes = await _toolService.getRegisteredTools();
     final ownedTools = tool_assets.toolsOf(toolIndexes);
 
     setState(() {
       _totalExec = totalExec;
+      _allCourseCount = allCount;
+      _completedCount = doneCount;
       _savedCoursesCount = savedCourses.length;
       _avgFatigueReduction = avgReduction;
       _ownedTools = ownedTools;
@@ -62,10 +74,12 @@ class _MypageScreenState extends State<MypageScreen> {
   }
 
   /// 완료율 계산
+  /// 완료율: 각 코스의 progress 평균
+  /// completed 코스 = 100%, pending 코스 = 0%
   int get _completionRate {
-    if (_totalExec == 0) return 0;
-    // 완료된 코스 수 / 총 실행 수 * 100 (일단 100%로 간주)
-    return 83; // placeholder - 실제 구현에서는 DB 쿼리 필요
+    if (_allCourseCount == 0) return 0;
+    // completed 코스는 100%, 나머지는 0%
+    return (_completedCount * 100 / _allCourseCount).round();
   }
 
   @override

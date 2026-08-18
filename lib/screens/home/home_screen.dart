@@ -183,40 +183,50 @@ class _HomeScreenState extends State<HomeScreen> {
     return Scaffold(
       backgroundColor: AppColors.background,
       body: SafeArea(
-        child: Padding(
+        child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 28),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // PULLIM 로고 타이틀
-              Text(
-                'PULLIM',
-                style: AppTypography.b20.copyWith(
-                  color: AppColors.textPrimary,
-                  fontWeight: FontWeight.w800,
-                  letterSpacing: 2,
-                  fontSize: 22,
-                ),
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+              minHeight: MediaQuery.of(context).size.height -
+                  MediaQuery.of(context).padding.top -
+                  MediaQuery.of(context).padding.bottom -
+                  kBottomNavigationBarHeight - 56,
+            ),
+            child: IntrinsicHeight(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // PULLIM 로고 타이틀
+                  Text(
+                    'PULLIM',
+                    style: AppTypography.b20.copyWith(
+                      color: AppColors.textPrimary,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: 2,
+                      fontSize: 22,
+                    ),
+                  ),
+                  const SizedBox(height: 32),
+
+                  // 주간 캘린더
+                  _buildWeekCalendar(),
+                  const SizedBox(height: 24),
+
+                  // 연속 운동 카드
+                  _buildStreakCard(),
+                  const SizedBox(height: 36),
+
+                  // 최근 운동 섹션 (1개만)
+                  _buildRecentSectionFixed(_recentExecutions.take(1).toList()),
+
+                  const SizedBox(height: 24),
+
+                  // 액션 카드 (코스 생성 + 점검 기반 코스)
+                  _buildActionCards(),
+                  const SizedBox(height: 8),
+                ],
               ),
-              const SizedBox(height: 32),
-
-              // 주간 캘린더
-              _buildWeekCalendar(),
-              const SizedBox(height: 24),
-
-              // 연속 운동 카드
-              _buildStreakCard(),
-              const SizedBox(height: 36),
-
-              // 최근 운동 섹션 (1개만)
-              _buildRecentSectionFixed(_recentExecutions.take(1).toList()),
-
-              const Spacer(),
-
-              // 액션 카드 (코스 생성 + 점검 기반 코스)
-              _buildActionCards(),
-              const SizedBox(height: 8),
-            ],
+            ),
           ),
         ),
       ),
