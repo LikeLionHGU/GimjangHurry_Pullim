@@ -149,7 +149,7 @@ const Map<int, Move> kMoves = <int, Move>{
     name: '상부승모근 후크 홀드',
     posture: Posture.seatedChair,
     body: [25],
-    tool: [10, 12, 7],
+    tool: [10, 7],
     description: '앉거나 서서 목을 압박 반대쪽으로 기울여 근육을 늘린다.\n'
         '도구를 어깨 위에 걸치고 반대손으로 아래로 당긴다.\n'
         '가장 아픈 지점에서 30초 머문 뒤 5~8cm 범위로 짧게 움직인다.\n'
@@ -173,7 +173,7 @@ const Map<int, Move> kMoves = <int, Move>{
     name: '상부승모근 시티드 롤링',
     posture: Posture.seatedChair,
     body: [25],
-    tool: [12, 10],
+    tool: [10],
     description: '의자에 앉아 등을 세우고 어깨를 내린다.\n'
         '반대손으로 도구를 잡아 목 옆에서 어깨 끝 방향으로 얹는다.\n'
         '목을 반대쪽으로 살짝 기울이고 한 방향으로만 길게 쓸어낸다.\n'
@@ -199,7 +199,7 @@ const Map<int, Move> kMoves = <int, Move>{
     name: '중간삼각근 측와위 롤링',
     posture: Posture.sideLying,
     body: [2],
-    tool: [5, 12, 9, 10, 1],
+    tool: [5, 9, 10, 1],
     description: '옆으로 누워 압박측 팔을 머리 위로 뻗고 힘을 뺀다.\n'
         '어깨 맨 위 뼈에서 2~3cm 아래부터 도구를 어깨 바깥면에 놓는다.\n'
         '어깨 바깥에서 팔 중간까지 길게 위아래로 굴린다.\n'
@@ -465,7 +465,7 @@ const Map<int, Move> kMoves = <int, Move>{
     name: '이두근 책상 압박',
     posture: Posture.seatedChair,
     body: [8],
-    tool: [5, 12, 9, 10, 1, 2],
+    tool: [5, 9, 10, 1, 2],
     description: '의자에 앉아 팔을 책상 위 도구에 올린다.\n'
         '팔꿈치를 살짝 굽혀 근육의 힘을 뺀다.\n'
         '상체를 앞으로 기울여 팔 무게와 상체 무게로 압력을 만든다.\n'
@@ -478,7 +478,7 @@ const Map<int, Move> kMoves = <int, Move>{
     name: '삼두근 만세 측와위 롤링',
     posture: Posture.sideLying,
     body: [33],
-    tool: [5, 12, 7, 9, 1, 2],
+    tool: [5, 7, 9, 1, 2],
     description: '옆으로 누워 압박측 팔을 머리 위로 뻗는다.\n'
         '팔 뒤쪽 아래에 도구를 놓고 반대손으로 바닥을 짚어 체중을 조절한다.\n'
         '겨드랑이 뒤에서 팔꿈치 방향으로 굴린다.\n'
@@ -490,7 +490,7 @@ const Map<int, Move> kMoves = <int, Move>{
     name: '상완근 외측 압박',
     posture: Posture.seatedChair,
     body: [9],
-    tool: [7, 9, 5, 12],
+    tool: [7, 9, 5],
     description: '앉아서 팔을 책상 위 도구에 올린다.\n'
         '팔꿈치를 살짝 굽히고 손등이 위로 오게 돌린다.\n'
         '팔꿈치 주름에서 위로 3~7cm, 이두근 바깥 경계 바로 옆에 도구를 둔다.\n'
@@ -502,7 +502,7 @@ const Map<int, Move> kMoves = <int, Move>{
     name: '위팔 양방향 롤링',
     posture: Posture.seatedChair,
     body: [8, 33],
-    tool: [12, 5],
+    tool: [5],
     description: '의자에 앉아 팔을 몸 앞에 두고 팔꿈치를 살짝 굽힌다.\n'
         '반대손으로 도구를 잡고 위팔 앞면부터 감싸듯 얹는다.\n'
         '앞면을 8~10회 왕복한 뒤 뒷면으로 옮겨 같은 횟수를 반복한다.\n'
@@ -516,7 +516,7 @@ const Map<int, Move> kMoves = <int, Move>{
     name: '전완굴근 롤링',
     posture: Posture.seatedChair,
     body: [10],
-    tool: [12, 8, 9, 5],
+    tool: [8, 9, 5],
     description: '앉아서 팔꿈치를 책상에 두고 손바닥이 위로 오게 한다.\n'
         '반대손으로 도구를 잡고 팔뚝 안쪽을 누른다.\n'
         '손목 힘을 완전히 빼고 팔꿈치에서 손목 방향으로 굴린다.\n'
@@ -528,7 +528,7 @@ const Map<int, Move> kMoves = <int, Move>{
     name: '전완신근 롤링',
     posture: Posture.seatedChair,
     body: [34],
-    tool: [12, 9, 8, 7],
+    tool: [9, 8, 7],
     description: '앉아서 팔을 책상에 두고 손등이 위로 오게 한다.\n'
         '반대손으로 도구를 잡고 팔뚝 바깥면을 누른다.\n'
         '팔꿈치 바깥 뼈에서 손목 방향 2~6cm가 핵심 구역이다.\n'
@@ -540,7 +540,7 @@ const Map<int, Move> kMoves = <int, Move>{
     name: '전완 책상 원형 압박',
     posture: Posture.seatedChair,
     body: [10, 34],
-    tool: [8, 9, 10, 12],
+    tool: [8, 9, 10],
     description: '책상 위에 도구를 놓는다.\n'
         '전완 또는 손바닥을 얹고 상체 무게를 살짝 싣는다.\n'
         '어깨를 내리고 팔에 힘을 뺀 채 원을 그리듯 움직인다.\n'
@@ -642,7 +642,7 @@ const Map<int, Move> kMoves = <int, Move>{
     name: '대퇴사두근 프론 롤링',
     posture: Posture.prone,
     body: [14],
-    tool: [2, 1, 3, 12, 7],
+    tool: [2, 1, 3, 7],
     description: '엎드려 팔꿈치로 상체를 받친다.\n'
         '허벅지 앞에 도구를 가로로 놓는다.\n'
         '반대쪽 다리를 옆으로 굽혀 바닥에 두면 압력이 줄어든다.\n'
@@ -654,7 +654,7 @@ const Map<int, Move> kMoves = <int, Move>{
     name: '대퇴직근 시티드 롤링',
     posture: Posture.seatedChair,
     body: [15],
-    tool: [12, 5, 9],
+    tool: [5, 9],
     description: '의자 끝에 앉아 압박측 다리를 앞으로 뻗고 뒤꿈치를 바닥에 댄다.\n'
         '무릎을 살짝 굽혀 근육의 힘을 뺀다.\n'
         '양손으로 도구를 잡고 허벅지 앞면에 얹는다.\n'
@@ -678,7 +678,7 @@ const Map<int, Move> kMoves = <int, Move>{
     name: '내측광근 개구리 롤링',
     posture: Posture.prone,
     body: [16],
-    tool: [5, 12, 2, 9, 10],
+    tool: [5, 2, 9, 10],
     description: '엎드려 압박측 다리를 옆으로 90° 벌린다.\n'
         '허벅지 안쪽 아래에 도구를 놓는다.\n'
         '목표는 무릎뼈 안쪽 위 5~10cm 구간이다.\n'
@@ -692,7 +692,7 @@ const Map<int, Move> kMoves = <int, Move>{
     name: '햄스트링 바닥 롤링',
     posture: Posture.seatedFloor,
     body: [39],
-    tool: [2, 1, 3, 12, 7],
+    tool: [2, 1, 3, 7],
     description: '바닥에 앉아 도구 위에 허벅지 뒤를 얹고 손으로 바닥을 짚어 엉덩이를 든다.\n'
         '반대쪽 다리를 바닥에 내리면 압력이 약해지고 두 다리를 겹치면 강해진다.\n'
         '앉는 뼈 아래에서 무릎 위 5cm까지 굴린다.\n'
@@ -716,7 +716,7 @@ const Map<int, Move> kMoves = <int, Move>{
     name: '햄스트링 의자 롤링',
     posture: Posture.seatedChair,
     body: [39],
-    tool: [12, 5],
+    tool: [5],
     description: '의자에 앉아 압박측 발을 앞쪽 바닥이나 낮은 발판에 둔다.\n'
         '무릎을 약 120°로 굽혀 근육의 힘을 뺀다.\n'
         '양손으로 도구를 잡고 허벅지 뒤에 감듯이 얹는다.\n'
@@ -754,7 +754,7 @@ const Map<int, Move> kMoves = <int, Move>{
     name: '내전근 시티드 롤링',
     posture: Posture.seatedChair,
     body: [18],
-    tool: [12, 5],
+    tool: [5],
     description: '의자에 앉아 압박측 다리를 바깥으로 벌리고 무릎을 굽힌다.\n'
         '발바닥은 바닥에 붙이고 무릎을 옆으로 열어둔다.\n'
         '도구를 허벅지 안쪽 면에 얹고 양손으로 잡는다.\n'
@@ -768,7 +768,7 @@ const Map<int, Move> kMoves = <int, Move>{
     name: '외측광근 30° 측와위 롤링',
     posture: Posture.sideLying,
     body: [17],
-    tool: [2, 1, 12, 7, 9],
+    tool: [2, 1, 7, 9],
     description: '옆으로 눕되 몸을 앞으로 30° 기울인다.\n'
         '완전히 옆으로 누우면 인대와 뼈만 눌려 통증만 커진다.\n'
         '위쪽 다리를 앞 바닥에 짚어 체중을 조절한다.\n'
@@ -792,7 +792,7 @@ const Map<int, Move> kMoves = <int, Move>{
     name: '원위 외측광근 국소 압박',
     posture: Posture.sideLying,
     body: [17],
-    tool: [5, 9, 10, 12],
+    tool: [5, 9, 10],
     description: '옆으로 누워 몸을 앞으로 30° 기울인다.\n'
         '무릎뼈 바깥 위 5~10cm 구간에만 도구를 놓는다.\n'
         '반대쪽 다리를 앞에 짚어 압력을 조절한다.\n'
@@ -806,7 +806,7 @@ const Map<int, Move> kMoves = <int, Move>{
     name: '비복근 의자 롤링',
     posture: Posture.seatedChair,
     body: [40],
-    tool: [12, 2, 1, 7],
+    tool: [2, 1, 7],
     description: '의자에 앉아 압박측 발을 앞으로 두고 무릎을 살짝 굽힌다.\n'
         '양손으로 도구를 잡고 종아리 뒤에 얹는다.\n'
         '발목 힘을 완전히 빼고 무릎 아래에서 발목 위까지 굴린다.\n'
@@ -830,7 +830,7 @@ const Map<int, Move> kMoves = <int, Move>{
     name: '가자미근 무릎굴곡 압박',
     posture: Posture.seatedFloor,
     body: [41],
-    tool: [7, 9, 12, 5],
+    tool: [7, 9, 5],
     description: '바닥에 앉아 무릎을 30~45° 굽힌다. 겉근육이 느슨해지며 심부가 드러난다.\n'
         '종아리 아래 1/3 지점에 도구를 놓는다.\n'
         '반대쪽 다리로 압력을 조절하며 30~45초 머문다.\n'
@@ -842,7 +842,7 @@ const Map<int, Move> kMoves = <int, Move>{
     name: '아킬레스 이행부 압박',
     posture: Posture.seatedFloor,
     body: [42],
-    tool: [11, 10, 9, 12],
+    tool: [11, 10, 9],
     description: '바닥에 앉아 무릎을 살짝 굽힌다.\n'
         '도구의 홈이 아킬레스건 자체를 비우도록 좌우 가장자리에 걸친다.\n'
         '반대쪽 다리로 압력을 조절하고 발목 힘을 뺀다.\n'
@@ -856,7 +856,7 @@ const Map<int, Move> kMoves = <int, Move>{
     name: '전경골근 시티드 롤링',
     posture: Posture.seatedChair,
     body: [19],
-    tool: [12, 5, 9],
+    tool: [5, 9],
     description: '의자에 앉아 다리를 반대 무릎 위에 올린다.\n'
         '정강이 뼈 바깥 1~2cm 근육 위에 도구를 얹는다.\n'
         '발목 힘을 빼고 무릎 아래 5cm에서 발목 위까지 굴린다.\n'
@@ -880,7 +880,7 @@ const Map<int, Move> kMoves = <int, Move>{
     name: '비골근 측와위 롤링',
     posture: Posture.sideLying,
     body: [20],
-    tool: [5, 7, 9, 12],
+    tool: [5, 7, 9],
     description: '옆으로 누워 종아리 바깥면 아래에 도구를 놓는다.\n'
         '무릎 바깥 아래 튀어나온 뼈에서 최소 5cm 아래부터 시작한다.\n'
         '위쪽 다리를 앞에 짚어 압력을 조절한다.\n'

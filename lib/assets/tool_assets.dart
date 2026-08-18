@@ -1,7 +1,7 @@
 /// tool_assets.dart
 ///
 /// 도구(tool) 에셋.
-/// 인덱스(1~12)로 조회한다.
+/// 인덱스(1~11)로 조회한다.
 ///
 ///   final tool = kTools[7]!;            // 라크로스볼
 ///   final balls = toolsByCategory(ToolCategory.massageBall);
@@ -10,8 +10,7 @@ library tool_assets;
 /// 도구 대분류.
 enum ToolCategory {
   foamRoller('폼롤러'),
-  massageBall('마사지볼'),
-  stick('스틱');
+  massageBall('마사지볼');
 
   const ToolCategory(this.label);
   final String label;
@@ -29,8 +28,7 @@ enum ToolShape {
   spiky('스파이키'),
   cork('코르크'),
   tennis('테니스'),
-  peanut('피넛볼'),
-  rollerStick('롤러스틱');
+  peanut('피넛볼');
 
   const ToolShape(this.label);
   final String label;
@@ -47,7 +45,7 @@ class Tool {
   /// 조회용 인덱스.
   final int index;
 
-  /// 폼롤러 / 마사지볼 / 스틱.
+  /// 폼롤러 / 마사지볼.
   final ToolCategory category;
 
   /// 스무스 / 그리드 / 피넛볼 등.
@@ -56,7 +54,7 @@ class Tool {
   /// 예: "피넛볼 폼롤러"가 아닌 "피넛볼 마사지볼" 형태의 표시용 이름.
   String get displayName => '${shape.label} ${category.label}';
 
-  /// 도구 이미지 에셋 경로. 파일명: tool-01.png ~ tool-12.png.
+  /// 도구 이미지 에셋 경로. 파일명: tool-01.png ~ tool-11.png.
   String get imagePath => "assets/images/tools/tool-${index.toString().padLeft(2, '0')}.png";
 }
 
@@ -116,11 +114,6 @@ const Map<int, Tool> kTools = <int, Tool>{
     index: 11,
     category: ToolCategory.massageBall,
     shape: ToolShape.peanut,
-  ),
-  12: Tool(
-    index: 12,
-    category: ToolCategory.stick,
-    shape: ToolShape.rollerStick,
   ),
 };
 
