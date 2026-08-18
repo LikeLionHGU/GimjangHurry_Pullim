@@ -4,6 +4,7 @@ import '../../constants/app_typography.dart';
 import '../../course_generator/models/course.dart';
 import '../../models/course_model.dart';
 import '../../services/database_helper.dart';
+import '../main_shell.dart';
 import '../posture/posture_guide_screen.dart';
 
 /// 코스 완료 화면.
@@ -155,7 +156,10 @@ class _CourseCompleteScreenState extends State<CourseCompleteScreen> {
     }
 
     if (!mounted) return;
-    Navigator.of(context).pushNamedAndRemoveUntil('/', (_) => false);
+    Navigator.of(context).pushAndRemoveUntil(
+      MaterialPageRoute(builder: (_) => const MainShell()),
+      (_) => false,
+    );
   }
 
   // ──────────────────────────────────────────────────────────────────────────

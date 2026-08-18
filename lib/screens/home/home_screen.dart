@@ -395,14 +395,15 @@ class _HomeScreenState extends State<HomeScreen> {
           TextButton(
             onPressed: () async {
               Navigator.pop(ctx);
-              final course = await CourseLoader.loadFromDb(courseModel.courseId!);
+              final newId = await CourseLoader.duplicateForReplay(courseModel.courseId!);
+              final course = await CourseLoader.loadFromDb(newId);
               if (course != null && mounted) {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
                     builder: (_) => CourseExecutionScreen(
                       course: course,
-                      courseId: courseModel.courseId!,
+                      courseId: newId,
                     ),
                   ),
                 ).then((_) => _loadData());

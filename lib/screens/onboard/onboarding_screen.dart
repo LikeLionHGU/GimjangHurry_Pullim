@@ -55,35 +55,28 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             children: [
               const Spacer(flex: 2),
 
-              // 로고
-              Text(
-                'PULLIM',
-                style: AppTypography.b35.copyWith(
-                  color: AppColors.textPrimary,
-                  fontSize: 36,
-                  fontWeight: FontWeight.w800,
-                  letterSpacing: 3,
+              // 환영 메시지
+              Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  '환영합니다',
+                  style: AppTypography.sb24.copyWith(
+                    color: AppColors.primary,
+                  ),
                 ),
               ),
               const SizedBox(height: 8),
-              Text(
-                '근막 이완 코스',
-                style: AppTypography.r14.copyWith(color: AppColors.textSecondary),
-              ),
-
-              const Spacer(flex: 1),
-
-              // 이름 입력
               Align(
                 alignment: Alignment.centerLeft,
                 child: Text(
                   '이름을 입력해주세요',
-                  style: AppTypography.sb18.copyWith(
-                    color: AppColors.textPrimary,
+                  style: AppTypography.r14.copyWith(
+                    color: AppColors.textSecondary,
+                    fontSize: 15,
                   ),
                 ),
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 24),
               TextField(
                 controller: _nameController,
                 style: AppTypography.r16.copyWith(color: AppColors.textPrimary),

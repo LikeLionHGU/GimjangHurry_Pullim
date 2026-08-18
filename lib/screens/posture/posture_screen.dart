@@ -663,13 +663,11 @@ class _PostureScreenState extends State<PostureScreen> {
 
     return LayoutBuilder(
       builder: (context, constraints) {
-        // 중앙 가이드 프레임 영역 계산 (화면 대비 비율)
         final frameWidth = constraints.maxWidth * 0.55;
         final frameHeight = constraints.maxHeight * 0.85;
         final frameLeft = (constraints.maxWidth - frameWidth) / 2;
         final frameTop = (constraints.maxHeight - frameHeight) / 2;
 
-        // 프레임의 정규화된 비율 (0~1 범위) 저장
         _guideFrameRect = Rect.fromLTWH(
           frameLeft / constraints.maxWidth,
           frameTop / constraints.maxHeight,
@@ -677,20 +675,60 @@ class _PostureScreenState extends State<PostureScreen> {
           frameHeight / constraints.maxHeight,
         );
 
+        // 가이드 색상: 감지 안됨=주황, 감지됨=연두
+        final guideColor = _isPersonInFrame
+            ? AppColors.primary
+            : const Color(0xFFFF6B3D);
+
         return Stack(
           fit: StackFit.expand,
           children: [
             // 카메라 프리뷰
-            CameraPreview(_cameraController!),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(16),
+              child: CameraPreview(_cameraController!),
+            ),
 
-            // 어두운 오버레이 + 중앙 프레임 구멍
-            _buildFrameOverlay(constraints, frameLeft, frameTop, frameWidth, frameHeight),
-
-            // 프레임 테두리
+            // 머리 원형 가이드
             Positioned(
-              left: frameLeft,
-              top: frameTop,
-              child: _buildFrameBorder(frameWidth, frameHeight),
+              top: constraints.maxHeight * 0.08,
+              left: constraints.maxWidth * 0.5 - 30,
+              child: Container(
+                width: 60,
+                height: 60,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: Border.all(color: guideColor, width: 2.5),
+                ),
+              ),
+            ),
+
+            // 몸통 사각형 가이드
+            Positioned(
+              top: constraints.maxHeight * 0.22,
+              left: constraints.maxWidth * 0.5 - constraints.maxWidth * 0.18,
+              child: Container(
+                width: constraints.maxWidth * 0.36,
+                height: constraints.maxHeight * 0.28,
+                decoration: BoxDecoration(
+                  border: Border.all(color: guideColor, width: 2.5),
+                  borderRadius: BorderRadius.circular(4),
+                ),
+              ),
+            ),
+
+            // 발 원형 가이드
+            Positioned(
+              bottom: constraints.maxHeight * 0.1,
+              left: constraints.maxWidth * 0.5 - 20,
+              child: Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: Border.all(color: guideColor, width: 2.5),
+                ),
+              ),
             ),
 
             // 포즈 실루엣 오버레이
@@ -728,91 +766,83 @@ class _PostureScreenState extends State<PostureScreen> {
                 ),
               ),
 
-            // 하단 상태 메시지
-            Positioned(
-              bottom: 12,
-              left: 16,
-              right: 16,
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                decoration: BoxDecoration(
-                  color: AppColors.background.withValues(alpha: 0.85),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Row(
-                  children: [
-                    Icon(
-                      _isPersonInFrame ? Icons.check_circle : Icons.info_outline,
-                      color: _isPersonInFrame ? AppColors.primary : AppColors.textSecondary,
-                      size: 20,
-                    ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: Text(
-                        _statusMessage,
-                        style: AppTypography.r12.copyWith(
-                          color: _isPersonInFrame ? AppColors.primary : AppColors.textPrimary,
-                          fontSize: 13,
-                          fontWeight: FontWeight.w500,
+            // 하단 상태 메시지 (카메라 안)
+            if (!_isPersonInFrame && !_countingDown)
+              Positioned(
+                bottom: 16,
+                left: 16,
+                right: 16,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                  decoration: BoxDecoration(
+                    color: AppColors.background.withValues(alpha: 0.8),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(6),
+                        decoration: BoxDecoration(
+                          border: Border.all(color: AppColors.primary, width: 1.5),
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: const Icon(Icons.person, color: AppColors.primary, size: 18),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              _statusMessage.split('.').first,
+                              style: AppTypography.sb16.copyWith(
+                                color: AppColors.textPrimary,
+                                fontSize: 14,
+                              ),
+                            ),
+                            if (_statusMessage.contains('.'))
+                              Text(
+                                _statusMessage.split('.').skip(1).join('.').trim(),
+                                style: AppTypography.r12.copyWith(color: AppColors.textTertiary),
+                              ),
+                          ],
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
-            ),
           ],
         );
       },
     );
   }
 
-  /// 중앙 프레임 외부를 어둡게 (뷰파인더 효과)
-  Widget _buildFrameOverlay(BoxConstraints constraints, double frameLeft,
-      double frameTop, double frameWidth, double frameHeight) {
-    return CustomPaint(
-      size: Size(constraints.maxWidth, constraints.maxHeight),
-      painter: _ViewfinderOverlayPainter(
-        frameRect: Rect.fromLTWH(frameLeft, frameTop, frameWidth, frameHeight),
-      ),
-    );
-  }
-
-  /// 중앙 프레임 테두리 (코너 강조)
-  Widget _buildFrameBorder(double width, double height) {
-    final borderColor = _isPersonInFrame
-        ? AppColors.primary
-        : AppColors.textTertiary.withValues(alpha: 0.7);
-
-    return SizedBox(
-      width: width,
-      height: height,
-      child: CustomPaint(
-        painter: _CornerBorderPainter(color: borderColor),
-      ),
-    );
-  }
-
   Widget _buildBottomStatus() {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-      child: Column(
-        children: [
-          // 진행 바
-          LinearProgressIndicator(
-            value: _getProgress(),
-            backgroundColor: AppColors.surface,
-            valueColor: const AlwaysStoppedAnimation<Color>(AppColors.primary),
-            borderRadius: BorderRadius.circular(4),
-          ),
-          const SizedBox(height: 12),
-          Text(
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(24, 12, 24, 16),
+      child: SizedBox(
+        width: double.infinity,
+        height: 56,
+        child: ElevatedButton.icon(
+          onPressed: null, // 자동 촬영이므로 버튼은 상태 표시용
+          icon: const Icon(Icons.camera_alt_outlined),
+          label: Text(
             _currentPhase == CapturePhase.front
-                ? '1/2 정면 촬영 · 프레임 안에 서면 자동 촬영됩니다'
-                : '2/2 측면 촬영 · 프레임 안에 서면 자동 촬영됩니다',
-            style: AppTypography.r12.copyWith(color: AppColors.textTertiary),
+                ? '촬영 시작하기'
+                : '촬영 시작하기',
           ),
-        ],
+          style: ElevatedButton.styleFrom(
+            backgroundColor: AppColors.primary,
+            foregroundColor: AppColors.background,
+            disabledBackgroundColor: AppColors.primary,
+            disabledForegroundColor: AppColors.background,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+          ),
+        ),
       ),
     );
   }

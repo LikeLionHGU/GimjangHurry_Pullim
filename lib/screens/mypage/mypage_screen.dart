@@ -7,8 +7,10 @@ import '../../models/course_model.dart';
 import '../../assets/tool_assets.dart' as tool_assets;
 import '../../providers/app_provider.dart';
 import '../../services/database_helper.dart';
+import '../../services/course_loader.dart';
 import '../../services/tool_registration_service.dart';
 import '../../widgets/common_widgets.dart';
+import '../course/course_execution_screen.dart';
 import '../posture/posture_guide_screen.dart';
 import '../home/recent_history_screen.dart';
 import 'add_tool_screen.dart';
@@ -84,7 +86,7 @@ class _MypageScreenState extends State<MypageScreen> {
                     children: [
                       // 사용자 이름
                       Text(
-                        '$userName님,',
+                        '$userName님',
                         style: AppTypography.sb24.copyWith(
                           color: AppColors.primary,
                         ),
@@ -298,16 +300,64 @@ class _MypageScreenState extends State<MypageScreen> {
             ),
           )
         else
-          ..._recentCourses.map((course) => Padding(
-                padding: const EdgeInsets.only(bottom: 12),
-                child: CourseItemCard(
-                  title: course.name,
-                  toolInfo: '${course.totalMove}단계',
-                  duration: course.formattedTime,
-                  steps: '${course.totalMove}단계',
-                ),
-              )),
+          ..._recentCourses.map((course) {
+                final timeStr = course.executedAt != null
+                    ? '${course.executedAt!.month}/${course.executedAt!.day} ${course.executedAt!.hour}:${course.executedAt!.minute.toString().padLeft(2, '0')}'
+                    : '';
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 12),
+                  child: CourseItemCard(
+                    title: course.name,
+                    toolInfo: timeStr,
+                    duration: course.formattedTime,
+                    steps: '${course.totalMove}단계',
+                    onTap: () => _showExecuteDialog(course),
+                  ),
+                );
+              }),
       ],
+    );
+  }
+
+  void _showExecuteDialog(CourseModel courseModel) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: AppColors.cardBackground,
+        title: Text(courseModel.name,
+            style: AppTypography.sb18.copyWith(color: AppColors.textPrimary)),
+        content: Text(
+          '${courseModel.totalMove}단계 · ${courseModel.formattedTime}\n\n이 코스를 실행하시겠습니까?',
+          style: AppTypography.r14.copyWith(color: AppColors.textSecondary),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: Text('취소',
+                style: AppTypography.r14.copyWith(color: AppColors.textTertiary)),
+          ),
+          TextButton(
+            onPressed: () async {
+              Navigator.pop(ctx);
+              final newId = await CourseLoader.duplicateForReplay(courseModel.courseId!);
+              final course = await CourseLoader.loadFromDb(newId);
+              if (course != null && mounted) {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => CourseExecutionScreen(
+                      course: course,
+                      courseId: newId,
+                    ),
+                  ),
+                ).then((_) => _loadData());
+              }
+            },
+            child: Text('시작하기',
+                style: AppTypography.r14.copyWith(color: AppColors.primary)),
+          ),
+        ],
+      ),
     );
   }
 }

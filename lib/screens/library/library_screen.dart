@@ -4,7 +4,9 @@ import '../../constants/app_strings.dart';
 import '../../constants/app_typography.dart';
 import '../../models/course_model.dart';
 import '../../services/database_helper.dart';
+import '../../services/course_loader.dart';
 import '../../widgets/common_widgets.dart';
+import '../course/course_execution_screen.dart';
 import 'library_all_screen.dart';
 
 class LibraryScreen extends StatefulWidget {
@@ -119,11 +121,21 @@ class _LibraryScreenState extends State<LibraryScreen> {
             child: SizedBox(
               width: double.infinity,
               child: ElevatedButton(
-                onPressed: () {
-                  // TODO: 코스 실행 화면으로 이동 (다른 팀원 구현)
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('코스 실행 화면으로 이동합니다.')),
-                  );
+                onPressed: () async {
+                  final courseModel = _savedCourses[_selectedIndex!];
+                  final newId = await CourseLoader.duplicateForReplay(courseModel.courseId!);
+                  final course = await CourseLoader.loadFromDb(newId);
+                  if (course != null && mounted) {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => CourseExecutionScreen(
+                          course: course,
+                          courseId: newId,
+                        ),
+                      ),
+                    ).then((_) => _loadCourses());
+                  }
                 },
                 child: const Text(AppStrings.startCourse),
               ),
