@@ -32,7 +32,6 @@ const _centerParts = <BodyPart>{
   BodyPart.upperBack,
   BodyPart.abdomen,
   BodyPart.waist,
-  BodyPart.hip,
 };
 
 class CourseGenerationScreen extends StatefulWidget {
@@ -531,7 +530,7 @@ class _CourseGenerationScreenState extends State<CourseGenerationScreen> {
 
   Widget _buildFatigueSlider(_FatigueKey key) {
     final level = _fatigueLevels[key] ?? 5.0;
-    final label = '${key.face.label} ${key.part.label}';
+    final label = key.part.label;
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
@@ -591,7 +590,7 @@ class _CourseGenerationScreenState extends State<CourseGenerationScreen> {
       spacing: 8,
       runSpacing: 8,
       children: _fatigueLevels.entries.map((entry) {
-        final label = '${entry.key.face.label} ${entry.key.part.label}';
+        final label = '${entry.key.part.label}';
         final level = entry.value.round();
         return Container(
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
