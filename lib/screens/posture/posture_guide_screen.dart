@@ -5,23 +5,29 @@ import '../../widgets/common_widgets.dart';
 import 'posture_screen.dart';
 
 /// 촬영 가이드 화면 - 자세 측정 전 안내
-/// GUI 1페이지: "내 몸을 먼저 확인할게요" + 촬영 가이드 + 촬영 시작하기
 class PostureGuideScreen extends StatelessWidget {
   const PostureGuideScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: const Text('전신 촬영'),
+        backgroundColor: AppColors.background,
+        elevation: 0,
+        centerTitle: true,
+        title: Text(
+          '전신 촬영',
+          style: AppTypography.sb18.copyWith(color: AppColors.textPrimary),
+        ),
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
+          icon: const Icon(Icons.arrow_back_ios, color: AppColors.textPrimary, size: 20),
           onPressed: () => Navigator.pop(context),
         ),
       ),
       body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24),
+          padding: const EdgeInsets.symmetric(horizontal: 28),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -60,34 +66,6 @@ class PostureGuideScreen extends StatelessWidget {
               const SizedBox(height: 12),
               _buildGuideItem(3, '편한 복장으로', '몸의 라인이 보이는 복장이 좋아요.'),
 
-              const SizedBox(height: 24),
-
-              // 자동 촬영 안내
-              Container(
-                padding: const EdgeInsets.all(14),
-                decoration: BoxDecoration(
-                  color: AppColors.primary.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: AppColors.primary.withValues(alpha: 0.3)),
-                ),
-                child: Row(
-                  children: [
-                    Icon(Icons.auto_awesome, color: AppColors.primary, size: 20),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: Text(
-                        '가이드 위치에 맞게 서면 자동으로 촬영됩니다.\n음성으로 자세를 안내해 드려요.',
-                        style: TextStyle(
-                          color: AppColors.primary,
-                          fontSize: 13,
-                          height: 1.4,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-
               const Spacer(),
 
               // 촬영 시작하기 버튼
@@ -101,8 +79,15 @@ class PostureGuideScreen extends StatelessWidget {
                       MaterialPageRoute(builder: (_) => const PostureScreen()),
                     );
                   },
-                  icon: const Icon(Icons.camera_alt_outlined),
-                  label: const Text('촬영 시작하기'),
+                  icon: const Icon(Icons.camera_alt_outlined, size: 20),
+                  label: Text('촬영 시작하기', style: AppTypography.b16),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                    foregroundColor: AppColors.background,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
                 ),
               ),
               const SizedBox(height: 24),

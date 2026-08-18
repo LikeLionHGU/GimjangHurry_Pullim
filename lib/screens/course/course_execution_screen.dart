@@ -222,7 +222,7 @@ class _CourseExecutionScreenState extends State<CourseExecutionScreen> {
             // ── 본문 ──
             Expanded(
               child: SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
+                padding: const EdgeInsets.symmetric(horizontal: 28),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -253,8 +253,9 @@ class _CourseExecutionScreenState extends State<CourseExecutionScreen> {
                   onPressed: _isTimerMode ? _goToNextStep : _startTimer,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.primary,
+                    foregroundColor: AppColors.background,
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(30),
+                      borderRadius: BorderRadius.circular(12),
                     ),
                   ),
                   child: Text(
@@ -277,9 +278,8 @@ class _CourseExecutionScreenState extends State<CourseExecutionScreen> {
       width: double.infinity,
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       decoration: BoxDecoration(
-        color: AppColors.secondary,
+        color: AppColors.cardBackground,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.toolSelectBox),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -373,7 +373,7 @@ class _CourseExecutionScreenState extends State<CourseExecutionScreen> {
         Container(
           height: 240,
           decoration: BoxDecoration(
-            color: AppColors.secondary,
+            color: AppColors.cardBackground,
             borderRadius: BorderRadius.circular(12),
           ),
           child: ClipRRect(
@@ -383,7 +383,7 @@ class _CourseExecutionScreenState extends State<CourseExecutionScreen> {
               children: [
                 // 페이지 1: 자세 사진 (placeholder)
                 Container(
-                  color: AppColors.secondary,
+                  color: AppColors.cardBackground,
                   child: Center(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -401,7 +401,7 @@ class _CourseExecutionScreenState extends State<CourseExecutionScreen> {
                 ),
                 // 페이지 2: 부위 이미지
                 Container(
-                  color: AppColors.secondary,
+                  color: AppColors.cardBackground,
                   padding: const EdgeInsets.all(16),
                   child: bodyImage != null
                       ? Image.asset(
@@ -447,7 +447,6 @@ class _CourseExecutionScreenState extends State<CourseExecutionScreen> {
       width: double.infinity,
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppColors.secondary,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: AppColors.toolSelectBox),
       ),

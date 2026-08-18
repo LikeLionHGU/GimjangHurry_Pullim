@@ -175,7 +175,7 @@ class _CourseCompleteScreenState extends State<CourseCompleteScreen> {
           children: [
             Expanded(
               child: SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
+                padding: const EdgeInsets.symmetric(horizontal: 28),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -258,7 +258,7 @@ class _CourseCompleteScreenState extends State<CourseCompleteScreen> {
           width: double.infinity,
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: AppColors.secondary,
+            color: AppColors.cardBackground,
             borderRadius: BorderRadius.circular(16),
           ),
           child: Row(
@@ -340,8 +340,9 @@ class _CourseCompleteScreenState extends State<CourseCompleteScreen> {
               onPressed: _onComplete,
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primary,
+                foregroundColor: AppColors.background,
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(30),
+                  borderRadius: BorderRadius.circular(12),
                 ),
               ),
               child: Text(
@@ -405,11 +406,11 @@ class _CourseCompleteScreenState extends State<CourseCompleteScreen> {
           Expanded(
             child: SliderTheme(
               data: SliderThemeData(
-                activeTrackColor: AppColors.primary.withValues(alpha: 0.5),
-                inactiveTrackColor: AppColors.primary.withValues(alpha: 0.5),
+                activeTrackColor: AppColors.primary,
+                inactiveTrackColor: AppColors.toolSelectBox,
                 thumbShape: _NumberedThumbShape(value: level.round()),
                 overlayColor: AppColors.primary.withValues(alpha: 0.2),
-                trackHeight: 2,
+                trackHeight: 3,
               ),
               child: Slider(
                 value: level,
@@ -460,11 +461,13 @@ class _NumberedThumbShape extends SliderComponentShape {
   }) {
     final canvas = context.canvas;
 
+    // 녹색으로 꽉 채운 원
     final fillPaint = Paint()
       ..color = AppColors.primary
       ..style = PaintingStyle.fill;
     canvas.drawCircle(center, _thumbRadius, fillPaint);
 
+    // 숫자 텍스트 (검정)
     final textSpan = TextSpan(
       text: this.value.toString(),
       style: const TextStyle(

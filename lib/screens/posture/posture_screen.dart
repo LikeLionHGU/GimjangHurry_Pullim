@@ -620,7 +620,7 @@ class _PostureScreenState extends State<PostureScreen> {
 
   Widget _buildPhaseIndicator() {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+      padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 12),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [

@@ -26,13 +26,10 @@ class MainShell extends StatelessWidget {
         index: currentIndex,
         children: screens,
       ),
-      bottomNavigationBar: Container(
-        decoration: const BoxDecoration(
-          border: Border(
-            top: BorderSide(color: AppColors.border, width: 0.5),
-          ),
-        ),
+      bottomNavigationBar: SizedBox(
+        height: 80,
         child: BottomNavigationBar(
+          backgroundColor: const Color(0xFF141315),
           currentIndex: currentIndex,
           onTap: (index) => provider.setNavIndex(index),
           items: const [

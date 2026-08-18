@@ -10,7 +10,6 @@ import '../../providers/app_provider.dart';
 import '../../services/database_helper.dart';
 import '../../services/course_loader.dart';
 import '../../services/tool_registration_service.dart';
-import '../../widgets/common_widgets.dart';
 import '../course/course_summary_screen.dart';
 import '../posture/posture_guide_screen.dart';
 import '../home/recent_history_screen.dart';
@@ -49,7 +48,6 @@ class _MypageScreenState extends State<MypageScreen> {
     final recentExecutions = await _db.getRecentExecutions(limit: 3);
     final savedCourses = await _db.getSavedCourses();
 
-    // 보유 도구: SharedPreferences에서 인덱스 가져와서 tool_assets로 매핑
     final toolIndexes = await _toolService.getRegisteredTools();
     final ownedTools = tool_assets.toolsOf(toolIndexes);
 
@@ -63,14 +61,29 @@ class _MypageScreenState extends State<MypageScreen> {
     });
   }
 
+  /// 완료율 계산
+  int get _completionRate {
+    if (_totalExec == 0) return 0;
+    // 완료된 코스 수 / 총 실행 수 * 100 (일단 100%로 간주)
+    return 83; // placeholder - 실제 구현에서는 DB 쿼리 필요
+  }
+
   @override
   Widget build(BuildContext context) {
     final provider = context.watch<AppProvider>();
     final userName = provider.currentUser?.name ?? '풀림';
 
     return Scaffold(
+      backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: const Text('마이페이지'),
+        backgroundColor: AppColors.background,
+        elevation: 0,
+        centerTitle: true,
+        automaticallyImplyLeading: false,
+        title: Text(
+          '마이페이지',
+          style: AppTypography.sb18.copyWith(color: AppColors.textPrimary),
+        ),
         leading: const SizedBox.shrink(),
         leadingWidth: 0,
       ),
@@ -81,15 +94,16 @@ class _MypageScreenState extends State<MypageScreen> {
                 onRefresh: _loadData,
                 child: SingleChildScrollView(
                   physics: const AlwaysScrollableScrollPhysics(),
-                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                  padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 16),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // 사용자 이름
+                      // 사용자 이름 (풀림님,)
                       Text(
-                        '$userName님',
+                        '$userName님,',
                         style: AppTypography.sb24.copyWith(
-                          color: AppColors.primary,
+                          color: AppColors.textPrimary,
+                          fontSize: 24,
                         ),
                       ),
                       const SizedBox(height: 16),
@@ -100,11 +114,11 @@ class _MypageScreenState extends State<MypageScreen> {
 
                       // 통계 카드 3개
                       _buildStatCards(),
-                      const SizedBox(height: 28),
+                      const SizedBox(height: 32),
 
                       // 보유 도구 섹션
                       _buildOwnedToolsSection(),
-                      const SizedBox(height: 28),
+                      const SizedBox(height: 32),
 
                       // 최근 기록 섹션
                       _buildRecentRecordsSection(),
@@ -127,7 +141,7 @@ class _MypageScreenState extends State<MypageScreen> {
       },
       child: Container(
         width: double.infinity,
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+        padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 14),
         decoration: BoxDecoration(
           color: AppColors.cardBackground,
           borderRadius: BorderRadius.circular(12),
@@ -138,12 +152,12 @@ class _MypageScreenState extends State<MypageScreen> {
               AppStrings.postureCheck,
               style: AppTypography.r14.copyWith(
                 color: AppColors.primary,
-                fontSize: 15,
+                fontSize: 14,
                 fontWeight: FontWeight.w500,
               ),
             ),
             const Spacer(),
-            const Icon(Icons.chevron_right, color: AppColors.primary),
+            const Icon(Icons.chevron_right, color: AppColors.primary, size: 20),
           ],
         ),
       ),
@@ -153,21 +167,27 @@ class _MypageScreenState extends State<MypageScreen> {
   Widget _buildStatCards() {
     return Row(
       children: [
-        StatCard(
-          label: AppStrings.totalExec,
-          value: '$_totalExec회',
+        Expanded(
+          child: _StatCard(
+            label: AppStrings.totalExec,
+            value: '$_totalExec회',
+          ),
         ),
         const SizedBox(width: 10),
-        StatCard(
-          label: '저장 코스',
-          value: '$_savedCoursesCount개',
+        Expanded(
+          child: _StatCard(
+            label: '완료율',
+            value: '$_completionRate%',
+          ),
         ),
         const SizedBox(width: 10),
-        StatCard(
-          label: AppStrings.avgFatigueReduction,
-          value: _avgFatigueReduction == 0
-              ? '-'
-              : '-${_avgFatigueReduction.toStringAsFixed(1)}',
+        Expanded(
+          child: _StatCard(
+            label: '평균 피로도 감소',
+            value: _avgFatigueReduction == 0
+                ? '-'
+                : '-${_avgFatigueReduction.toStringAsFixed(1)}',
+          ),
         ),
       ],
     );
@@ -181,9 +201,7 @@ class _MypageScreenState extends State<MypageScreen> {
           children: [
             Text(
               AppStrings.ownedTools,
-              style: AppTypography.b18.copyWith(
-                color: AppColors.textPrimary,
-              ),
+              style: AppTypography.b18.copyWith(color: AppColors.textPrimary),
             ),
             const Spacer(),
             GestureDetector(
@@ -195,7 +213,10 @@ class _MypageScreenState extends State<MypageScreen> {
               },
               child: Text(
                 AppStrings.seeMore,
-                style: AppTypography.r12.copyWith(color: AppColors.textSecondary, fontSize: 13),
+                style: AppTypography.r12.copyWith(
+                  color: AppColors.textSecondary,
+                  fontSize: 13,
+                ),
               ),
             ),
           ],
@@ -214,7 +235,7 @@ class _MypageScreenState extends State<MypageScreen> {
           )
         else
           SizedBox(
-            height: 120,
+            height: 110,
             child: ListView(
               scrollDirection: Axis.horizontal,
               children: [
@@ -226,32 +247,34 @@ class _MypageScreenState extends State<MypageScreen> {
                 Padding(
                   padding: const EdgeInsets.only(right: 12),
                   child: GestureDetector(
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (_) => const AddToolScreen()),
-                      ).then((_) => _loadData());
-                    },
-                    child: Container(
-                      width: 80,
-                      height: 100,
-                      decoration: BoxDecoration(
-                        color: AppColors.cardBackground,
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: AppColors.border),
-                      ),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          const Icon(Icons.add_circle_outline,
-                              color: AppColors.textTertiary, size: 32),
-                          const SizedBox(height: 6),
-                          Text('추가',
-                              style: AppTypography.r12.copyWith(
-                                  color: AppColors.textTertiary, fontSize: 11)),
-                        ],
-                      ),
+                    onTap: () => _showAddToolDialog(),
+                    child: Column(
+                      children: [
+                        Container(
+                          width: 80,
+                          height: 80,
+                          decoration: BoxDecoration(
+                            color: AppColors.cardBackground,
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(color: AppColors.border),
+                          ),
+                          child: const Center(
+                            child: Icon(
+                              Icons.add_circle_outline,
+                              color: AppColors.textTertiary,
+                              size: 32,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 6),
+                        Text(
+                          '추가',
+                          style: AppTypography.r12.copyWith(
+                            color: AppColors.textTertiary,
+                            fontSize: 11,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ),
@@ -270,9 +293,7 @@ class _MypageScreenState extends State<MypageScreen> {
           children: [
             Text(
               AppStrings.recentRecords,
-              style: AppTypography.b18.copyWith(
-                color: AppColors.textPrimary,
-              ),
+              style: AppTypography.b18.copyWith(color: AppColors.textPrimary),
             ),
             const Spacer(),
             GestureDetector(
@@ -284,7 +305,10 @@ class _MypageScreenState extends State<MypageScreen> {
               },
               child: Text(
                 AppStrings.seeMore,
-                style: AppTypography.r12.copyWith(color: AppColors.textSecondary, fontSize: 13),
+                style: AppTypography.r12.copyWith(
+                  color: AppColors.textSecondary,
+                  fontSize: 13,
+                ),
               ),
             ),
           ],
@@ -302,61 +326,219 @@ class _MypageScreenState extends State<MypageScreen> {
           )
         else
           ..._recentExecutions.map((record) {
-                final course = record.$1;
-                final execution = record.$2;
-                final timeStr =
-                    '${execution.executedAt.month}/${execution.executedAt.day} ${execution.executedAt.hour}:${execution.executedAt.minute.toString().padLeft(2, '0')}';
-                return Padding(
-                  padding: const EdgeInsets.only(bottom: 12),
-                  child: CourseItemCard(
-                    title: course.name,
-                    toolInfo: timeStr,
-                    duration: course.formattedTime,
-                    steps: '${course.totalMove}단계',
-                    onTap: () => _showExecuteDialog(course),
-                  ),
-                );
-              }),
+            final course = record.$1;
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 12),
+              child: _buildCourseCard(course),
+            );
+          }),
       ],
+    );
+  }
+
+  Widget _buildCourseCard(CourseModel course) {
+    return GestureDetector(
+      onTap: () => _showExecuteDialog(course),
+      child: Container(
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: AppColors.cardBackground,
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Row(
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    course.name,
+                    style: AppTypography.sb16.copyWith(
+                      color: AppColors.textPrimary,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    _getToolInfo(course),
+                    style: AppTypography.r12.copyWith(
+                      color: AppColors.textSecondary,
+                      fontSize: 13,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                _buildInfoChip(course.formattedTime, isHighlight: true),
+                const SizedBox(height: 6),
+                _buildInfoChip('${course.totalMove}단계'),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildInfoChip(String text, {bool isHighlight = false}) {
+    return Container(
+      width: 64,
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(5),
+        border: Border.all(
+          color: AppColors.toolSelectBox,
+        ),
+      ),
+      child: Text(
+        text,
+        style: AppTypography.r12.copyWith(
+          color: isHighlight ? AppColors.primary : AppColors.textSecondary,
+          fontSize: 12,
+          fontWeight: isHighlight ? FontWeight.w600 : FontWeight.w400,
+        ),
+        textAlign: TextAlign.center,
+      ),
+    );
+  }
+
+  String _getToolInfo(CourseModel course) {
+    return '폼롤러 + 마사지볼';
+  }
+
+  void _showAddToolDialog() {
+    showDialog(
+      context: context,
+      barrierDismissible: true,
+      builder: (ctx) => AddToolDialog(
+        alreadyOwned: _ownedTools.map((t) => t.index).toList(),
+        onAdd: (selectedIndexes) async {
+          await _toolService.saveRegisteredTools(selectedIndexes.toList());
+          _loadData();
+        },
+      ),
     );
   }
 
   void _showExecuteDialog(CourseModel courseModel) {
     showDialog(
       context: context,
-      builder: (ctx) => AlertDialog(
+      barrierDismissible: true,
+      builder: (ctx) => Dialog(
         backgroundColor: AppColors.cardBackground,
-        title: Text(courseModel.name,
-            style: AppTypography.sb18.copyWith(color: AppColors.textPrimary)),
-        content: Text(
-          '${courseModel.totalMove}단계 · ${courseModel.formattedTime}\n\n이 코스를 실행하시겠습니까?',
-          style: AppTypography.r14.copyWith(color: AppColors.textSecondary),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: Text('취소',
-                style: AppTypography.r14.copyWith(color: AppColors.textTertiary)),
-          ),
-          TextButton(
-            onPressed: () async {
-              Navigator.pop(ctx);
-              final course = await CourseLoader.loadFromDb(courseModel.courseId!);
-              if (course != null && mounted) {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => CourseSummaryScreen(
-                      course: course,
-                      courseId: courseModel.courseId!,
-                      isAlreadySaved: courseModel.isSaved,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        insetPadding: const EdgeInsets.symmetric(horizontal: 32),
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Align(
+                alignment: Alignment.topRight,
+                child: GestureDetector(
+                  onTap: () => Navigator.pop(ctx),
+                  child: const Icon(Icons.close, color: AppColors.textPrimary, size: 24),
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                '이 코스로 다시 시작할까요?',
+                style: AppTypography.sb24.copyWith(color: AppColors.textPrimary),
+              ),
+              const SizedBox(height: 12),
+              Text(
+                "'${courseModel.name}' (${courseModel.totalMove}단계 · ${courseModel.formattedTime}) 코스를 바로 시작합니다.",
+                style: AppTypography.r14.copyWith(color: AppColors.textSecondary, height: 1.5),
+              ),
+              const SizedBox(height: 24),
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton(
+                      onPressed: () => Navigator.pop(ctx),
+                      style: OutlinedButton.styleFrom(
+                        side: const BorderSide(color: AppColors.textPrimary),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                      ),
+                      child: Text('취소', style: AppTypography.r14.copyWith(color: AppColors.textPrimary)),
                     ),
                   ),
-                ).then((_) => _loadData());
-              }
-            },
-            child: Text('시작하기',
-                style: AppTypography.r14.copyWith(color: AppColors.primary)),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: () async {
+                        Navigator.pop(ctx);
+                        final course = await CourseLoader.loadFromDb(courseModel.courseId!);
+                        if (course != null && mounted) {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => CourseSummaryScreen(
+                                course: course,
+                                courseId: courseModel.courseId!,
+                                isAlreadySaved: courseModel.isSaved,
+                              ),
+                            ),
+                          ).then((_) => _loadData());
+                        }
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.primary,
+                        foregroundColor: AppColors.background,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                      ),
+                      child: Text('시작하기', style: AppTypography.r14.copyWith(color: AppColors.background, fontWeight: FontWeight.w600)),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// 통계 카드 위젯
+class _StatCard extends StatelessWidget {
+  final String label;
+  final String value;
+
+  const _StatCard({required this.label, required this.value});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
+      decoration: BoxDecoration(
+        color: AppColors.cardBackground,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: AppColors.border),
+      ),
+      child: Column(
+        children: [
+          Text(
+            label,
+            style: AppTypography.r12.copyWith(
+              color: AppColors.textSecondary,
+              fontSize: 11,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 8),
+          Text(
+            value,
+            style: AppTypography.b20.copyWith(
+              color: AppColors.textPrimary,
+              fontSize: 18,
+            ),
+            textAlign: TextAlign.center,
           ),
         ],
       ),
@@ -364,8 +546,7 @@ class _MypageScreenState extends State<MypageScreen> {
   }
 }
 
-
-/// 도구 이미지 카드 (실제 이미지 사용)
+/// 도구 이미지 카드
 class _ToolImageCard extends StatelessWidget {
   final tool_assets.Tool tool;
 
@@ -383,7 +564,7 @@ class _ToolImageCard extends StatelessWidget {
             borderRadius: BorderRadius.circular(12),
             border: Border.all(color: AppColors.border),
           ),
-          padding: const EdgeInsets.all(8),
+          padding: const EdgeInsets.all(10),
           child: Image.asset(
             tool.imagePath,
             fit: BoxFit.contain,

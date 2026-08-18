@@ -60,7 +60,7 @@ class _PostureResultScreenState extends State<PostureResultScreen> {
 
                     // 분석 항목 리스트
                     Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 24),
+                      padding: const EdgeInsets.symmetric(horizontal: 28),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -114,7 +114,7 @@ class _PostureResultScreenState extends State<PostureResultScreen> {
     final imagePath = _showFront ? widget.frontImagePath : widget.sideImagePath;
 
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+      margin: const EdgeInsets.symmetric(horizontal: 28, vertical: 8),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(16),
         child: AspectRatio(
@@ -163,7 +163,7 @@ class _PostureResultScreenState extends State<PostureResultScreen> {
         setState(() => _showFront = label == '정면');
       },
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 8),
         decoration: BoxDecoration(
           color: isActive ? AppColors.primary : AppColors.surface,
           borderRadius: BorderRadius.circular(20),
@@ -314,7 +314,7 @@ class _PostureResultScreenState extends State<PostureResultScreen> {
   /// 면책 안내
   Widget _buildDisclaimer() {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+      padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 12),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

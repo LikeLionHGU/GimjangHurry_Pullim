@@ -41,62 +41,84 @@ class _ToolRegistrationScreenState extends State<ToolRegistrationScreen> {
     final categoryTools = toolsByCategory(_selectedCategory);
 
     return Scaffold(
+      backgroundColor: AppColors.background,
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // 뒤로가기 (온보딩이므로 실제로 뒤로 갈 곳은 없지만 시안 반영)
-              const SizedBox(height: 8),
+        child: Column(
+          children: [
+            // 본문 스크롤 영역
+            Expanded(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.symmetric(horizontal: 28),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const SizedBox(height: 16),
+                    // 뒤로가기
+                    GestureDetector(
+                      onTap: () => Navigator.pop(context),
+                      child: const Icon(
+                        Icons.arrow_back_ios,
+                        color: AppColors.textPrimary,
+                        size: 20,
+                      ),
+                    ),
+                    const SizedBox(height: 32),
 
-              // 타이틀
-              Text(
-                '도구 등록',
-                style: AppTypography.sb24.copyWith(
-                  color: AppColors.textPrimary,
-                  fontSize: 28,
+                    // 타이틀
+                    Text(
+                      '도구 등록',
+                      style: AppTypography.b20.copyWith(
+                        color: AppColors.textPrimary,
+                        fontSize: 26,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    Text(
+                      '보유한 도구를 선택해 등록하세요.\n여러 개 추가할 수 있습니다.',
+                      style: AppTypography.r14.copyWith(
+                        color: AppColors.textSecondary,
+                        height: 1.5,
+                      ),
+                    ),
+                    const SizedBox(height: 28),
+
+                    // 도구 종류 / 형태
+                    Text(
+                      '도구 종류 / 형태',
+                      style: AppTypography.b18.copyWith(
+                        color: AppColors.textPrimary,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    _buildCategoryTabs(),
+                    const SizedBox(height: 16),
+
+                    // 도구 그리드
+                    _buildToolGrid(categoryTools),
+                    const SizedBox(height: 32),
+
+                    // 등록된 도구 섹션
+                    Text(
+                      '등록된 도구',
+                      style: AppTypography.b18.copyWith(
+                        color: AppColors.textPrimary,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    _buildSelectedToolsSection(),
+                    const SizedBox(height: 24),
+                  ],
                 ),
               ),
-              const SizedBox(height: 8),
-              Text(
-                '보유한 도구를 선택해 등록하세요.\n여러 개 추가할 수 있습니다.',
-                style: AppTypography.r14.copyWith(color: AppColors.textSecondary),
-              ),
-              const SizedBox(height: 24),
+            ),
 
-              // 카테고리 탭 영역
-              Text(
-                '도구 종류 / 형태',
-                style: AppTypography.b16.copyWith(color: AppColors.textPrimary),
-              ),
-              const SizedBox(height: 12),
-              _buildCategoryTabs(),
-              const SizedBox(height: 16),
-
-              // 도구 그리드
-              Expanded(
-                child: _buildToolGrid(categoryTools),
-              ),
-
-              // 등록된 도구 영역
-              if (_selectedIndexes.isNotEmpty) ...[
-                const SizedBox(height: 12),
-                Text(
-                  '등록된 도구',
-                  style: AppTypography.b16.copyWith(color: AppColors.textPrimary),
-                ),
-                const SizedBox(height: 8),
-                _buildSelectedToolsRow(),
-              ],
-
-              const SizedBox(height: 16),
-
-              // CTA 버튼
-              _buildCtaButton(),
-              const SizedBox(height: 12),
-            ],
-          ),
+            // CTA 버튼
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 8, 20, 16),
+              child: _buildCtaButton(),
+            ),
+          ],
         ),
       ),
     );
@@ -117,7 +139,7 @@ class _ToolRegistrationScreenState extends State<ToolRegistrationScreen> {
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               decoration: BoxDecoration(
-                color: isSelected ? Colors.transparent : AppColors.secondary,
+                color: Colors.transparent,
                 border: Border.all(
                   color: isSelected ? AppColors.primary : AppColors.toolSelectBox,
                 ),
@@ -127,6 +149,7 @@ class _ToolRegistrationScreenState extends State<ToolRegistrationScreen> {
                 category.label,
                 style: AppTypography.sb16.copyWith(
                   color: isSelected ? AppColors.primary : AppColors.textSecondary,
+                  fontSize: 14,
                 ),
               ),
             ),
@@ -142,6 +165,8 @@ class _ToolRegistrationScreenState extends State<ToolRegistrationScreen> {
 
   Widget _buildToolGrid(List<Tool> tools) {
     return GridView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
       itemCount: tools.length,
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 4,
@@ -170,13 +195,20 @@ class _ToolRegistrationScreenState extends State<ToolRegistrationScreen> {
                   child: Image.asset(
                     tool.imagePath,
                     fit: BoxFit.contain,
+                    errorBuilder: (_, __, ___) => const Icon(
+                      Icons.fitness_center,
+                      color: AppColors.textSecondary,
+                    ),
                   ),
                 ),
               ),
               const SizedBox(height: 4),
               Text(
                 tool.shape.label,
-                style: AppTypography.r12.copyWith(color: AppColors.textPrimary),
+                style: AppTypography.r12.copyWith(
+                  color: AppColors.textPrimary,
+                  fontSize: 11,
+                ),
                 textAlign: TextAlign.center,
                 overflow: TextOverflow.ellipsis,
               ),
@@ -188,17 +220,32 @@ class _ToolRegistrationScreenState extends State<ToolRegistrationScreen> {
   }
 
   // ----------------------------------------------------------
-  // 등록된 도구 가로 스크롤
+  // 등록된 도구 섹션
   // ----------------------------------------------------------
 
-  Widget _buildSelectedToolsRow() {
+  Widget _buildSelectedToolsSection() {
+    if (_selectedIndexes.isEmpty) {
+      return Container(
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(vertical: 20),
+        child: Center(
+          child: Text(
+            '도구를 선택해 등록하세요.',
+            style: AppTypography.r14.copyWith(
+              color: AppColors.textSecondary,
+            ),
+          ),
+        ),
+      );
+    }
+
     final selectedTools = _selectedIndexes
         .map((i) => kTools[i])
         .whereType<Tool>()
         .toList();
 
     return SizedBox(
-      height: 80,
+      height: 88,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
         itemCount: selectedTools.length,
@@ -208,14 +255,22 @@ class _ToolRegistrationScreenState extends State<ToolRegistrationScreen> {
           return Column(
             children: [
               Container(
-                width: 56,
-                height: 56,
+                width: 60,
+                height: 60,
                 decoration: BoxDecoration(
                   color: AppColors.secondary,
                   borderRadius: BorderRadius.circular(12),
                 ),
-                padding: const EdgeInsets.all(6),
-                child: Image.asset(tool.imagePath, fit: BoxFit.contain),
+                padding: const EdgeInsets.all(8),
+                child: Image.asset(
+                  tool.imagePath,
+                  fit: BoxFit.contain,
+                  errorBuilder: (_, __, ___) => const Icon(
+                    Icons.fitness_center,
+                    color: AppColors.textSecondary,
+                    size: 20,
+                  ),
+                ),
               ),
               const SizedBox(height: 4),
               Text(
@@ -241,11 +296,11 @@ class _ToolRegistrationScreenState extends State<ToolRegistrationScreen> {
 
     return SizedBox(
       width: double.infinity,
-      height: 52,
+      height: 56,
       child: ElevatedButton(
         onPressed: isEnabled ? _onRegister : null,
         style: ElevatedButton.styleFrom(
-          backgroundColor: isEnabled ? AppColors.primary : AppColors.toolSelectBox,
+          backgroundColor: AppColors.primary,
           foregroundColor: AppColors.background,
           disabledBackgroundColor: AppColors.toolSelectBox,
           disabledForegroundColor: AppColors.textSecondary,
@@ -255,7 +310,9 @@ class _ToolRegistrationScreenState extends State<ToolRegistrationScreen> {
         ),
         child: Text(
           _isSaving ? '저장 중...' : '도구 등록하고 시작하기',
-          style: AppTypography.b16,
+          style: AppTypography.b16.copyWith(
+            color: isEnabled ? AppColors.background : AppColors.textSecondary,
+          ),
         ),
       ),
     );
@@ -350,13 +407,13 @@ class _OnboardingPostureScreen extends StatelessWidget {
 
             // 버튼들
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24),
+              padding: const EdgeInsets.symmetric(horizontal: 28),
               child: Column(
                 children: [
                   // 자세 측정 시작 버튼
                   SizedBox(
                     width: double.infinity,
-                    height: 52,
+                    height: 56,
                     child: ElevatedButton(
                       onPressed: () {
                         Navigator.push(
