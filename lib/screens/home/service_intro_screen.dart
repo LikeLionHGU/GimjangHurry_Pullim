@@ -407,14 +407,7 @@ class CautionScreen extends StatelessWidget {
                 width: double.infinity,
                 height: 56,
                 child: ElevatedButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => const ToolRegistrationScreen(),
-                      ),
-                    );
-                  },
+                  onPressed: () => Navigator.pop(context),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.primary,
                     foregroundColor: AppColors.background,
@@ -422,7 +415,7 @@ class CautionScreen extends StatelessWidget {
                       borderRadius: BorderRadius.circular(12),
                     ),
                   ),
-                  child: Text('도구 등록하고 시작하기', style: AppTypography.b16),
+                  child: Text('확인하기', style: AppTypography.b16),
                 ),
               ),
             ),

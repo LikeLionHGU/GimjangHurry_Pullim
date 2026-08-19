@@ -102,6 +102,8 @@ class DatabaseHelper {
         issues TEXT,
         summary TEXT,
         score INTEGER NOT NULL DEFAULT 0,
+        front_image TEXT,
+        side_image TEXT,
         FOREIGN KEY (user_id) REFERENCES users(user_id)
       )
     ''');
@@ -448,6 +450,15 @@ class DatabaseHelper {
       'posture_results',
       where: 'user_id = ?',
       whereArgs: [userId],
+      orderBy: 'measured_at DESC',
+    );
+    return maps.map((m) => PostureResultModel.fromMap(m)).toList();
+  }
+
+  Future<List<PostureResultModel>> getAllPostureResults() async {
+    final db = await database;
+    final maps = await db.query(
+      'posture_results',
       orderBy: 'measured_at DESC',
     );
     return maps.map((m) => PostureResultModel.fromMap(m)).toList();

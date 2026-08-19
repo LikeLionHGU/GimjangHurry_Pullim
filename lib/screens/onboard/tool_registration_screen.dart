@@ -358,12 +358,21 @@ class _OnboardingPostureScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AppColors.background,
+      appBar: AppBar(
+        backgroundColor: AppColors.background,
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios, color: AppColors.textPrimary, size: 20),
+          onPressed: () => Navigator.pop(context),
+        ),
+      ),
       body: SafeArea(
         child: Column(
           children: [
             // 상단 안내
             Padding(
-              padding: const EdgeInsets.fromLTRB(24, 32, 24, 0),
+              padding: const EdgeInsets.fromLTRB(24, 16, 24, 0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [

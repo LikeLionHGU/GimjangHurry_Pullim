@@ -1,14 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:intl/intl.dart';
 import '../../constants/app_colors.dart';
 import '../../constants/app_strings.dart';
 import '../../constants/app_typography.dart';
 import '../../models/course_model.dart';
 import '../../providers/app_provider.dart';
+import '../../models/posture_result_model.dart';
 import '../../services/database_helper.dart';
 import '../../services/course_loader.dart';
 import '../course/course_summary_screen.dart';
+import '../posture/posture_result_screen.dart';
 import 'library_all_screen.dart';
+import 'posture_history_screen.dart';
 
 class LibraryScreen extends StatefulWidget {
   const LibraryScreen({super.key});
@@ -20,20 +24,23 @@ class LibraryScreen extends StatefulWidget {
 class _LibraryScreenState extends State<LibraryScreen> {
   final DatabaseHelper _db = DatabaseHelper();
   List<CourseModel> _savedCourses = [];
+  List<PostureResultModel> _postureResults = [];
   int? _selectedIndex;
   bool _isLoading = true;
 
   @override
   void initState() {
     super.initState();
-    _loadCourses();
+    _loadData();
   }
 
-  Future<void> _loadCourses() async {
+  Future<void> _loadData() async {
     setState(() => _isLoading = true);
     final courses = await _db.getSavedCourses();
+    final postureResults = await _db.getAllPostureResults();
     setState(() {
       _savedCourses = courses;
+      _postureResults = postureResults;
       _isLoading = false;
     });
   }
@@ -86,7 +93,7 @@ class _LibraryScreenState extends State<LibraryScreen> {
                   AppStrings.savedCourses,
                   style: AppTypography.b20.copyWith(
                     color: AppColors.textPrimary,
-                    fontSize: 22,
+                    fontSize: 20,
                   ),
                 ),
                 const SizedBox(height: 20),
@@ -106,7 +113,7 @@ class _LibraryScreenState extends State<LibraryScreen> {
                       MaterialPageRoute(
                         builder: (_) => const LibraryAllScreen(),
                       ),
-                    ).then((_) => _loadCourses());
+                    ).then((_) => _loadData());
                   },
                   child: Padding(
                     padding: const EdgeInsets.symmetric(vertical: 8),
@@ -133,6 +140,11 @@ class _LibraryScreenState extends State<LibraryScreen> {
                     ),
                   ),
                 ),
+
+                const SizedBox(height: 32),
+
+                // 자세 측정 결과 섹션
+                _buildPostureSection(),
               ],
             ),
           ),
@@ -179,7 +191,7 @@ class _LibraryScreenState extends State<LibraryScreen> {
             isAlreadySaved: courseModel.isSaved,
           ),
         ),
-      ).then((_) => _loadCourses());
+      ).then((_) => _loadData());
     }
   }
 
@@ -300,4 +312,133 @@ class _LibraryScreenState extends State<LibraryScreen> {
   String _getToolInfo(CourseModel course) {
     return '폼롤러 + 마사지볼';
   }
+
+  Widget _buildPostureSection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          '자세 측정 결과',
+          style: AppTypography.b20.copyWith(
+            color: AppColors.textPrimary,
+            fontSize: 18,
+          ),
+        ),
+        const SizedBox(height: 16),
+        if (_postureResults.isEmpty)
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(vertical: 32),
+            child: Center(
+              child: Text(
+                '측정 결과가 없습니다',
+                style: AppTypography.r14.copyWith(color: AppColors.textTertiary),
+              ),
+            ),
+          )
+        else
+          ..._postureResults.take(2).map(_buildPostureItem),
+        if (_postureResults.isNotEmpty)
+          GestureDetector(
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const PostureHistoryScreen()),
+              ).then((_) => _loadData());
+            },
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 8),
+              child: Row(
+                children: [
+                  Icon(Icons.assessment, color: AppColors.textPrimary, size: 20),
+                  const SizedBox(width: 10),
+                  Text('자세 측정 전체 보기',
+                      style: AppTypography.r14.copyWith(color: AppColors.textPrimary)),
+                  const Spacer(),
+                  const Icon(Icons.chevron_right, color: AppColors.textPrimary),
+                ],
+              ),
+            ),
+          ),
+      ],
+    );
+  }
+
+  Widget _buildPostureItem(PostureResultModel result) {
+    final dateStr = DateFormat('yyyy.MM.dd  HH:mm').format(result.measuredAt);
+    final scoreColor = result.score >= 85
+        ? AppColors.primary
+        : result.score >= 60
+            ? AppColors.warning
+            : AppColors.error;
+
+    return GestureDetector(
+      onTap: () {
+        final frontAngles = <String, double>{};
+        final sideAngles = <String, double>{};
+        result.angles.forEach((k, v) {
+          if (k.startsWith('front_')) frontAngles[k.replaceFirst('front_', '')] = v;
+          if (k.startsWith('side_')) sideAngles[k.replaceFirst('side_', '')] = v;
+        });
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => PostureResultScreen(
+              result: result,
+              frontImagePath: result.frontImagePath,
+              sideImagePath: result.sideImagePath,
+              frontAngles: frontAngles,
+              sideAngles: sideAngles,
+              score: result.score,
+            ),
+          ),
+        );
+      },
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 12),
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: AppColors.cardBackground,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 48,
+              height: 48,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(color: scoreColor, width: 2),
+              ),
+              child: Center(
+                child: Text('${result.score}',
+                    style: AppTypography.sb16.copyWith(color: scoreColor)),
+              ),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(dateStr,
+                      style: AppTypography.r14.copyWith(color: AppColors.textPrimary)),
+                  const SizedBox(height: 4),
+                  Text(
+                    result.issues.isNotEmpty
+                        ? '주의: ${result.issues.join(", ")}'
+                        : '양호한 자세',
+                    style: AppTypography.r12.copyWith(color: AppColors.textTertiary),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+              ),
+            ),
+            const Icon(Icons.chevron_right, color: AppColors.textTertiary),
+          ],
+        ),
+      ),
+    );
+  }
+
 }

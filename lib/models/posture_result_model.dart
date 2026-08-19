@@ -3,10 +3,12 @@ class PostureResultModel {
   final int? resultId;
   final int userId;
   final DateTime measuredAt;
-  final Map<String, double> angles; // 관절별 각도
-  final List<String> issues; // 감지된 문제 부위
-  final String? summary; // 종합 평가
-  final int score; // 자세 점수 (0~100)
+  final Map<String, double> angles;
+  final List<String> issues;
+  final String? summary;
+  final int score;
+  final String? frontImagePath;
+  final String? sideImagePath;
 
   PostureResultModel({
     this.resultId,
@@ -16,6 +18,8 @@ class PostureResultModel {
     required this.issues,
     this.summary,
     this.score = 0,
+    this.frontImagePath,
+    this.sideImagePath,
   }) : measuredAt = measuredAt ?? DateTime.now();
 
   Map<String, dynamic> toMap() {
@@ -27,6 +31,8 @@ class PostureResultModel {
       'issues': issues.join(','),
       'summary': summary,
       'score': score,
+      'front_image': frontImagePath,
+      'side_image': sideImagePath,
     };
   }
 
@@ -54,6 +60,8 @@ class PostureResultModel {
       issues: issuesList,
       summary: map['summary'] as String?,
       score: map['score'] as int? ?? 0,
+      frontImagePath: map['front_image'] as String?,
+      sideImagePath: map['side_image'] as String?,
     );
   }
 
@@ -65,6 +73,8 @@ class PostureResultModel {
     List<String>? issues,
     String? summary,
     int? score,
+    String? frontImagePath,
+    String? sideImagePath,
   }) {
     return PostureResultModel(
       resultId: resultId ?? this.resultId,
@@ -74,6 +84,8 @@ class PostureResultModel {
       issues: issues ?? this.issues,
       summary: summary ?? this.summary,
       score: score ?? this.score,
+      frontImagePath: frontImagePath ?? this.frontImagePath,
+      sideImagePath: sideImagePath ?? this.sideImagePath,
     );
   }
 }

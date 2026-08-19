@@ -1,9 +1,13 @@
+import 'dart:io';
+import 'dart:ui' as ui;
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import 'package:google_mlkit_pose_detection/google_mlkit_pose_detection.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
+import 'package:path/path.dart' as p;
 import '../../constants/app_colors.dart';
 import '../../constants/app_strings.dart';
 import '../../constants/app_typography.dart';
@@ -39,6 +43,11 @@ class _PostureScreenState extends State<PostureScreen> {
   String? _sideImagePath;
   Map<String, double>? _frontAngles;
   Map<String, double>? _sideAngles;
+
+  // 촬영 시점 포즈 좌표 (정규화 0~1)
+  List<Map<String, double>>? _frontPosePoints;
+  List<Map<String, double>>? _sidePosePoints;
+  List<List<int>>? _poseConnections;
 
   // 촬영 완료 플래그
   bool _frontCaptured = false;
@@ -134,7 +143,7 @@ class _PostureScreenState extends State<PostureScreen> {
     }
 
     final camera = cameras.firstWhere(
-      (c) => c.lensDirection == CameraLensDirection.back,
+      (c) => c.lensDirection == CameraLensDirection.front,
       orElse: () => cameras.first,
     );
 
@@ -411,6 +420,7 @@ class _PostureScreenState extends State<PostureScreen> {
 
       if (_currentPhase == CapturePhase.front) {
         _frontCaptured = true;
+        _frontPosePoints = _extractNormalizedPoints();
         setState(() {
           _frontImagePath = xFile.path;
           _frontAngles = angles;
@@ -435,6 +445,7 @@ class _PostureScreenState extends State<PostureScreen> {
         }
       } else {
         _sideCaptured = true;
+        _sidePosePoints = _extractNormalizedPoints();
         setState(() {
           _sideImagePath = xFile.path;
           _sideAngles = angles;
@@ -464,6 +475,115 @@ class _PostureScreenState extends State<PostureScreen> {
     }
   }
 
+  /// 현재 감지된 포즈의 랜드마크를 정규화 좌표(0~1)로 추출
+  List<Map<String, double>> _extractNormalizedPoints() {
+    if (_detectedPose == null || _cameraController == null) return [];
+    final imgW = _cameraController!.value.previewSize!.height;
+    final imgH = _cameraController!.value.previewSize!.width;
+    
+    final orderedTypes = [
+      PoseLandmarkType.nose,
+      PoseLandmarkType.leftShoulder,
+      PoseLandmarkType.rightShoulder,
+      PoseLandmarkType.leftElbow,
+      PoseLandmarkType.rightElbow,
+      PoseLandmarkType.leftWrist,
+      PoseLandmarkType.rightWrist,
+      PoseLandmarkType.leftHip,
+      PoseLandmarkType.rightHip,
+      PoseLandmarkType.leftKnee,
+      PoseLandmarkType.rightKnee,
+      PoseLandmarkType.leftAnkle,
+      PoseLandmarkType.rightAnkle,
+    ];
+
+    return orderedTypes.map((type) {
+      final lm = _detectedPose!.landmarks[type];
+      if (lm == null) return {'x': -1.0, 'y': -1.0};
+      return {'x': lm.x / imgW, 'y': lm.y / imgH};
+    }).toList();
+  }
+
+  /// 사진 위에 스켈레톤 라인을 그려서 새 이미지로 저장
+  Future<String?> _saveImageWithSkeleton(String imagePath, List<Map<String, double>>? points) async {
+    if (points == null || points.isEmpty) return imagePath;
+
+    try {
+      final file = File(imagePath);
+      final bytes = await file.readAsBytes();
+      final codec = await ui.instantiateImageCodec(bytes);
+      final frame = await codec.getNextFrame();
+      final image = frame.image;
+
+      final recorder = ui.PictureRecorder();
+      final canvas = Canvas(recorder);
+      final imgWidth = image.width.toDouble();
+      final imgHeight = image.height.toDouble();
+
+      // 원본 이미지 그리기
+      canvas.drawImage(image, Offset.zero, Paint());
+
+      // 스켈레톤 그리기
+      final dotPaint = Paint()
+        ..color = const Color(0xFFCDFF00)
+        ..style = PaintingStyle.fill;
+
+      final linePaint = Paint()
+        ..color = const Color(0xFFCDFF00).withValues(alpha: 0.8)
+        ..strokeWidth = imgWidth * 0.006
+        ..style = PaintingStyle.stroke
+        ..strokeCap = StrokeCap.round;
+
+      final offsets = points.map((pt) {
+        final x = pt['x'] ?? -1;
+        final y = pt['y'] ?? -1;
+        if (x < 0 || y < 0) return null;
+        return Offset(x * imgWidth, y * imgHeight);
+      }).toList();
+
+      // 연결선
+      const connections = [
+        [0, 1], [0, 2], [1, 2],
+        [1, 3], [3, 5], [2, 4], [4, 6],
+        [1, 7], [2, 8], [7, 8],
+        [7, 9], [9, 11], [8, 10], [10, 12],
+      ];
+
+      for (final conn in connections) {
+        final a = conn[0] < offsets.length ? offsets[conn[0]] : null;
+        final b = conn[1] < offsets.length ? offsets[conn[1]] : null;
+        if (a != null && b != null) {
+          canvas.drawLine(a, b, linePaint);
+        }
+      }
+
+      // 점
+      for (final pt in offsets) {
+        if (pt != null) {
+          canvas.drawCircle(pt, imgWidth * 0.01, dotPaint);
+        }
+      }
+
+      // 이미지로 변환
+      final picture = recorder.endRecording();
+      final rendered = await picture.toImage(image.width, image.height);
+      final pngBytes = await rendered.toByteData(format: ui.ImageByteFormat.png);
+
+      if (pngBytes == null) return imagePath;
+
+      // 새 파일로 저장
+      final dir = file.parent.path;
+      final newPath = p.join(dir, '${DateTime.now().millisecondsSinceEpoch}_skeleton.png');
+      final newFile = File(newPath);
+      await newFile.writeAsBytes(pngBytes.buffer.asUint8List());
+
+      return newPath;
+    } catch (e) {
+      debugPrint('스켈레톤 이미지 합성 실패: $e');
+      return imagePath;
+    }
+  }
+
   Future<void> _goToResult() async {
     try {
       final provider = context.read<AppProvider>();
@@ -488,12 +608,18 @@ class _PostureScreenState extends State<PostureScreen> {
       );
       final summary = PoseAnalyzer.generateDetailedSummary(issues, score);
 
+      // 스켈레톤 오버레이를 합성한 이미지 생성
+      final frontWithSkeleton = await _saveImageWithSkeleton(_frontImagePath!, _frontPosePoints);
+      final sideWithSkeleton = await _saveImageWithSkeleton(_sideImagePath!, _sidePosePoints);
+
       final result = PostureResultModel(
         userId: userId,
         angles: combinedAngles,
         issues: issues,
         summary: summary,
         score: score,
+        frontImagePath: frontWithSkeleton,
+        sideImagePath: sideWithSkeleton,
       );
 
       final db = DatabaseHelper();
@@ -505,11 +631,13 @@ class _PostureScreenState extends State<PostureScreen> {
           MaterialPageRoute(
             builder: (_) => PostureResultScreen(
               result: result,
-              frontImagePath: _frontImagePath,
-              sideImagePath: _sideImagePath,
+              frontImagePath: frontWithSkeleton,
+              sideImagePath: sideWithSkeleton,
               frontAngles: _frontAngles ?? {},
               sideAngles: _sideAngles ?? {},
               score: score,
+              frontPosePoints: _frontPosePoints,
+              sidePosePoints: _sidePosePoints,
             ),
           ),
         );

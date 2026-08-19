@@ -7,6 +7,7 @@ import 'providers/app_provider.dart';
 import 'screens/main_shell.dart';
 import 'screens/onboard/onboarding_screen.dart';
 import 'course_generator/env_loader.dart';
+import 'services/tool_registration_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -62,11 +63,25 @@ class _SplashScreenState extends State<SplashScreen> {
 
     if (!mounted) return;
 
-    // DB에 사용자가 있으면 홈, 없으면 온보딩
-    final destination = provider.isLoggedIn
-        ? const MainShell()
-        : const OnboardingScreen();
+    // DB에 사용자가 있으면 → 온보딩 완료 여부 체크
+    // 사용자 없으면 → 이름 입력부터 (온보딩 처음)
+    Widget destination;
+    if (!provider.isLoggedIn) {
+      destination = const OnboardingScreen();
+    } else {
+      // 사용자는 있지만 온보딩(도구등록)을 완료했는지 확인
+      final toolService = ToolRegistrationService();
+      final userName = provider.currentUser?.name ?? '';
+      final onboardingDone = await toolService.isOnboardingCompleteForUser(userName);
+      if (onboardingDone) {
+        destination = const MainShell();
+      } else {
+        // 이름은 입력했지만 온보딩 미완료 → 서비스 소개부터
+        destination = const OnboardingIntroScreen();
+      }
+    }
 
+    if (!mounted) return;
     Navigator.of(context).pushReplacement(
       MaterialPageRoute(builder: (_) => destination),
     );
