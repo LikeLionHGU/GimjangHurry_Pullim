@@ -356,8 +356,11 @@ class _CourseCompleteScreenState extends State<CourseCompleteScreen> {
             TextButton(
               onPressed: () {
                 Navigator.of(context).pushAndRemoveUntil(
-                  MaterialPageRoute(builder: (_) => const PostureGuideScreen()),
+                  MaterialPageRoute(builder: (_) => const MainShell()),
                   (_) => false,
+                );
+                Navigator.of(context).push(
+                  MaterialPageRoute(builder: (_) => const PostureGuideScreen()),
                 );
               },
               child: Text(

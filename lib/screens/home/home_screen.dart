@@ -74,38 +74,22 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<void> _onPostureBasedCourse() async {
     final userId = context.read<AppProvider>().currentUser?.userId ?? 1;
-    final service = PostureToReleaseService();
+    final db = DatabaseHelper();
+    final latestResult = await db.getLatestPostureResult(userId);
 
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (_) => const Center(child: CircularProgressIndicator()),
-    );
+    if (!mounted) return;
 
-    try {
-      final entries = await service.recommendFromLatest(userId);
-      service.dispose();
-
-      if (!mounted) return;
-      Navigator.pop(context);
-
-      if (entries.isEmpty) {
-        _showPostureCheckRequiredDialog();
-        return;
-      }
-
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (_) => CourseGenerationScreen(initialFatigueEntries: entries),
-        ),
-      );
-    } catch (e) {
-      service.dispose();
-      if (!mounted) return;
-      Navigator.pop(context);
+    if (latestResult == null || latestResult.issues.isEmpty) {
       _showPostureCheckRequiredDialog();
+      return;
     }
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => const _PostureRecommendLoadingScreen(),
+      ),
+    );
   }
 
   void _showPostureCheckRequiredDialog() {
@@ -728,6 +712,150 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+}
+
+/// 점검 기반 코스 추천 부위를 불러오는 로딩 화면.
+class _PostureRecommendLoadingScreen extends StatefulWidget {
+  const _PostureRecommendLoadingScreen();
+
+  @override
+  State<_PostureRecommendLoadingScreen> createState() =>
+      _PostureRecommendLoadingScreenState();
+}
+
+class _PostureRecommendLoadingScreenState
+    extends State<_PostureRecommendLoadingScreen> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _load());
+  }
+
+  Future<void> _load() async {
+    final userId = context.read<AppProvider>().currentUser?.userId ?? 1;
+    final service = PostureToReleaseService();
+
+    try {
+      final entries = await service.recommendFromLatest(userId);
+      service.dispose();
+
+      if (!mounted) return;
+
+      if (entries.isEmpty) {
+        Navigator.pop(context);
+        _showPostureCheckRequiredDialog();
+        return;
+      }
+
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (_) => CourseGenerationScreen(initialFatigueEntries: entries),
+        ),
+      );
+    } catch (e) {
+      service.dispose();
+      if (!mounted) return;
+      Navigator.pop(context);
+      _showPostureCheckRequiredDialog();
+    }
+  }
+
+  void _showPostureCheckRequiredDialog() {
+    final navContext = context;
+    showDialog(
+      context: navContext,
+      barrierDismissible: true,
+      builder: (ctx) => Dialog(
+        backgroundColor: AppColors.cardBackground,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        insetPadding: const EdgeInsets.symmetric(horizontal: 32),
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Align(
+                alignment: Alignment.topRight,
+                child: GestureDetector(
+                  onTap: () => Navigator.pop(ctx),
+                  child: const Icon(Icons.close, color: AppColors.textPrimary, size: 24),
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                '자세 점검이 필요해요',
+                style: AppTypography.sb24.copyWith(color: AppColors.textPrimary),
+              ),
+              const SizedBox(height: 12),
+              Text(
+                '맞춤 코스를 생성하려면 먼저 자세 점검 테스트를 완료해 주세요.',
+                style: AppTypography.r14.copyWith(color: AppColors.textSecondary, height: 1.5),
+              ),
+              const SizedBox(height: 24),
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton(
+                      onPressed: () => Navigator.pop(ctx),
+                      style: OutlinedButton.styleFrom(
+                        side: const BorderSide(color: AppColors.textPrimary),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                      ),
+                      child: Text('취소', style: AppTypography.r14.copyWith(color: AppColors.textPrimary)),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: () {
+                        Navigator.pop(ctx);
+                        Navigator.push(navContext, MaterialPageRoute(builder: (_) => const PostureGuideScreen()));
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.primary,
+                        foregroundColor: AppColors.background,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                      ),
+                      child: Text('점검하기', style: AppTypography.r14.copyWith(color: AppColors.background, fontWeight: FontWeight.w600)),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: AppColors.background,
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const CircularProgressIndicator(color: AppColors.primary),
+            const SizedBox(height: 24),
+            Text(
+              '맞춤 부위를 분석하고 있어요',
+              style: AppTypography.b16.copyWith(color: AppColors.textPrimary),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              '잠시만 기다려 주세요',
+              style: AppTypography.r14.copyWith(color: AppColors.textSecondary),
+            ),
+          ],
         ),
       ),
     );

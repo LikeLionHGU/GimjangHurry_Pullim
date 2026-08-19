@@ -591,7 +591,6 @@ class _CourseGenerationScreenState extends State<CourseGenerationScreen> {
       runSpacing: 8,
       children: _fatigueLevels.entries.map((entry) {
         final label = '${entry.key.part.label}';
-        final level = entry.value.round();
         return Container(
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
           decoration: BoxDecoration(
@@ -600,7 +599,7 @@ class _CourseGenerationScreenState extends State<CourseGenerationScreen> {
             borderRadius: BorderRadius.circular(20),
           ),
           child: Text(
-            '$label (Lv.$level)',
+            '$label',
             style: AppTypography.sb16.copyWith(
               color: AppColors.primary,
               fontSize: 13,
