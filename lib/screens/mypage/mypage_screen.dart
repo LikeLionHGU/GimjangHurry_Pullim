@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:sqflite/sqflite.dart';
 import '../../constants/app_colors.dart';
@@ -6,6 +7,7 @@ import '../../constants/app_strings.dart';
 import '../../constants/app_typography.dart';
 import '../../models/course_model.dart';
 import '../../models/execution_model.dart';
+import '../../models/posture_result_model.dart';
 import '../../assets/tool_assets.dart' as tool_assets;
 import '../../providers/app_provider.dart';
 import '../../services/database_helper.dart';
@@ -13,6 +15,8 @@ import '../../services/course_loader.dart';
 import '../../services/tool_registration_service.dart';
 import '../course/course_summary_screen.dart';
 import '../posture/posture_guide_screen.dart';
+import '../posture/posture_result_screen.dart';
+import '../library/posture_history_screen.dart';
 import '../home/recent_history_screen.dart';
 import 'add_tool_screen.dart';
 import 'owned_tools_screen.dart';
@@ -35,6 +39,7 @@ class _MypageScreenState extends State<MypageScreen> {
   double _avgFatigueReduction = 0;
   List<tool_assets.Tool> _ownedTools = [];
   List<(CourseModel, ExecutionModel)> _recentExecutions = [];
+  List<PostureResultModel> _postureResults = [];
   bool _isLoading = true;
 
   @override
@@ -61,6 +66,9 @@ class _MypageScreenState extends State<MypageScreen> {
     final toolIndexes = await _toolService.getRegisteredTools();
     final ownedTools = tool_assets.toolsOf(toolIndexes);
 
+    // 자세 측정 결과
+    final postureResults = await _db.getAllPostureResults();
+
     setState(() {
       _totalExec = totalExec;
       _allCourseCount = allCount;
@@ -68,6 +76,7 @@ class _MypageScreenState extends State<MypageScreen> {
       _savedCoursesCount = savedCourses.length;
       _avgFatigueReduction = avgReduction;
       _ownedTools = ownedTools;
+      _postureResults = postureResults;
       _recentExecutions = recentExecutions;
       _isLoading = false;
     });
@@ -122,12 +131,12 @@ class _MypageScreenState extends State<MypageScreen> {
                       ),
                       const SizedBox(height: 16),
 
-                      // 자세 점검하기 버튼
-                      _buildPostureCheckButton(),
-                      const SizedBox(height: 20),
-
                       // 통계 카드 3개
                       _buildStatCards(),
+                      const SizedBox(height: 32),
+
+                      // 자세 점검하기 + 최근 측정 결과
+                      _buildPostureSection(),
                       const SizedBox(height: 32),
 
                       // 보유 도구 섹션
@@ -145,36 +154,69 @@ class _MypageScreenState extends State<MypageScreen> {
     );
   }
 
-  Widget _buildPostureCheckButton() {
-    return GestureDetector(
-      onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (_) => const PostureGuideScreen()),
-        ).then((_) => _loadData());
-      },
-      child: Container(
-        width: double.infinity,
-        padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 14),
-        decoration: BoxDecoration(
-          color: AppColors.cardBackground,
-          borderRadius: BorderRadius.circular(12),
+  Widget _buildPostureSection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // 자세 점검하기 버튼
+        GestureDetector(
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const PostureGuideScreen()),
+            ).then((_) => _loadData());
+          },
+          child: Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+            decoration: BoxDecoration(
+              color: AppColors.cardBackground,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Row(
+              children: [
+                Text(
+                  AppStrings.postureCheck,
+                  style: AppTypography.r14.copyWith(
+                    color: AppColors.primary,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                const Spacer(),
+                const Icon(Icons.chevron_right, color: AppColors.primary, size: 20),
+              ],
+            ),
+          ),
         ),
-        child: Row(
-          children: [
-            Text(
-              AppStrings.postureCheck,
-              style: AppTypography.r14.copyWith(
-                color: AppColors.primary,
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
+
+        // 최근 측정 결과 1건
+        if (_postureResults.isNotEmpty) ...[
+          const SizedBox(height: 12),
+          _buildPostureItem(_postureResults.first),
+          // 전체 보기 링크
+          GestureDetector(
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const PostureHistoryScreen()),
+              ).then((_) => _loadData());
+            },
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 4),
+              child: Row(
+                children: [
+                  Icon(Icons.assessment, color: AppColors.textSecondary, size: 18),
+                  const SizedBox(width: 8),
+                  Text('자세 측정 전체 보기',
+                      style: AppTypography.r12.copyWith(color: AppColors.textSecondary)),
+                  const Spacer(),
+                  const Icon(Icons.chevron_right, color: AppColors.textSecondary, size: 18),
+                ],
               ),
             ),
-            const Spacer(),
-            const Icon(Icons.chevron_right, color: AppColors.primary, size: 20),
-          ],
-        ),
-      ),
+          ),
+        ],
+      ],
     );
   }
 
@@ -204,6 +246,84 @@ class _MypageScreenState extends State<MypageScreen> {
           ),
         ),
       ],
+    );
+  }
+
+
+  Widget _buildPostureItem(PostureResultModel result) {
+    final dateStr = DateFormat('yyyy.MM.dd  HH:mm').format(result.measuredAt);
+    final scoreColor = result.score >= 85
+        ? AppColors.primary
+        : result.score >= 60
+            ? AppColors.warning
+            : AppColors.error;
+
+    return GestureDetector(
+      onTap: () {
+        final frontAngles = <String, double>{};
+        final sideAngles = <String, double>{};
+        result.angles.forEach((k, v) {
+          if (k.startsWith('front_')) frontAngles[k.replaceFirst('front_', '')] = v;
+          if (k.startsWith('side_')) sideAngles[k.replaceFirst('side_', '')] = v;
+        });
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => PostureResultScreen(
+              result: result,
+              frontImagePath: result.frontImagePath,
+              sideImagePath: result.sideImagePath,
+              frontAngles: frontAngles,
+              sideAngles: sideAngles,
+              score: result.score,
+            ),
+          ),
+        );
+      },
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 12),
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: AppColors.cardBackground,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 48,
+              height: 48,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(color: scoreColor, width: 2),
+              ),
+              child: Center(
+                child: Text('${result.score}',
+                    style: AppTypography.sb16.copyWith(color: scoreColor)),
+              ),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(dateStr,
+                      style: AppTypography.r14.copyWith(color: AppColors.textPrimary)),
+                  const SizedBox(height: 4),
+                  Text(
+                    result.issues.isNotEmpty
+                        ? '주의: ${result.issues.join(", ")}'
+                        : '양호한 자세',
+                    style: AppTypography.r12.copyWith(color: AppColors.textTertiary),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+              ),
+            ),
+            const Icon(Icons.chevron_right, color: AppColors.textTertiary),
+          ],
+        ),
+      ),
     );
   }
 

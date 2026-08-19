@@ -39,6 +39,6 @@ class AppColors {
   static const Color borderActive = Color(0xFFB1ED01);
 
   // Status (legacy compat)
-  static const Color warning = Color(0xFFF6531F);
+  static const Color warning = Color(0xFFFF7E00);
   static const Color success = Color(0xFFB1ED01);
 }

@@ -39,7 +39,7 @@ class AppStrings {
 
   // 라이브러리
   static const String savedCourses = '저장된 코스';
-  static const String historyAll = '저장된 코스 전체 보기';
+  static const String historyAll = '저장된 코스 전체보기';
   static const String startCourse = '시작하기';
 
   // 마이페이지
