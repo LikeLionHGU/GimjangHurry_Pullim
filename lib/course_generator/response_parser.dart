@@ -23,8 +23,8 @@ class ResponseParser {
     final totalDuration = json['totalDuration'] as int;
     final summary = json['summary'] as String;
 
-    final steps = <CourseStep>[];
-    int computedTotal = 0;
+    var steps = <CourseStep>[];
+    var computedTotal = 0;
 
     for (var i = 0; i < rawSteps.length; i++) {
       final raw = rawSteps[i] as Map<String, dynamic>;
@@ -43,7 +43,7 @@ class ResponseParser {
       // 도구 자동 배정
       final toolIndex = moveFilter.bestToolForMove(move, request.ownedToolSet);
 
-      // duration 범위 체크
+      // duration 범위 체크 (병합된 step은 이후에 별도 처리하므로 여기서는 단순 기록)
       if (duration < move.time.min || duration > move.time.max) {
         warnings.add(
           '$stepLabel: duration ${duration}초가 허용 범위 '
@@ -62,12 +62,52 @@ class ResponseParser {
       computedTotal += duration;
     }
 
-    // 총 시간 검증
+    // 중복 동작 병합: 같은 moveIndex가 여러 번 등장하면 duration을 합산하여 하나로 통합
+    final mergedSteps = <CourseStep>[];
+    final seenMoves = <int>{};
+
+    for (final step in steps) {
+      if (seenMoves.contains(step.moveIndex)) {
+        // 이미 추가된 동일 동작을 찾아 duration 합산
+        final existingIdx = mergedSteps.indexWhere(
+          (s) => s.moveIndex == step.moveIndex,
+        );
+        if (existingIdx != -1) {
+          final existing = mergedSteps[existingIdx];
+          mergedSteps[existingIdx] = CourseStep(
+            moveIndex: existing.moveIndex,
+            toolIndex: existing.toolIndex,
+            duration: existing.duration + step.duration,
+            reason: existing.reason,
+          );
+          warnings.add(
+            '동작 ${step.moveIndex} 중복 발견: duration ${step.duration}초를 '
+            '기존 step에 합산 (총 ${existing.duration + step.duration}초).',
+          );
+        }
+      } else {
+        seenMoves.add(step.moveIndex);
+        mergedSteps.add(step);
+      }
+    }
+
+    // 병합된 결과로 교체
+    steps = mergedSteps;
+    computedTotal = steps.fold<int>(0, (sum, s) => sum + s.duration);
+
+    // 총 시간 검증 (80~110% 범위)
     final maxAllowed = (request.availableTime * 1.1).ceil();
     if (computedTotal > maxAllowed) {
       warnings.add(
         '계산된 총 시간($computedTotal초)이 가용 시간(${request.availableTime}초)의 '
         '110%($maxAllowed초)를 초과합니다.',
+      );
+    }
+    final minExpected = (request.availableTime * 0.8).floor();
+    if (computedTotal < minExpected) {
+      warnings.add(
+        '계산된 총 시간($computedTotal초)이 가용 시간(${request.availableTime}초)의 '
+        '80%($minExpected초)에 미달합니다.',
       );
     }
 

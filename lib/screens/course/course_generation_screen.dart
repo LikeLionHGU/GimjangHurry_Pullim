@@ -8,6 +8,7 @@ import '../../assets/tool_assets.dart';
 import '../../constants/app_colors.dart';
 import '../../constants/app_typography.dart';
 import '../../course_generator/course_generator_library.dart';
+import '../../services/effectiveness_service.dart';
 import '../../services/tool_registration_service.dart';
 import 'course_result_screen.dart';
 
@@ -756,8 +757,38 @@ class _CourseLoadingScreenState extends State<_CourseLoadingScreen> {
 
   Future<void> _generate() async {
     try {
+      // 효과 정보 조회 (실패해도 코스 생성은 계속 진행)
+      Map<String, PartEffectiveness>? effectiveness;
+      try {
+        final service = EffectivenessService();
+        // fatigueEntries에서 face_part 키 Set 생성
+        final targetKeys = <String>{};
+        for (final entry in widget.request.fatigueEntries) {
+          final face = entry.face == BodyFace.front ? 'front' : 'back';
+          final part = entry.part.name;
+          targetKeys.add('${face}_$part');
+        }
+        final result = await service.calculate(targetKeys);
+        if (result.isNotEmpty) {
+          effectiveness = result;
+          debugPrint('📊 효과 정보 ${result.length}개 부위 반영');
+        } else {
+          debugPrint('📊 효과 정보: 기록 부족으로 미반영');
+        }
+      } catch (e) {
+        debugPrint('📊 효과 정보 조회 실패 (무시): $e');
+      }
+
+      // CourseRequest에 효과 정보 주입
+      final request = CourseRequest(
+        fatigueEntries: widget.request.fatigueEntries,
+        ownedTools: widget.request.ownedTools,
+        availableTime: widget.request.availableTime,
+        effectiveness: effectiveness,
+      );
+
       final generator = CourseGenerator();
-      final course = await generator.generateCourse(widget.request);
+      final course = await generator.generateCourse(request);
 
       debugPrint('=== 코스 생성 완료 ===');
       debugPrint('요약: ${course.summary}');

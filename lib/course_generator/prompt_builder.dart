@@ -17,10 +17,11 @@ class PromptBuilder {
         '1. **자세 전환 최소화**: 같은 자세(posture)의 동작을 연속 배치하여 자세 전환 횟수를 줄인다.\n'
         '2. **피로도 비례 시간 배분**: 피로도가 높은 부위에 더 많은 시간(더 많은 동작 또는 더 긴 duration)을 배분한다.\n'
         '3. **시간 범위 준수**: 각 동작의 duration은 해당 동작의 time.min ~ time.max 범위 내에서 배정한다.\n'
-        '4. **총 시간 준수**: 모든 step의 duration 합이 가용 시간을 초과하지 않아야 한다. 가용 시간의 90~100%를 채우는 것이 이상적이다.\n'
-        '5. **동작 선택 이유**: 각 동작을 선택한 이유를 한국어로 간결하게 설명한다 (1~2문장).\n'
-        '6. **코스 이름**: 코스의 목적을 나타내는 짧고 직관적인 한국어 이름을 생성한다 (예: "목·어깨 집중 이완", "전신 피로 해소 코스").\n'
-        '7. **코스 요약**: 전체 코스의 목적과 흐름을 한국어로 2~3문장으로 요약한다.\n'
+        '4. **총 시간 유연 준수**: 모든 step의 duration 합이 가용 시간의 80~110% 범위 내에 들도록 한다.\n'
+        '5. **동작 중복 금지**: 같은 동작(moveIndex)을 2회 이상 선택하지 않는다. 반드시 서로 다른 동작만 선택한다.\n'
+        '6. **동작 선택 이유**: 각 동작을 선택한 이유를 한국어로 간결하게 설명한다 (1~2문장).\n'
+        '7. **코스 이름**: 코스의 목적을 나타내는 짧고 직관적인 한국어 이름을 생성한다 (예: "목·어깨 집중 이완", "전신 피로 해소 코스").\n'
+        '8. **코스 요약**: 전체 코스의 목적과 흐름을 한국어로 2~3문장으로 요약한다.\n'
         '\n'
         '## 응답 형식\n'
         '\n'
@@ -71,7 +72,40 @@ class PromptBuilder {
       buffer.writeln();
     }
 
-    // 3. 지시
+    // 3. 효과 참고사항 (조건 충족 시에만)
+    if (request.effectiveness != null && request.effectiveness!.isNotEmpty) {
+      final candidateIndexes = candidates.map((m) => m.index).toSet();
+      final relevantParts = request.effectiveness!.entries.where((entry) {
+        // 후보 동작 목록에 포함된 동작이 하나라도 있는 부위만 표시
+        return entry.value.moves.any((m) => candidateIndexes.contains(m.moveIndex));
+      }).toList();
+
+      if (relevantParts.isNotEmpty) {
+        buffer.writeln('## 참고 정보 (과거 실행 이력 기반)');
+        buffer.writeln();
+        buffer.writeln('아래는 이 사용자의 최근 30일간 운동 기록에서 추출한 부위별 동작 효과입니다.');
+        buffer.writeln('참고 정보입니다. 동작 선택에 자유롭게 활용하세요.');
+        buffer.writeln();
+
+        for (final entry in relevantParts) {
+          final part = entry.value;
+          buffer.writeln('### ${part.partLabel} (${part.sampleCount}회 실행, 평균 피로도 감소 ${part.avgReduction.toStringAsFixed(1)}점)');
+
+          // 후보에 포함된 동작만, 상위 5개까지 표시
+          final filteredMoves = part.moves
+              .where((m) => candidateIndexes.contains(m.moveIndex))
+              .take(5)
+              .toList();
+
+          for (final move in filteredMoves) {
+            buffer.writeln('- 동작 ${move.moveIndex} (${move.moveName}): 평균 -${move.avgReduction.toStringAsFixed(1)}점 (${move.count}회)');
+          }
+          buffer.writeln();
+        }
+      }
+    }
+
+    // 4. 지시
     buffer.writeln('## 지시');
     buffer.writeln();
     buffer.writeln('위 후보 동작들 중에서 적절한 동작을 선택하여 코스를 편성하세요.');
