@@ -381,23 +381,35 @@ class _CourseExecutionScreenState extends State<CourseExecutionScreen> {
             child: PageView(
               controller: _pageController,
               children: [
-                // 페이지 1: 자세 사진 (placeholder)
+                // 페이지 1: 동작 이미지
                 Container(
                   color: AppColors.cardBackground,
-                  child: Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const Icon(Icons.image_outlined,
-                            color: AppColors.textSecondary, size: 48),
-                        const SizedBox(height: 8),
-                        Text(
-                          '자세 이미지 준비 중',
-                          style: AppTypography.r14.copyWith(color: AppColors.textSecondary),
+                  padding: const EdgeInsets.all(16),
+                  child: _currentMove != null
+                      ? Image.asset(
+                          _currentMove!.imagePath,
+                          fit: BoxFit.contain,
+                          errorBuilder: (_, __, ___) => Center(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                const Icon(Icons.image_outlined,
+                                    color: AppColors.textSecondary, size: 48),
+                                const SizedBox(height: 8),
+                                Text(
+                                  '이미지 없음',
+                                  style: AppTypography.r14.copyWith(color: AppColors.textSecondary),
+                                ),
+                              ],
+                            ),
+                          ),
+                        )
+                      : Center(
+                          child: Text(
+                            '동작 이미지 없음',
+                            style: AppTypography.r14.copyWith(color: AppColors.textSecondary),
+                          ),
                         ),
-                      ],
-                    ),
-                  ),
                 ),
                 // 페이지 2: 부위 이미지
                 Container(
