@@ -103,7 +103,7 @@ class _PostureResultScreenState extends State<PostureResultScreen> {
                     );
                   },
                   icon: const Icon(Icons.play_arrow),
-                  label: const Text('코스 시작하기'),
+                  label: const Text('홈으로 이동'),
                 ),
               ),
             ),

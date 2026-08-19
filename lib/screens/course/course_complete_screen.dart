@@ -354,7 +354,22 @@ class _CourseCompleteScreenState extends State<CourseCompleteScreen> {
           if (widget.isPostureBased) ...[
             const SizedBox(height: 12),
             TextButton(
-              onPressed: () {
+              onPressed: () async {
+                // 실행 기록 저장 (홈으로 이동과 동일하게)
+                final db = DatabaseHelper();
+                final beforeMap = widget.isReplay
+                    ? <String, int>{}
+                    : CourseMapper.extractBeforeFatigue(widget.course);
+                final afterMap = <String, int>{};
+                final execution = ExecutionModel(
+                  courseId: widget.courseId,
+                  executedAt: DateTime.now(),
+                  before: beforeMap,
+                  after: afterMap,
+                );
+                await db.insertExecution(execution);
+
+                if (!mounted) return;
                 Navigator.of(context).pushAndRemoveUntil(
                   MaterialPageRoute(builder: (_) => const MainShell()),
                   (_) => false,
