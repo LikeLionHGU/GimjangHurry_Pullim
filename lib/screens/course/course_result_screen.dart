@@ -55,7 +55,7 @@ class CourseResultScreen extends StatelessWidget {
             // ── 본문 스크롤 영역 ──
             Expanded(
               child: SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
+                padding: const EdgeInsets.symmetric(horizontal: 28),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -80,11 +80,10 @@ class CourseResultScreen extends StatelessWidget {
                     Container(
                       width: double.infinity,
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 20, vertical: 16),
+                          horizontal: 28, vertical: 16),
                       decoration: BoxDecoration(
-                        color: AppColors.secondary,
+                        color: AppColors.cardBackground,
                         borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: AppColors.toolSelectBox),
                       ),
                       child: Row(
                         children: [
@@ -98,7 +97,7 @@ class CourseResultScreen extends StatelessWidget {
                           const Spacer(),
                           Text(
                             '$totalMinutes분',
-                            style: AppTypography.b20.copyWith(color: AppColors.textPrimary),
+                            style: AppTypography.b20.copyWith(color: AppColors.primary),
                           ),
                         ],
                       ),
@@ -121,7 +120,7 @@ class CourseResultScreen extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         const Icon(Icons.warning_amber_rounded,
-                            color: AppColors.error, size: 20),
+                            color: AppColors.primary, size: 20),
                         const SizedBox(width: 8),
                         Expanded(
                           child: Text(
@@ -185,8 +184,9 @@ class CourseResultScreen extends StatelessWidget {
                   ),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.primary,
+                    foregroundColor: AppColors.background,
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(30),
+                      borderRadius: BorderRadius.circular(12),
                     ),
                   ),
                 ),
@@ -215,7 +215,7 @@ class CourseResultScreen extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         decoration: BoxDecoration(
-          color: AppColors.secondary,
+          color: AppColors.cardBackground,
           borderRadius: BorderRadius.circular(12),
         ),
         child: Row(

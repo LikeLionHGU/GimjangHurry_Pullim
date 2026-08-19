@@ -32,7 +32,6 @@ const _centerParts = <BodyPart>{
   BodyPart.upperBack,
   BodyPart.abdomen,
   BodyPart.waist,
-  BodyPart.hip,
 };
 
 class CourseGenerationScreen extends StatefulWidget {
@@ -154,7 +153,7 @@ class _CourseGenerationScreenState extends State<CourseGenerationScreen> {
       backgroundColor: AppColors.background,
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+          padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 16),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -264,7 +263,7 @@ class _CourseGenerationScreenState extends State<CourseGenerationScreen> {
                   _showCustomTimeSlider = false;
                 }),
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                  padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 10),
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(20),
                     border: Border.all(
@@ -288,7 +287,7 @@ class _CourseGenerationScreenState extends State<CourseGenerationScreen> {
                 }
               }),
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 10),
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(20),
                   border: Border.all(
@@ -397,7 +396,7 @@ class _CourseGenerationScreenState extends State<CourseGenerationScreen> {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 8),
         decoration: BoxDecoration(
           color: isActive ? AppColors.primary : Colors.transparent,
           borderRadius: BorderRadius.circular(20),
@@ -423,7 +422,7 @@ class _CourseGenerationScreenState extends State<CourseGenerationScreen> {
     return ClipRRect(
       borderRadius: BorderRadius.circular(12),
       child: Container(
-        color: AppColors.secondary,
+        color: AppColors.cardBackground,
         child: LayoutBuilder(
           builder: (context, constraints) {
             return Stack(
@@ -531,7 +530,7 @@ class _CourseGenerationScreenState extends State<CourseGenerationScreen> {
 
   Widget _buildFatigueSlider(_FatigueKey key) {
     final level = _fatigueLevels[key] ?? 5.0;
-    final label = '${key.face.label} ${key.part.label}';
+    final label = key.part.label;
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
@@ -591,8 +590,7 @@ class _CourseGenerationScreenState extends State<CourseGenerationScreen> {
       spacing: 8,
       runSpacing: 8,
       children: _fatigueLevels.entries.map((entry) {
-        final label = '${entry.key.face.label} ${entry.key.part.label}';
-        final level = entry.value.round();
+        final label = '${entry.key.part.label}';
         return Container(
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
           decoration: BoxDecoration(
@@ -601,7 +599,7 @@ class _CourseGenerationScreenState extends State<CourseGenerationScreen> {
             borderRadius: BorderRadius.circular(20),
           ),
           child: Text(
-            '$label (Lv.$level)',
+            '$label',
             style: AppTypography.sb16.copyWith(
               color: AppColors.primary,
               fontSize: 13,
@@ -661,7 +659,7 @@ class _CourseGenerationScreenState extends State<CourseGenerationScreen> {
                       width: 68,
                       height: 68,
                       decoration: BoxDecoration(
-                        color: AppColors.secondary,
+                        color: AppColors.cardBackground,
                         border: Border.all(
                           color: isSelected
                               ? AppColors.primary
@@ -715,13 +713,15 @@ class _CourseGenerationScreenState extends State<CourseGenerationScreen> {
     final isEnabled = _fatigueLevels.isNotEmpty;
     return SizedBox(
       width: double.infinity,
-      height: 52,
+      height: 56,
       child: ElevatedButton(
         onPressed: isEnabled ? _onGeneratePressed : null,
         style: ElevatedButton.styleFrom(
           backgroundColor:
               isEnabled ? AppColors.primary : AppColors.toolSelectBox,
           foregroundColor: AppColors.background,
+          disabledBackgroundColor: AppColors.toolSelectBox,
+          disabledForegroundColor: AppColors.textSecondary,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
           ),

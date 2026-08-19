@@ -17,11 +17,15 @@ class CourseExecutionScreen extends StatefulWidget {
     required this.course,
     required this.courseId,
     this.isPostureBased = false,
+    this.isReplay = false,
+    this.isAlreadySaved = false,
   });
 
   final Course course;
   final int courseId;
   final bool isPostureBased;
+  final bool isReplay;
+  final bool isAlreadySaved;
 
   @override
   State<CourseExecutionScreen> createState() => _CourseExecutionScreenState();
@@ -165,6 +169,8 @@ class _CourseExecutionScreenState extends State<CourseExecutionScreen> {
             course: widget.course,
             courseId: widget.courseId,
             isPostureBased: widget.isPostureBased,
+            isReplay: widget.isReplay,
+            isAlreadySaved: widget.isAlreadySaved,
           ),
         ),
       );
@@ -216,7 +222,7 @@ class _CourseExecutionScreenState extends State<CourseExecutionScreen> {
             // ── 본문 ──
             Expanded(
               child: SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
+                padding: const EdgeInsets.symmetric(horizontal: 28),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -247,8 +253,9 @@ class _CourseExecutionScreenState extends State<CourseExecutionScreen> {
                   onPressed: _isTimerMode ? _goToNextStep : _startTimer,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.primary,
+                    foregroundColor: AppColors.background,
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(30),
+                      borderRadius: BorderRadius.circular(12),
                     ),
                   ),
                   child: Text(
@@ -271,9 +278,8 @@ class _CourseExecutionScreenState extends State<CourseExecutionScreen> {
       width: double.infinity,
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       decoration: BoxDecoration(
-        color: AppColors.secondary,
+        color: AppColors.cardBackground,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.toolSelectBox),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -367,7 +373,7 @@ class _CourseExecutionScreenState extends State<CourseExecutionScreen> {
         Container(
           height: 240,
           decoration: BoxDecoration(
-            color: AppColors.secondary,
+            color: AppColors.cardBackground,
             borderRadius: BorderRadius.circular(12),
           ),
           child: ClipRRect(
@@ -375,27 +381,39 @@ class _CourseExecutionScreenState extends State<CourseExecutionScreen> {
             child: PageView(
               controller: _pageController,
               children: [
-                // 페이지 1: 자세 사진 (placeholder)
+                // 페이지 1: 동작 이미지
                 Container(
-                  color: AppColors.secondary,
-                  child: Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const Icon(Icons.image_outlined,
-                            color: AppColors.textSecondary, size: 48),
-                        const SizedBox(height: 8),
-                        Text(
-                          '자세 이미지 준비 중',
-                          style: AppTypography.r14.copyWith(color: AppColors.textSecondary),
+                  color: AppColors.cardBackground,
+                  padding: const EdgeInsets.all(16),
+                  child: _currentMove != null
+                      ? Image.asset(
+                          _currentMove!.imagePath,
+                          fit: BoxFit.contain,
+                          errorBuilder: (_, __, ___) => Center(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                const Icon(Icons.image_outlined,
+                                    color: AppColors.textSecondary, size: 48),
+                                const SizedBox(height: 8),
+                                Text(
+                                  '이미지 없음',
+                                  style: AppTypography.r14.copyWith(color: AppColors.textSecondary),
+                                ),
+                              ],
+                            ),
+                          ),
+                        )
+                      : Center(
+                          child: Text(
+                            '동작 이미지 없음',
+                            style: AppTypography.r14.copyWith(color: AppColors.textSecondary),
+                          ),
                         ),
-                      ],
-                    ),
-                  ),
                 ),
                 // 페이지 2: 부위 이미지
                 Container(
-                  color: AppColors.secondary,
+                  color: AppColors.cardBackground,
                   padding: const EdgeInsets.all(16),
                   child: bodyImage != null
                       ? Image.asset(
@@ -441,7 +459,6 @@ class _CourseExecutionScreenState extends State<CourseExecutionScreen> {
       width: double.infinity,
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppColors.secondary,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: AppColors.toolSelectBox),
       ),

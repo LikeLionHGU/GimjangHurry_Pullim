@@ -12,6 +12,8 @@ class PostureResultScreen extends StatefulWidget {
   final Map<String, double> frontAngles;
   final Map<String, double> sideAngles;
   final int score;
+  final List<Map<String, double>>? frontPosePoints;
+  final List<Map<String, double>>? sidePosePoints;
 
   const PostureResultScreen({
     super.key,
@@ -21,6 +23,8 @@ class PostureResultScreen extends StatefulWidget {
     required this.frontAngles,
     required this.sideAngles,
     required this.score,
+    this.frontPosePoints,
+    this.sidePosePoints,
   });
 
   @override
@@ -60,7 +64,7 @@ class _PostureResultScreenState extends State<PostureResultScreen> {
 
                     // 분석 항목 리스트
                     Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 24),
+                      padding: const EdgeInsets.symmetric(horizontal: 28),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -114,7 +118,7 @@ class _PostureResultScreenState extends State<PostureResultScreen> {
     final imagePath = _showFront ? widget.frontImagePath : widget.sideImagePath;
 
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+      margin: const EdgeInsets.symmetric(horizontal: 28, vertical: 8),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(16),
         child: AspectRatio(
@@ -133,11 +137,7 @@ class _PostureResultScreenState extends State<PostureResultScreen> {
                   ),
                 ),
 
-              // 스켈레톤 오버레이 (점+선 형태 - GUI처럼)
-              if (imagePath != null)
-                CustomPaint(
-                  painter: _SkeletonPainter(isFront: _showFront),
-                ),
+              // 스켈레톤은 이미지에 합성되어 저장됨 - 추가 오버레이 불필요
             ],
           ),
         ),
@@ -163,7 +163,7 @@ class _PostureResultScreenState extends State<PostureResultScreen> {
         setState(() => _showFront = label == '정면');
       },
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 8),
         decoration: BoxDecoration(
           color: isActive ? AppColors.primary : AppColors.surface,
           borderRadius: BorderRadius.circular(20),
@@ -314,7 +314,7 @@ class _PostureResultScreenState extends State<PostureResultScreen> {
   /// 면책 안내
   Widget _buildDisclaimer() {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+      padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 12),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -492,92 +492,64 @@ class _AnalysisCard extends StatelessWidget {
   }
 }
 
-/// 스켈레톤 페인터 (점+선 형태 - GUI처럼 흰/초록 점과 연결선)
+/// 스켈레톤 페인터 - 실제 포즈 좌표 기반
 class _SkeletonPainter extends CustomPainter {
-  final bool isFront;
-  _SkeletonPainter({required this.isFront});
+  final List<Map<String, double>>? points;
+  _SkeletonPainter({this.points});
 
   @override
   void paint(Canvas canvas, Size size) {
+    if (points == null || points!.isEmpty) return;
+
     final dotPaint = Paint()
       ..color = AppColors.primary
       ..style = PaintingStyle.fill;
 
     final linePaint = Paint()
-      ..color = AppColors.primary.withValues(alpha: 0.7)
-      ..strokeWidth = 2
-      ..style = PaintingStyle.stroke;
+      ..color = AppColors.primary.withValues(alpha: 0.8)
+      ..strokeWidth = 2.5
+      ..style = PaintingStyle.stroke
+      ..strokeCap = StrokeCap.round;
 
-    // 가상의 표준 스켈레톤 좌표 (비율 기반)
-    final points = _getSkeletonPoints(size, isFront);
+    // 정규화 좌표를 화면 좌표로 변환
+    final offsets = points!.map((p) {
+      final x = p['x'] ?? -1;
+      final y = p['y'] ?? -1;
+      if (x < 0 || y < 0) return null;
+      return Offset(x * size.width, y * size.height);
+    }).toList();
 
     // 연결선
-    for (final conn in _getConnections()) {
-      if (conn[0] < points.length && conn[1] < points.length) {
-        canvas.drawLine(points[conn[0]], points[conn[1]], linePaint);
+    // 순서: 0코, 1왼어깨, 2오른어깨, 3왼팔꿈치, 4오른팔꿈치,
+    //       5왼손목, 6오른손목, 7왼골반, 8오른골반,
+    //       9왼무릎, 10오른무릎, 11왼발목, 12오른발목
+    final connections = [
+      [0, 1], [0, 2],
+      [1, 2],
+      [1, 3], [3, 5],
+      [2, 4], [4, 6],
+      [1, 7], [2, 8],
+      [7, 8],
+      [7, 9], [9, 11],
+      [8, 10], [10, 12],
+    ];
+
+    for (final conn in connections) {
+      final a = conn[0] < offsets.length ? offsets[conn[0]] : null;
+      final b = conn[1] < offsets.length ? offsets[conn[1]] : null;
+      if (a != null && b != null) {
+        canvas.drawLine(a, b, linePaint);
       }
     }
 
     // 점
-    for (final p in points) {
-      canvas.drawCircle(p, 4, dotPaint);
+    for (final p in offsets) {
+      if (p != null) {
+        canvas.drawCircle(p, 5, dotPaint);
+      }
     }
-  }
-
-  List<Offset> _getSkeletonPoints(Size size, bool front) {
-    final cx = size.width * 0.5;
-    // 0:코, 1:왼어깨, 2:오른어깨, 3:왼팔꿈치, 4:오른팔꿈치,
-    // 5:왼손목, 6:오른손목, 7:왼골반, 8:오른골반,
-    // 9:왼무릎, 10:오른무릎, 11:왼발목, 12:오른발목
-    if (front) {
-      return [
-        Offset(cx, size.height * 0.08),         // 코
-        Offset(cx - size.width * 0.15, size.height * 0.18), // 왼어깨
-        Offset(cx + size.width * 0.15, size.height * 0.18), // 오른어깨
-        Offset(cx - size.width * 0.22, size.height * 0.32), // 왼팔꿈치
-        Offset(cx + size.width * 0.22, size.height * 0.32), // 오른팔꿈치
-        Offset(cx - size.width * 0.20, size.height * 0.44), // 왼손목
-        Offset(cx + size.width * 0.20, size.height * 0.44), // 오른손목
-        Offset(cx - size.width * 0.08, size.height * 0.48), // 왼골반
-        Offset(cx + size.width * 0.08, size.height * 0.48), // 오른골반
-        Offset(cx - size.width * 0.09, size.height * 0.68), // 왼무릎
-        Offset(cx + size.width * 0.09, size.height * 0.68), // 오른무릎
-        Offset(cx - size.width * 0.09, size.height * 0.90), // 왼발목
-        Offset(cx + size.width * 0.09, size.height * 0.90), // 오른발목
-      ];
-    } else {
-      // 측면
-      return [
-        Offset(cx + size.width * 0.02, size.height * 0.08),  // 코
-        Offset(cx - size.width * 0.02, size.height * 0.18),  // 어깨
-        Offset(cx - size.width * 0.02, size.height * 0.18),  // (동일)
-        Offset(cx - size.width * 0.10, size.height * 0.32),  // 팔꿈치
-        Offset(cx - size.width * 0.10, size.height * 0.32),  // (동일)
-        Offset(cx - size.width * 0.05, size.height * 0.44),  // 손목
-        Offset(cx - size.width * 0.05, size.height * 0.44),  // (동일)
-        Offset(cx, size.height * 0.48),                       // 골반
-        Offset(cx, size.height * 0.48),                       // (동일)
-        Offset(cx + size.width * 0.02, size.height * 0.68),   // 무릎
-        Offset(cx + size.width * 0.02, size.height * 0.68),   // (동일)
-        Offset(cx + size.width * 0.01, size.height * 0.90),   // 발목
-        Offset(cx + size.width * 0.01, size.height * 0.90),   // (동일)
-      ];
-    }
-  }
-
-  List<List<int>> _getConnections() {
-    return [
-      [0, 1], [0, 2],       // 코 → 어깨
-      [1, 2],               // 어깨 연결
-      [1, 3], [3, 5],       // 왼팔
-      [2, 4], [4, 6],       // 오른팔
-      [1, 7], [2, 8],       // 어깨 → 골반
-      [7, 8],               // 골반 연결
-      [7, 9], [9, 11],      // 왼다리
-      [8, 10], [10, 12],    // 오른다리
-    ];
   }
 
   @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
 }

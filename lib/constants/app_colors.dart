@@ -18,7 +18,7 @@ class AppColors {
   // Surface / Secondary
   static const Color secondary = Color(0xFF1E1E1F);
   static const Color surface = Color(0xFF1E1E1F);
-  static const Color cardBackground = Color(0xFF1E1E1F);
+  static const Color cardBackground = Color(0xFF171819);
 
   // Functional greys
   static const Color toolSelectBox = Color(0xFF555555);
