@@ -370,21 +370,16 @@ class _CourseGenerationScreenState extends State<CourseGenerationScreen> {
 
 
   Widget _buildToggleButtons() {
-    final frontCount =
-        _fatigueLevels.keys.where((k) => k.face == BodyFace.front).length;
-    final backCount =
-        _fatigueLevels.keys.where((k) => k.face == BodyFace.back).length;
-
     return Row(
       children: [
         _toggleButton(
-          '전면${frontCount > 0 ? " ($frontCount)" : ""}',
+          '전면',
           _isFront,
           () => setState(() => _isFront = true),
         ),
         const SizedBox(width: 8),
         _toggleButton(
-          '후면${backCount > 0 ? " ($backCount)" : ""}',
+          '후면',
           !_isFront,
           () => setState(() => _isFront = false),
         ),

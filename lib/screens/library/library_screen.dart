@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../../constants/app_colors.dart';
 import '../../constants/app_strings.dart';
 import '../../constants/app_typography.dart';
 import '../../models/course_model.dart';
+import '../../providers/app_provider.dart';
 import '../../services/database_helper.dart';
 import '../../services/course_loader.dart';
 import '../course/course_summary_screen.dart';
@@ -38,6 +40,16 @@ class _LibraryScreenState extends State<LibraryScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final navIndex = context.watch<AppProvider>().currentNavIndex;
+    // 라이브러리 탭이 아닐 때 선택 초기화
+    if (navIndex != 1 && _selectedIndex != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted && _selectedIndex != null) {
+          setState(() => _selectedIndex = null);
+        }
+      });
+    }
+
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
