@@ -352,7 +352,7 @@ class _LibraryScreenState extends State<LibraryScreen> {
                 children: [
                   Icon(Icons.assessment, color: AppColors.textPrimary, size: 20),
                   const SizedBox(width: 10),
-                  Text('자세 측정 전체 보기',
+                  Text('자세 측정 결과 전체 보기',
                       style: AppTypography.r14.copyWith(color: AppColors.textPrimary)),
                   const Spacer(),
                   const Icon(Icons.chevron_right, color: AppColors.textPrimary),
