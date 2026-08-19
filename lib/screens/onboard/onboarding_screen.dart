@@ -39,7 +39,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (_) => const _OnboardingIntroScreen()),
+      MaterialPageRoute(builder: (_) => const OnboardingIntroScreen()),
     );
   }
 
@@ -49,32 +49,28 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       backgroundColor: AppColors.background,
       body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 32),
+          padding: const EdgeInsets.symmetric(horizontal: 28),
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const Spacer(flex: 2),
 
-              Align(
-                alignment: Alignment.centerLeft,
-                child: Text(
-                  '환영합니다',
-                  style: AppTypography.sb24.copyWith(
-                    color: AppColors.primary,
-                  ),
+              Text(
+                '환영합니다!',
+                style: AppTypography.sb24.copyWith(
+                  color: AppColors.textPrimary,
+                  fontSize: 26,
                 ),
               ),
-              const SizedBox(height: 8),
-              Align(
-                alignment: Alignment.centerLeft,
-                child: Text(
-                  '이름을 입력해주세요',
-                  style: AppTypography.r14.copyWith(
-                    color: AppColors.textSecondary,
-                    fontSize: 15,
-                  ),
+              const SizedBox(height: 12),
+              Text(
+                'PULLIM에서 사용할 이름을 입력해주세요.',
+                style: AppTypography.r14.copyWith(
+                  color: AppColors.textSecondary,
+                  height: 1.5,
                 ),
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 32),
               TextField(
                 controller: _nameController,
                 style: AppTypography.r16.copyWith(color: AppColors.textPrimary),
@@ -82,7 +78,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                   hintText: '이름 입력',
                   hintStyle: AppTypography.r16.copyWith(color: AppColors.textTertiary),
                   filled: true,
-                  fillColor: AppColors.surface,
+                  fillColor: AppColors.cardBackground,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
                     borderSide: BorderSide.none,
@@ -92,14 +88,15 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     borderSide: const BorderSide(color: AppColors.primary),
                   ),
                   contentPadding:
-                      const EdgeInsets.symmetric(horizontal: 28, vertical: 16),
+                      const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
                 ),
                 textInputAction: TextInputAction.done,
                 onSubmitted: (_) => _onNext(),
               ),
 
-              const Spacer(flex: 2),
+              const Spacer(flex: 3),
 
+              // 다음 버튼
               SizedBox(
                 width: double.infinity,
                 height: 56,
@@ -115,7 +112,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                   child: Text('다음', style: AppTypography.b16),
                 ),
               ),
-              const SizedBox(height: 40),
+              const SizedBox(height: 32),
             ],
           ),
         ),
@@ -126,13 +123,21 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
 /// 온보딩 2단계: 근막 이완 코스 소개 페이지
 /// 배경 그라데이션 + 실루엣, 이용 흐름, 주의사항, 의료면책
-class _OnboardingIntroScreen extends StatelessWidget {
-  const _OnboardingIntroScreen();
+class OnboardingIntroScreen extends StatelessWidget {
+  const OnboardingIntroScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,
+      appBar: AppBar(
+        backgroundColor: AppColors.background,
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios, color: AppColors.textPrimary, size: 20),
+          onPressed: () => Navigator.pop(context),
+        ),
+      ),
       body: SafeArea(
         child: SingleChildScrollView(
           child: Column(
@@ -140,7 +145,7 @@ class _OnboardingIntroScreen extends StatelessWidget {
             children: [
               // 상단 히어로 영역 (그라데이션 + 타이틀)
               _buildHeroSection(),
-              const SizedBox(height: 28),
+              const SizedBox(height: 8),
 
               // 이용 흐름
               Padding(
@@ -287,37 +292,67 @@ class _OnboardingIntroScreen extends StatelessWidget {
     );
   }
 
-  /// 히어로 섹션: 상단 그라데이션 + 실루엣 배경 + 타이틀
+  /// 히어로 섹션: 배경 이미지 + 그라데이션 오버레이 + 타이틀
   Widget _buildHeroSection() {
-    return Container(
+    return SizedBox(
       width: double.infinity,
-      padding: const EdgeInsets.fromLTRB(24, 32, 24, 32),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [
-            AppColors.primary.withValues(alpha: 0.15),
-            AppColors.background,
-          ],
-        ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      height: 300,
+      child: Stack(
+        fit: StackFit.expand,
         children: [
-          Text(
-            '근막 이완 코스',
-            style: AppTypography.sb24.copyWith(
-              color: AppColors.primary,
-              fontSize: 26,
+          // 배경 이미지 (하단 정렬 - 머리 안 짤리게)
+          Image.asset(
+            'assets/images/onboarding.png',
+            fit: BoxFit.cover,
+            alignment: const Alignment(0, -0.3),
+            errorBuilder: (_, __, ___) => Container(
+              color: AppColors.primary.withValues(alpha: 0.15),
             ),
           ),
-          const SizedBox(height: 8),
-          Text(
-            '짧은 시간 안에 뭉친 근육을 풀고\n몸의 변화를 직접 느껴보세요.',
-            style: AppTypography.r14.copyWith(
-              color: AppColors.textSecondary,
-              height: 1.5,
+          // 하단만 살짝 어둡게
+          Positioned(
+            bottom: 0,
+            left: 0,
+            right: 0,
+            height: 100,
+            child: Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    Colors.transparent,
+                    AppColors.background,
+                  ],
+                ),
+              ),
+            ),
+          ),
+          // 텍스트
+          Positioned(
+            left: 28,
+            right: 28,
+            top: 100,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  '근막 이완 코스',
+                  style: AppTypography.sb24.copyWith(
+                    color: AppColors.textPrimary,
+                    fontSize: 26,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  '짧은 시간 안에 뭉친 근육을 풀고\n몸의 변화를 직접 느껴보세요.',
+                  style: AppTypography.r14.copyWith(
+                    color: AppColors.textSecondary,
+                    height: 1.5,
+                  ),
+                ),
+              ],
             ),
           ),
         ],

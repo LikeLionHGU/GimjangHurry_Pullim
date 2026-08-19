@@ -66,6 +66,32 @@ class PostureGuideScreen extends StatelessWidget {
               const SizedBox(height: 12),
               _buildGuideItem(3, '편한 복장으로', '몸의 라인이 보이는 복장이 좋아요.'),
 
+              const SizedBox(height: 20),
+
+              // 자동 촬영 안내 문구
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                decoration: BoxDecoration(
+                  color: AppColors.primary.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Row(
+                  children: [
+                    Icon(Icons.timer, color: AppColors.primary, size: 18),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Text(
+                        '가이드 위치에 맞게 서면 3초 후 자동으로 촬영됩니다.',
+                        style: AppTypography.r12.copyWith(
+                          color: AppColors.primary,
+                          fontSize: 13,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
               const Spacer(),
 
               // 촬영 시작하기 버튼
