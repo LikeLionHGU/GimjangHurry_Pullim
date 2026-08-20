@@ -3,6 +3,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/likelion_mid_hackathon.iml" filepath="$PROJECT_DIR$/likelion_mid_hackathon.iml" />
+      <module fileurl="file://$PROJECT_DIR$/android/likelion_mid_hackathon_android.iml" filepath="$PROJECT_DIR$/android/likelion_mid_hackathon_android.iml" />
     </modules>
   </component>
 </project>
