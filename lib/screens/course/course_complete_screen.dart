@@ -370,10 +370,6 @@ class _CourseCompleteScreenState extends State<CourseCompleteScreen> {
                 await db.insertExecution(execution);
 
                 if (!mounted) return;
-                Navigator.of(context).pushAndRemoveUntil(
-                  MaterialPageRoute(builder: (_) => const MainShell()),
-                  (_) => false,
-                );
                 Navigator.of(context).push(
                   MaterialPageRoute(builder: (_) => const PostureGuideScreen()),
                 );

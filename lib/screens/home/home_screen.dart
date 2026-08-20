@@ -123,7 +123,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 '맞춤 코스를 생성하려면 먼저 자세 점검 테스트를 완료해 주세요.',
                 style: AppTypography.r14.copyWith(color: AppColors.textSecondary, height: 1.5),
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 12),
               Row(
                 children: [
                   Expanded(
@@ -181,20 +181,15 @@ class _HomeScreenState extends State<HomeScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   // PULLIM 로고 타이틀
-                  Text(
-                    'PULLIM',
-                    style: AppTypography.b20.copyWith(
-                      color: AppColors.textPrimary,
-                      fontWeight: FontWeight.w800,
-                      letterSpacing: 2,
-                      fontSize: 22,
-                    ),
+                  Image.asset(
+                    'assets/images/logo2.png',
+                    height: 34,
                   ),
                   const SizedBox(height: 32),
 
                   // 주간 캘린더
                   _buildWeekCalendar(),
-                  const SizedBox(height: 24),
+                  const SizedBox(height: 28),
 
                   // 연속 운동 카드
                   _buildStreakCard(),
@@ -666,7 +661,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 "'${courseModel.name}' (${courseModel.totalMove}단계 · ${courseModel.formattedTime}) 코스를 바로 시작합니다.",
                 style: AppTypography.r14.copyWith(color: AppColors.textSecondary, height: 1.5),
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 12),
               Row(
                 children: [
                   Expanded(
@@ -797,7 +792,7 @@ class _PostureRecommendLoadingScreenState
                 '맞춤 코스를 생성하려면 먼저 자세 점검 테스트를 완료해 주세요.',
                 style: AppTypography.r14.copyWith(color: AppColors.textSecondary, height: 1.5),
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 12),
               Row(
                 children: [
                   Expanded(
@@ -840,22 +835,38 @@ class _PostureRecommendLoadingScreenState
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const CircularProgressIndicator(color: AppColors.primary),
-            const SizedBox(height: 24),
-            Text(
-              '맞춤 부위를 분석하고 있어요',
-              style: AppTypography.b16.copyWith(color: AppColors.textPrimary),
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.centerLeft,
+            end: Alignment.centerRight,
+            colors: [
+              Color(0xFF0C1500),
+              Color(0xFF010101),
+            ],
+          ),
+        ),
+        child: Center(
+          child: Padding(
+            padding: const EdgeInsets.only(bottom: 80),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Image.asset(
+                  'assets/images/logo.png',
+                  width: 120,
+                  height: 120,
+                ),
+                Text(
+                  'LOADING · · ·',
+                  style: AppTypography.b20.copyWith(
+                    color: AppColors.textPrimary,
+                    letterSpacing: 2,
+                  ),
+                ),
+              ],
             ),
-            const SizedBox(height: 8),
-            Text(
-              '잠시만 기다려 주세요',
-              style: AppTypography.r14.copyWith(color: AppColors.textSecondary),
-            ),
-          ],
+          ),
         ),
       ),
     );

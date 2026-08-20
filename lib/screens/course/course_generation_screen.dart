@@ -165,7 +165,7 @@ class _CourseGenerationScreenState extends State<CourseGenerationScreen> {
                 padding: EdgeInsets.zero,
                 alignment: Alignment.centerLeft,
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 12),
               // 코스 생성 타이틀
               Text(
                 '코스 생성',
@@ -219,7 +219,7 @@ class _CourseGenerationScreenState extends State<CourseGenerationScreen> {
                 _buildToggleButtons(),
                 const SizedBox(height: 16),
                 _buildBodyImageWithSpots(),
-                const SizedBox(height: 24),
+                const SizedBox(height: 12),
                 Text(
                   '피로도 입력',
                   style: AppTypography.b18.copyWith(color: AppColors.textPrimary),
@@ -238,7 +238,7 @@ class _CourseGenerationScreenState extends State<CourseGenerationScreen> {
                 else
                   ..._fatigueLevels.keys.map(_buildFatigueSlider),
               ],
-              const SizedBox(height: 24),
+              const SizedBox(height: 12),
               _buildGenerateButton(),
               const SizedBox(height: 16),
             ],
@@ -831,10 +831,38 @@ class _CourseLoadingScreenState extends State<_CourseLoadingScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,
-      body: Center(
-        child: Text(
-          '로딩중',
-          style: AppTypography.b20.copyWith(color: AppColors.textPrimary),
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.centerLeft,
+            end: Alignment.centerRight,
+            colors: [
+              Color(0xFF0C1500),
+              Color(0xFF010101),
+            ],
+          ),
+        ),
+        child: Center(
+          child: Padding(
+            padding: const EdgeInsets.only(bottom: 80),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Image.asset(
+                  'assets/images/logo.png',
+                  width: 120,
+                  height: 120,
+                ),
+                Text(
+                  'LOADING · · ·',
+                  style: AppTypography.b20.copyWith(
+                    color: AppColors.textPrimary,
+                    letterSpacing: 2,
+                  ),
+                ),
+              ],
+            ),
+          ),
         ),
       ),
     );

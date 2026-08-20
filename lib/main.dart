@@ -90,14 +90,41 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Center(
-        child: Text(
-          'PULLIM',
-          style: AppTypography.b35.copyWith(
-            color: AppColors.textPrimary,
-            fontWeight: FontWeight.w800,
-            letterSpacing: 3,
-            fontSize: 36,
+      backgroundColor: AppColors.background,
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              Color(0xFF010101),       // 위: 검정
+              Color(0xFF010101),       // 중간까지 검정 유지
+              Color(0xFF0B1200),       // 아래: primary(B1ED01) 계열 어두운 톤
+            ],
+            stops: [0.0, 0.0, 1.0],   // stops[1]을 조절하면 녹색 시작 위치 변경
+          ),
+        ),
+        child: Center(
+          child: Padding(
+            padding: const EdgeInsets.only(bottom: 80),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Image.asset(
+                  'assets/images/logo.png',
+                  width: 120,
+                  height: 120,
+                ),
+                Text(
+                  'PULLIM',
+                  style: AppTypography.b20.copyWith(
+                    color: AppColors.textPrimary,
+                    letterSpacing: 2,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),

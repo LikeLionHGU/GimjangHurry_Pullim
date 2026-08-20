@@ -3,7 +3,8 @@ import 'package:flutter/material.dart';
 import '../../constants/app_colors.dart';
 import '../../constants/app_typography.dart';
 import '../../models/posture_result_model.dart';
-import '../main_shell.dart';
+import '../../services/posture_to_release_service.dart';
+import '../course/course_generation_screen.dart';
 
 class PostureResultScreen extends StatefulWidget {
   final PostureResultModel result;
@@ -34,6 +35,15 @@ class PostureResultScreen extends StatefulWidget {
 class _PostureResultScreenState extends State<PostureResultScreen> {
   bool _showFront = true;
 
+  /// 현재 측정 결과를 기반으로 코스 생성 화면으로 이동한다.
+  void _onStartCourse() {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => _PostureRecommendLoadingScreen(result: widget.result),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -60,7 +70,7 @@ class _PostureResultScreenState extends State<PostureResultScreen> {
 
                     // 전체 자세 점수
                     _buildScoreSection(),
-                    const SizedBox(height: 24),
+                    const SizedBox(height: 12),
 
                     // 분석 항목 리스트
                     Padding(
@@ -95,15 +105,9 @@ class _PostureResultScreenState extends State<PostureResultScreen> {
                 width: double.infinity,
                 height: 56,
                 child: ElevatedButton.icon(
-                  onPressed: () {
-                    // 모든 이전 화면을 지우고 홈으로 이동
-                    Navigator.of(context).pushAndRemoveUntil(
-                      MaterialPageRoute(builder: (_) => const MainShell()),
-                      (_) => false,
-                    );
-                  },
+                  onPressed: _onStartCourse,
                   icon: const Icon(Icons.play_arrow),
-                  label: const Text('홈으로 이동'),
+                  label: const Text('코스 시작하기'),
                 ),
               ),
             ),
@@ -487,6 +491,94 @@ class _AnalysisCard extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// 점검 결과 기반 코스 추천 부위를 불러오는 로딩 화면.
+class _PostureRecommendLoadingScreen extends StatefulWidget {
+  const _PostureRecommendLoadingScreen({required this.result});
+
+  final PostureResultModel result;
+
+  @override
+  State<_PostureRecommendLoadingScreen> createState() =>
+      _PostureRecommendLoadingScreenState();
+}
+
+class _PostureRecommendLoadingScreenState
+    extends State<_PostureRecommendLoadingScreen> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _load());
+  }
+
+  Future<void> _load() async {
+    final service = PostureToReleaseService();
+
+    try {
+      final entries = await service.recommend(widget.result);
+      service.dispose();
+
+      if (!mounted) return;
+
+      if (entries.isEmpty) {
+        Navigator.pop(context);
+        return;
+      }
+
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (_) => CourseGenerationScreen(initialFatigueEntries: entries),
+        ),
+      );
+    } catch (e) {
+      service.dispose();
+      if (!mounted) return;
+      Navigator.pop(context);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: AppColors.background,
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.centerLeft,
+            end: Alignment.centerRight,
+            colors: [
+              Color(0xFF0C1500),
+              Color(0xFF010101),
+            ],
+          ),
+        ),
+        child: Center(
+          child: Padding(
+            padding: const EdgeInsets.only(bottom: 80),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Image.asset(
+                  'assets/images/logo.png',
+                  width: 120,
+                  height: 120,
+                ),
+                Text(
+                  'LOADING · · ·',
+                  style: AppTypography.b20.copyWith(
+                    color: AppColors.textPrimary,
+                    letterSpacing: 2,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }
