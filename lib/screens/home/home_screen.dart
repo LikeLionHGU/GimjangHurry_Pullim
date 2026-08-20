@@ -185,7 +185,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     'assets/images/logo2.png',
                     height: 34,
                   ),
-                  const SizedBox(height: 32),
+                  const SizedBox(height: 26),
 
                   // 주간 캘린더
                   _buildWeekCalendar(),
@@ -193,7 +193,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
                   // 연속 운동 카드
                   _buildStreakCard(),
-                  const SizedBox(height: 36),
+                  const SizedBox(height: 26),
 
                   // 최근 운동 섹션 (1개만)
                   _buildRecentSectionFixed(_recentExecutions.take(1).toList()),

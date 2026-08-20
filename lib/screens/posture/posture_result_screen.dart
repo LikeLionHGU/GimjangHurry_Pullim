@@ -322,7 +322,7 @@ class _PostureResultScreenState extends State<PostureResultScreen> {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Icon(Icons.warning_amber_rounded, color: AppColors.warning, size: 16),
+          const Icon(Icons.warning_amber_rounded, color: AppColors.primary, size: 16),
           const SizedBox(width: 8),
           Expanded(
             child: Text(

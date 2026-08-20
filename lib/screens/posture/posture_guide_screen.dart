@@ -72,7 +72,7 @@ class PostureGuideScreen extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
                 decoration: BoxDecoration(
-                  color: AppColors.primary.withValues(alpha: 0.1),
+                  color: Colors.transparent,
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: Row(
@@ -83,7 +83,7 @@ class PostureGuideScreen extends StatelessWidget {
                       child: Text(
                         '가이드 위치에 맞게 서면 3초 후 자동으로 촬영됩니다.',
                         style: AppTypography.r12.copyWith(
-                          color: AppColors.primary,
+                          color: AppColors.textSecondary,
                           fontSize: 13,
                         ),
                       ),

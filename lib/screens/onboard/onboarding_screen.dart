@@ -66,7 +66,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               Text(
                 'PULLIM에서 사용할 이름을 입력해주세요.',
                 style: AppTypography.r14.copyWith(
-                  color: AppColors.textSecondary,
+                  color: AppColors.textPrimary,
                   height: 1.5,
                 ),
               ),
@@ -210,7 +210,7 @@ class OnboardingIntroScreen extends StatelessWidget {
                     children: [
                       Row(children: [
                         const Icon(Icons.warning_amber_rounded,
-                            color: AppColors.warning, size: 20),
+                            color: AppColors.primary, size: 20),
                         const SizedBox(width: 8),
                         Text(
                           '의료 진단·치료 아님',

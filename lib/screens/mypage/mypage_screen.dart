@@ -126,7 +126,7 @@ class _MypageScreenState extends State<MypageScreen> {
                         '$userName님,',
                         style: AppTypography.sb24.copyWith(
                           color: AppColors.textPrimary,
-                          fontSize: 24,
+                          fontSize: 26,
                         ),
                       ),
                       const SizedBox(height: 16),
@@ -158,6 +158,11 @@ class _MypageScreenState extends State<MypageScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        Text(
+          '자세 점검',
+          style: AppTypography.b18.copyWith(color: AppColors.textPrimary),
+        ),
+        const SizedBox(height: 16),
         // 자세 점검하기 버튼
         GestureDetector(
           onTap: () {
@@ -669,8 +674,8 @@ class _StatCard extends StatelessWidget {
           Text(
             value,
             style: AppTypography.b20.copyWith(
-              color: AppColors.textPrimary,
-              fontSize: 18,
+              color: AppColors.primary,
+              fontSize: 22,
             ),
             textAlign: TextAlign.center,
           ),

@@ -122,7 +122,7 @@ class ServiceIntroScreen extends StatelessWidget {
                           Row(
                             children: [
                               const Icon(Icons.warning_amber_rounded,
-                                  color: AppColors.warning, size: 20),
+                                  color: AppColors.primary, size: 20),
                               const SizedBox(width: 8),
                               Expanded(
                                 child: Text(
@@ -371,7 +371,7 @@ class CautionScreen extends StatelessWidget {
                           Row(
                             children: [
                               const Icon(Icons.warning_amber_rounded,
-                                  color: AppColors.warning, size: 20),
+                                  color: AppColors.primary, size: 20),
                               const SizedBox(width: 8),
                               Text(
                                 '의료 서비스가 아닙니다',
