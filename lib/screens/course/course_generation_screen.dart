@@ -254,7 +254,7 @@ class _CourseGenerationScreenState extends State<CourseGenerationScreen> {
                   _showCustomTimeSlider = false;
                 }),
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 10),
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(20),
                     border: Border.all(
@@ -297,6 +297,7 @@ class _CourseGenerationScreenState extends State<CourseGenerationScreen> {
                     color: _showCustomTimeSlider || !_timeOptions.contains(_availableTime)
                         ? AppColors.primary
                         : AppColors.textSecondary,
+                    fontSize: 14,
                   ),
                 ),
               ),

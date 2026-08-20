@@ -25,15 +25,11 @@ class ServiceIntroScreen extends StatelessWidget {
         ),
       ),
       body: SafeArea(
-        child: Column(
-          children: [
-            Expanded(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 24),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // 타이틀
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 24),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
                     Text(
                       '내 몸 상태에 맞는\n근막 이완 루틴',
                       style: AppTypography.sb24.copyWith(
@@ -149,63 +145,59 @@ class ServiceIntroScreen extends StatelessWidget {
                     ),
 
                     const SizedBox(height: 32),
+
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 16),
+                      child: Column(
+                        children: [
+                          SizedBox(
+                            width: double.infinity,
+                            height: 56,
+                            child: ElevatedButton(
+                              onPressed: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) => const ToolRegistrationScreen(),
+                                  ),
+                                );
+                              },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: AppColors.primary,
+                                foregroundColor: AppColors.background,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                              ),
+                              child: Text('도구 등록하고 시작하기', style: AppTypography.b16),
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          TextButton(
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => const CautionScreen(),
+                                ),
+                              );
+                            },
+                            child: Text(
+                              '주의 사항 자세히 보기',
+                              style: AppTypography.r14.copyWith(
+                                color: AppColors.textSecondary,
+                                decoration: TextDecoration.underline,
+                                decorationColor: AppColors.textSecondary,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
                   ],
                 ),
               ),
             ),
-
-            // 하단 버튼 영역
-            Padding(
-              padding: const EdgeInsets.fromLTRB(24, 0, 24, 16),
-              child: Column(
-                children: [
-                  SizedBox(
-                    width: double.infinity,
-                    height: 56,
-                    child: ElevatedButton(
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => const ToolRegistrationScreen(),
-                          ),
-                        );
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.primary,
-                        foregroundColor: AppColors.background,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
-                      child: Text('도구 등록하고 시작하기', style: AppTypography.b16),
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  TextButton(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => const CautionScreen(),
-                        ),
-                      );
-                    },
-                    child: Text(
-                      '주의 사항 자세히 보기',
-                      style: AppTypography.r14.copyWith(
-                        color: AppColors.textSecondary,
-                        decoration: TextDecoration.underline,
-                        decorationColor: AppColors.textSecondary,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
     );
   }
 }
