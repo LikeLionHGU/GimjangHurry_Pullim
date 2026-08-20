@@ -160,10 +160,6 @@ class _CourseCompleteScreenState extends State<CourseCompleteScreen> {
     );
   }
 
-  // ──────────────────────────────────────────────────────────────────────────
-  // Build methods
-  // ──────────────────────────────────────────────────────────────────────────
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(

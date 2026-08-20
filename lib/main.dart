@@ -55,7 +55,6 @@ class _SplashScreenState extends State<SplashScreen> {
 
     final provider = context.read<AppProvider>();
 
-    // Provider가 아직 로딩 중이면 완료될 때까지 대기
     while (provider.isLoading) {
       await Future.delayed(const Duration(milliseconds: 100));
       if (!mounted) return;
@@ -63,20 +62,16 @@ class _SplashScreenState extends State<SplashScreen> {
 
     if (!mounted) return;
 
-    // DB에 사용자가 있으면 → 온보딩 완료 여부 체크
-    // 사용자 없으면 → 이름 입력부터 (온보딩 처음)
     Widget destination;
     if (!provider.isLoggedIn) {
       destination = const OnboardingScreen();
     } else {
-      // 사용자는 있지만 온보딩(도구등록)을 완료했는지 확인
       final toolService = ToolRegistrationService();
       final userName = provider.currentUser?.name ?? '';
       final onboardingDone = await toolService.isOnboardingCompleteForUser(userName);
       if (onboardingDone) {
         destination = const MainShell();
       } else {
-        // 이름은 입력했지만 온보딩 미완료 → 서비스 소개부터
         destination = const OnboardingIntroScreen();
       }
     }
@@ -97,11 +92,11 @@ class _SplashScreenState extends State<SplashScreen> {
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
             colors: [
-              Color(0xFF010101),       // 위: 검정
-              Color(0xFF010101),       // 중간까지 검정 유지
-              Color(0xFF0B1200),       // 아래: primary(B1ED01) 계열 어두운 톤
+              Color(0xFF010101),
+              Color(0xFF010101),
+              Color(0xFF0B1200),
             ],
-            stops: [0.0, 0.0, 1.0],   // stops[1]을 조절하면 녹색 시작 위치 변경
+            stops: [0.0, 0.0, 1.0],
           ),
         ),
         child: Center(

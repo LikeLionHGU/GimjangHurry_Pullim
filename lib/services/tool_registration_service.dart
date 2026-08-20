@@ -1,5 +1,4 @@
 // 온보딩에서 사용자가 등록한 도구 목록을 로컬에 저장하고 조회하는 서비스.
-// 사용자별(이메일 기반) 온보딩 상태를 관리한다.
 
 import 'package:shared_preferences/shared_preferences.dart';
 import 'database_helper.dart';

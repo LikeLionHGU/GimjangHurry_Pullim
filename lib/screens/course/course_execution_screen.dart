@@ -198,7 +198,6 @@ class _CourseExecutionScreenState extends State<CourseExecutionScreen> {
       body: SafeArea(
         child: Column(
           children: [
-            // ── 상단 AppBar ──
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
               child: Row(
@@ -219,7 +218,6 @@ class _CourseExecutionScreenState extends State<CourseExecutionScreen> {
               ),
             ),
 
-            // ── 본문 ──
             Expanded(
               child: SingleChildScrollView(
                 padding: const EdgeInsets.symmetric(horizontal: 28),
@@ -243,7 +241,6 @@ class _CourseExecutionScreenState extends State<CourseExecutionScreen> {
               ),
             ),
 
-            // ── 하단 버튼 ──
             Padding(
               padding: const EdgeInsets.fromLTRB(20, 8, 20, 16),
               child: SizedBox(

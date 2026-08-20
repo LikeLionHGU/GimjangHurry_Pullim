@@ -187,20 +187,16 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                   const SizedBox(height: 26),
 
-                  // 주간 캘린더
                   _buildWeekCalendar(),
                   const SizedBox(height: 28),
 
-                  // 연속 운동 카드
                   _buildStreakCard(),
                   const SizedBox(height: 26),
 
-                  // 최근 운동 섹션 (1개만)
                   _buildRecentSectionFixed(_recentExecutions.take(1).toList()),
 
                   const SizedBox(height: 24),
 
-                  // 액션 카드 (코스 생성 + 점검 기반 코스)
                   _buildActionCards(),
                   const SizedBox(height: 8),
                 ],
@@ -211,10 +207,6 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
     );
   }
-
-  // ──────────────────────────────────────────────────────────────
-  // 주간 캘린더
-  // ──────────────────────────────────────────────────────────────
 
   Widget _buildWeekCalendar() {
     final now = DateTime.now();
@@ -264,10 +256,6 @@ class _HomeScreenState extends State<HomeScreen> {
             );
             final dayLabel = ['S', 'M', 'T', 'W', 'T', 'F', 'S'][i];
 
-            // 색상 로직:
-            // 운동 완료한 날 (오늘 포함) → 꽉 찬 녹색
-            // 오늘인데 운동 안 함 → 투명한 녹색
-            // 나머지 → 기본 surface
             final Color circleColor;
             final Color textColor;
             if (hasExercise) {
@@ -323,10 +311,6 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  // ──────────────────────────────────────────────────────────────
-  // 연속 운동 카드
-  // ──────────────────────────────────────────────────────────────
-
   Widget _buildStreakCard() {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 18),
@@ -372,10 +356,6 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
     );
   }
-
-  // ──────────────────────────────────────────────────────────────
-  // 최근 운동 섹션
-  // ──────────────────────────────────────────────────────────────
 
   Widget _buildRecentSectionFixed(List<(CourseModel, ExecutionModel)> recentToShow) {
     return Column(
@@ -506,10 +486,6 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  // ──────────────────────────────────────────────────────────────
-  // 액션 카드
-  // ──────────────────────────────────────────────────────────────
-
   Widget _buildActionCards() {
     return Row(
       children: [
@@ -625,10 +601,6 @@ class _HomeScreenState extends State<HomeScreen> {
       ],
     );
   }
-
-  // ──────────────────────────────────────────────────────────────
-  // 코스 실행 확인 다이얼로그
-  // ──────────────────────────────────────────────────────────────
 
   void _showCourseExecuteDialog(CourseModel courseModel) {
     showDialog(

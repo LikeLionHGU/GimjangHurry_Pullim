@@ -1,7 +1,3 @@
-// 코스 생성 화면.
-// 사용시간 선택 → 도구 선택 → 부위 선택 → 피로도 입력 → 코스 생성 호출.
-// 생성 버튼을 누르면 로딩 화면으로 전환되어 AI 코스 생성을 수행한다.
-
 import 'package:flutter/material.dart';
 import '../../assets/body_assets.dart';
 import '../../assets/tool_assets.dart';
@@ -61,7 +57,6 @@ class _CourseGenerationScreenState extends State<CourseGenerationScreen> {
   /// 전면/후면 구분 없이 누적되는 피로도 맵.
   final Map<_FatigueKey, double> _fatigueLevels = {};
 
-  // ── 도구 선택 ──────────────────────────────────────────────
   final _toolService = ToolRegistrationService();
 
   /// 온보딩에서 등록된 도구 인덱스 목록.
@@ -158,7 +153,6 @@ class _CourseGenerationScreenState extends State<CourseGenerationScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // 뒤로가기
               IconButton(
                 icon: const Icon(Icons.arrow_back_ios, color: AppColors.textPrimary),
                 onPressed: () => Navigator.pop(context),
@@ -166,7 +160,6 @@ class _CourseGenerationScreenState extends State<CourseGenerationScreen> {
                 alignment: Alignment.centerLeft,
               ),
               const SizedBox(height: 12),
-              // 코스 생성 타이틀
               Text(
                 '코스 생성',
                 style: AppTypography.sb24.copyWith(color: AppColors.textPrimary),
@@ -177,7 +170,6 @@ class _CourseGenerationScreenState extends State<CourseGenerationScreen> {
                 style: AppTypography.r14.copyWith(color: AppColors.textSecondary),
               ),
               const SizedBox(height: 28),
-              // 사용시간
               Text(
                 '사용시간',
                 style: AppTypography.b18.copyWith(color: AppColors.textPrimary),
@@ -185,10 +177,8 @@ class _CourseGenerationScreenState extends State<CourseGenerationScreen> {
               const SizedBox(height: 12),
               _buildTimeSelector(),
               const SizedBox(height: 32),
-              // 도구 선택
               _buildToolSelector(),
               const SizedBox(height: 32),
-              // 부위 선택 (자세 측정 기반이면 읽기 전용 요약만 표시)
               if (_isPostureBased) ...[
                 Text(
                   '측정 기반 추천 부위',
@@ -605,8 +595,6 @@ class _CourseGenerationScreenState extends State<CourseGenerationScreen> {
       }).toList(),
     );
   }
-
-  // ── 도구 선택 섹션 ─────────────────────────────────────────
 
   Widget _buildToolSelector() {
     if (_isLoadingTools) {

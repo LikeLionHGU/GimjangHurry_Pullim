@@ -66,7 +66,6 @@ class _MypageScreenState extends State<MypageScreen> {
     final toolIndexes = await _toolService.getRegisteredTools();
     final ownedTools = tool_assets.toolsOf(toolIndexes);
 
-    // 자세 측정 결과
     final postureResults = await _db.getAllPostureResults();
 
     setState(() {
@@ -121,7 +120,6 @@ class _MypageScreenState extends State<MypageScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // 사용자 이름 (풀림님,)
                       Text(
                         '$userName님,',
                         style: AppTypography.sb24.copyWith(
@@ -131,19 +129,15 @@ class _MypageScreenState extends State<MypageScreen> {
                       ),
                       const SizedBox(height: 16),
 
-                      // 통계 카드 3개
                       _buildStatCards(),
                       const SizedBox(height: 32),
 
-                      // 자세 점검하기 + 최근 측정 결과
                       _buildPostureSection(),
                       const SizedBox(height: 32),
 
-                      // 보유 도구 섹션
                       _buildOwnedToolsSection(),
                       const SizedBox(height: 32),
 
-                      // 최근 기록 섹션
                       _buildRecentRecordsSection(),
                       const SizedBox(height: 32),
                     ],
@@ -163,7 +157,6 @@ class _MypageScreenState extends State<MypageScreen> {
           style: AppTypography.b18.copyWith(color: AppColors.textPrimary),
         ),
         const SizedBox(height: 16),
-        // 자세 점검하기 버튼
         GestureDetector(
           onTap: () {
             Navigator.push(
@@ -194,11 +187,9 @@ class _MypageScreenState extends State<MypageScreen> {
           ),
         ),
 
-        // 최근 측정 결과 1건
         if (_postureResults.isNotEmpty) ...[
           const SizedBox(height: 12),
           _buildPostureItem(_postureResults.first),
-          // 전체 보기 링크
           GestureDetector(
             onTap: () {
               Navigator.push(
@@ -382,7 +373,6 @@ class _MypageScreenState extends State<MypageScreen> {
                       padding: const EdgeInsets.only(right: 12),
                       child: _ToolImageCard(tool: tool),
                     )),
-                // 도구 추가 버튼
                 Padding(
                   padding: const EdgeInsets.only(right: 12),
                   child: GestureDetector(
