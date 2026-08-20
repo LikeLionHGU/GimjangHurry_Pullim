@@ -149,6 +149,7 @@ class _CourseGenerationScreenState extends State<CourseGenerationScreen> {
       backgroundColor: AppColors.background,
       body: SafeArea(
         child: SingleChildScrollView(
+          key: const PageStorageKey('course_gen_scroll'),
           padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 16),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -418,6 +419,7 @@ class _CourseGenerationScreenState extends State<CourseGenerationScreen> {
                   imagePath,
                   width: constraints.maxWidth,
                   fit: BoxFit.fitWidth,
+                  gaplessPlayback: true,
                 ),
                 Positioned.fill(
                   child: LayoutBuilder(
