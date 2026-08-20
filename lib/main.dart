@@ -94,7 +94,7 @@ class _SplashScreenState extends State<SplashScreen> {
             colors: [
               Color(0xFF010101),
               Color(0xFF010101),
-              Color(0xFF0B1200),
+              Color(0xFF161D02),
             ],
             stops: [0.0, 0.0, 1.0],
           ),

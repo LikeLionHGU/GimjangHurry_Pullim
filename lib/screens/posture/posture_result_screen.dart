@@ -552,7 +552,7 @@ class _PostureRecommendLoadingScreenState
             begin: Alignment.centerLeft,
             end: Alignment.centerRight,
             colors: [
-              Color(0xFF0C1500),
+              Color(0xFF121801),
               Color(0xFF010101),
             ],
           ),
